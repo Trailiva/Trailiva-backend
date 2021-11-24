@@ -9,6 +9,7 @@ import com.trailiva.web.payload.request.ResetPasswordRequest;
 import com.trailiva.web.payload.request.UserRequest;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.TokenResponse;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,7 +37,7 @@ public class AuthServiceImpl implements AuthService{
     private EmailService emailService;
 
     @Autowired
-    private TokenRepprojectository tokenRepository;
+    private TokenRepository tokenRepository;
 
     @Override
     public void register(UserRequest userRequest) {
