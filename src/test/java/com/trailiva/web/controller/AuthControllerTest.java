@@ -117,7 +117,7 @@ class AuthControllerTest {
         ResetPasswordRequest passwordReset = new ResetPasswordRequest("test@gmail.com", "test123");
 
         //When
-        MvcResult mvcResult = mockMvc.perform(post("/api/v1/avidbikers/auth/password/reset/93j34fh8wnj43n8a")
+        MvcResult mvcResult = mockMvc.perform(post("/api/v1/trailiva/auth/password/reset/93j34fh8wnj43n8a")
                         .contentType("application/json").content(objectMapper.writeValueAsString(passwordReset)))
                 .andDo(print())
                 .andExpect(status().isOk()).andReturn();

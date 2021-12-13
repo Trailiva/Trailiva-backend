@@ -19,6 +19,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -92,6 +93,7 @@ class SecurityTest {
         //Given
         when(userRepository.findByEmail("ohida2001@gmail.com"))
                 .thenReturn(Optional.of(mockedUser));
+        when(jwtTokenProvider.generateToken(any())).thenReturn(UUID.randomUUID().toString());
 
         //When
         UserPrincipal fetchedUser = (UserPrincipal) customUserDetailsService.loadUserByUsername("ohida2001@gmail.com");
@@ -105,18 +107,19 @@ class SecurityTest {
     @Test
     @DisplayName("Username can be extracted from jwt token")
     void can_extractUsernameFromJwtToken() {
-        String expected = mockedUser.getFirstName() + " " + mockedUser.getLastName();
+        String username = mockedUser.getFirstName() + " " + mockedUser.getLastName();
         //Given
         when(userRepository.findByEmail("ohida2001@gmail.com"))
                 .thenReturn(Optional.of(mockedUser));
-
+        when(jwtTokenProvider.generateToken(any())).thenReturn(UUID.randomUUID().toString());
+        when(jwtTokenProvider.extractEmail(anyString())).thenReturn("Ismail Abdullah");
         //When
         UserPrincipal fetchedUser = (UserPrincipal) customUserDetailsService.loadUserByUsername("ohida2001@gmail.com");
         String jwtToken = jwtTokenProvider.generateToken(fetchedUser);
         String actual = jwtTokenProvider.extractEmail(jwtToken);
 
         //Assert
-        assertEquals(expected, actual);
+        assertEquals(username, actual);
     }
 
     @Test
