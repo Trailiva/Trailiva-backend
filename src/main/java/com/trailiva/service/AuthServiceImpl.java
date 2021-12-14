@@ -13,6 +13,8 @@ import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.TokenResponse;
+import com.trailiva.web.payload.response.UserResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     @Autowired
@@ -53,12 +56,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public User register(UserRequest userRequest) throws AuthException {
+    public UserResponse register(UserRequest userRequest) throws AuthException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
         User user = modelMapper.map(userRequest, User.class);
-        return userRepository.save(user);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User savedUser = userRepository.save(user);
+        return modelMapper.map(savedUser, UserResponse.class);
 //        String otp = otpService.generateOtp(userDto.getEmail());
 //        try {
 //            emailNotificationService.sendEmailTo(user.getEmail(), "OTP Semicolon ORM", String.format("Your OTP is %s", otp));
@@ -117,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
         if (token.getExpiry().isBefore(LocalDateTime.now())) {
             throw new TokenException("This password reset token has expired ");
         }
-        if (!token.getUser().getId().equals(userToResetPassword.getId())) {
+        if (!token.getUserId().equals(userToResetPassword.getUserId())) {
             throw new TokenException("This password rest token does not belong to this user");
         }
         userToResetPassword.setPassword(passwordEncoder.encode(newPassword));
@@ -131,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new AuthException("No user found with user name " + email));
         Token token = new Token();
         token.setType(TokenType.PASSWORD_RESET);
-        token.setUser(userToResetPassword);
+        token.setUserId(userToResetPassword.getUserId());
         token.setToken(UUID.randomUUID().toString());
         token.setExpiry(LocalDateTime.now().plusMinutes(30));
         return tokenRepository.save(token);

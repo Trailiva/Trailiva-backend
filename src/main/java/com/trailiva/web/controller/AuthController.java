@@ -7,6 +7,7 @@ import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
+import com.trailiva.web.payload.response.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid UserRequest userRequest) {
         try {
-            User savedUser = authService.register(userRequest);
+            UserResponse savedUser = authService.register(userRequest);
             return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
         } catch (AuthException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);

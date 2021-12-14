@@ -1,20 +1,18 @@
 package com.trailiva.data.model;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
-@Document
+@Entity
 public class Token {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     private String token;
     private TokenType type;
-    @DBRef
-    private User user;
+    private Long userId;
     private LocalDateTime expiry;
 }

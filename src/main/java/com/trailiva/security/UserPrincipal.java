@@ -18,7 +18,7 @@ import static java.lang.String.format;
 @Data
 @NoArgsConstructor
 public class UserPrincipal implements UserDetails {
-    private String id;
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;
@@ -29,11 +29,11 @@ public class UserPrincipal implements UserDetails {
 
 
     public static UserDetails create(User user) {
-        List<GrantedAuthority> authorities = user.getRoles()
-                .stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .collect(Collectors.toList());
+        List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
+                new SimpleGrantedAuthority(role.getName().name())
+        ).collect(Collectors.toList());
         return new UserPrincipal(
-                user.getId(),
+                user.getUserId(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
@@ -65,7 +65,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override

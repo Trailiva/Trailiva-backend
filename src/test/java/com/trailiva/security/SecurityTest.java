@@ -1,6 +1,7 @@
 package com.trailiva.security;
 
 import com.trailiva.data.model.Role;
+import com.trailiva.data.model.RoleName;
 import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -11,12 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.mongodb.config.EnableMongoAuditing;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -25,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@EnableMongoAuditing
 @Slf4j
 @MockitoSettings(strictness = Strictness.LENIENT)
 class SecurityTest {
@@ -48,7 +46,8 @@ class SecurityTest {
         mockedUser.setLastName("Abdullah");
         mockedUser.setEmail("ohida2001@gmail.com");
         mockedUser.setPassword("pass1234");
-        mockedUser.getRoles().add(Role.USER);
+        Role role = new Role(RoleName.ROLE_USER);
+        mockedUser.getRoles().add(role);
         MockitoAnnotations.openMocks(this);
     }
 

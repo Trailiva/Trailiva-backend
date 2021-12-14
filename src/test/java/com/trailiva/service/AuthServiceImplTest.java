@@ -1,9 +1,6 @@
 package com.trailiva.service;
 
-import com.trailiva.data.model.Role;
-import com.trailiva.data.model.Token;
-import com.trailiva.data.model.TokenType;
-import com.trailiva.data.model.User;
+import com.trailiva.data.model.*;
 import com.trailiva.data.repository.TokenRepository;
 import com.trailiva.data.repository.UserRepository;
 import com.trailiva.security.CustomUserDetailService;
@@ -16,6 +13,7 @@ import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.request.ResetPasswordRequest;
 import com.trailiva.web.payload.request.UserRequest;
 import com.trailiva.web.payload.response.JwtTokenResponse;
+import com.trailiva.web.payload.response.UserResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -78,12 +76,13 @@ class AuthServiceImplTest {
     @BeforeEach
     void setUp() {
         mockedUser = new User();
-        mockedUser.setId("001");
+        mockedUser.setId(1L);
         mockedUser.setFirstName("Ismail");
         mockedUser.setLastName("Abdullah");
         mockedUser.setEmail("ismail@gmail.com");
         mockedUser.setPassword("pass1234");
-        mockedUser.getRoles().add(Role.USER);
+        Role role = new Role(RoleName.ROLE_USER);
+        mockedUser.getRoles().add(role);
         MockitoAnnotations.openMocks(this);
     }
 
@@ -98,7 +97,7 @@ class AuthServiceImplTest {
         when(userRepository.save(any(User.class))).thenReturn(mockedUser);
 
         //When
-        User savedUser = authService.register(userRequest);
+        UserResponse savedUser = authService.register(userRequest);
 
         //Assert
         verify(userRepository, times(1)).existsByEmail(mockedUser.getEmail());
@@ -202,7 +201,7 @@ class AuthServiceImplTest {
         assertNotNull(tokenArgumentCaptor.getValue());
         assertNotNull(tokenArgumentCaptor.getValue().getToken());
         assertEquals(TokenType.PASSWORD_RESET, tokenArgumentCaptor.getValue().getType());
-        assertNotNull(tokenArgumentCaptor.getValue().getUser());
+        assertNotNull(tokenArgumentCaptor.getValue().getUserId());
     }
 
     @Test
@@ -214,10 +213,10 @@ class AuthServiceImplTest {
         String passwordResetToken = UUID.randomUUID().toString();
 
         Token mockToken = new Token();
-        mockToken.setId("001");
+        mockToken.setId(1L);
         mockToken.setToken(passwordResetToken);
         mockToken.setType(TokenType.PASSWORD_RESET);
-        mockToken.setUser(mockedUser);
+        mockToken.setUserId(mockToken.getUserId());
         mockToken.setExpiry(LocalDateTime.now().plusMinutes(30));
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockedUser));
