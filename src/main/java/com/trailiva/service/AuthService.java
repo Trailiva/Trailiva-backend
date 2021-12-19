@@ -11,7 +11,7 @@ import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.UserResponse;
 
 public interface AuthService {
-    UserResponse register(UserRequest userRequest) throws AuthException;
+    void register(UserRequest userRequest) throws AuthException;
     JwtTokenResponse login(LoginRequest loginRequest);
      void updatePassword(PasswordRequest passwordRequest) throws AuthException;
     void  resetPassword(ResetPasswordRequest resetPasswordRequest, String passwordResetToken) throws AuthException, TokenException;

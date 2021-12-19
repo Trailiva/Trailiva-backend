@@ -27,6 +27,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web:2.6.1'
 	implementation 'org.modelmapper:modelmapper:2.4.4'
 	implementation 'org.projectlombok:lombok:1.18.22'
+	implementation group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '1.4.0'
 	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
 	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
@@ -38,7 +39,7 @@ dependencies {
 
 
 	compileOnly 'org.projectlombok:lombok:1.18.22'
-	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok:1.18.22'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.1'
 	testImplementation 'org.springframework.security:spring-security-test:5.5.1'
 
