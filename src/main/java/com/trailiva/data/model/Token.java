@@ -1,5 +1,6 @@
 package com.trailiva.data.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -14,5 +15,6 @@ public class Token {
     private String token;
     private TokenType type;
     private Long userId;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expiry;
 }

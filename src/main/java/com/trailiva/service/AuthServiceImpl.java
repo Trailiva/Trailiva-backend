@@ -12,8 +12,6 @@ import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
-import com.trailiva.web.payload.response.TokenResponse;
-import com.trailiva.web.payload.response.UserResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,18 +50,16 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    public AuthServiceImpl() {
-    }
 
     @Override
-    public UserResponse register(UserRequest userRequest) throws AuthException {
+    public void register(UserRequest userRequest) throws AuthException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
         User user = modelMapper.map(userRequest, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        User savedUser = userRepository.save(user);
-        return modelMapper.map(savedUser, UserResponse.class);
+        save(user);
+
 //        String otp = otpService.generateOtp(userDto.getEmail());
 //        try {
 //            emailNotificationService.sendEmailTo(user.getEmail(), "OTP Semicolon ORM", String.format("Your OTP is %s", otp));
@@ -108,7 +104,7 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthException("Passwords do not match");
         }
         userToChangePassword.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(userToChangePassword);
+        save(userToChangePassword);
     }
 
     @Override
@@ -126,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
             throw new TokenException("This password rest token does not belong to this user");
         }
         userToResetPassword.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(userToResetPassword);
+        save(userToResetPassword);
         tokenRepository.delete(token);
     }
 
@@ -146,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.existsByEmail(email);
     }
 
-    private User save(User user) {
-        return userRepository.save(user);
+    private void save(User user) {
+        userRepository.save(user);
     }
 }

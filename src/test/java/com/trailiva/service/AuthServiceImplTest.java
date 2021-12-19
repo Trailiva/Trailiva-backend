@@ -14,6 +14,7 @@ import com.trailiva.web.payload.request.ResetPasswordRequest;
 import com.trailiva.web.payload.request.UserRequest;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.UserResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AuthServiceImplTest {
@@ -76,7 +78,7 @@ class AuthServiceImplTest {
     @BeforeEach
     void setUp() {
         mockedUser = new User();
-        mockedUser.setId(1L);
+        mockedUser.setUserId(1L);
         mockedUser.setFirstName("Ismail");
         mockedUser.setLastName("Abdullah");
         mockedUser.setEmail("ismail@gmail.com");
@@ -97,12 +99,11 @@ class AuthServiceImplTest {
         when(userRepository.save(any(User.class))).thenReturn(mockedUser);
 
         //When
-        UserResponse savedUser = authService.register(userRequest);
+       authService.register(userRequest);
 
         //Assert
         verify(userRepository, times(1)).existsByEmail(mockedUser.getEmail());
         verify(userRepository, times(1)).save(mockedUser);
-        assertThat(savedUser).isNotNull();
     }
 
 
@@ -216,7 +217,7 @@ class AuthServiceImplTest {
         mockToken.setId(1L);
         mockToken.setToken(passwordResetToken);
         mockToken.setType(TokenType.PASSWORD_RESET);
-        mockToken.setUserId(mockToken.getUserId());
+        mockToken.setUserId(1L);
         mockToken.setExpiry(LocalDateTime.now().plusMinutes(30));
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockedUser));
