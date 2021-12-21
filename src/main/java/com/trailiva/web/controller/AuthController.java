@@ -4,16 +4,20 @@ import com.trailiva.data.model.Token;
 import com.trailiva.service.AuthService;
 import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.TokenException;
+import com.trailiva.web.exceptions.UserVerificationException;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.ApiResponse;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -23,13 +27,30 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest) {
+    public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest, HttpServletRequest request) {
         try {
-            authService.register(userRequest);
+            authService.register(userRequest, getSiteUrl(request));
             return new ResponseEntity<>(new ApiResponse(true, "User successfully created"), HttpStatus.CREATED);
-        } catch (AuthException e) {
+        } catch (MessagingException | UnsupportedEncodingException  | AuthException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<?> verify(@Param("code") String code){
+        try {
+            boolean isVerified = authService.verify(code);
+            if (isVerified)
+                return new ResponseEntity<>(new ApiResponse(true, "User is verified"), HttpStatus.OK);
+            else return new ResponseEntity<>(new ApiResponse(false, "Failed"), HttpStatus.BAD_REQUEST);
+        }catch (UserVerificationException e){
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private String getSiteUrl(HttpServletRequest request) {
+        String url = request.getRequestURL().toString();
+        return url.replace(request.getServletPath(), "");
     }
 
     @PostMapping("/login")

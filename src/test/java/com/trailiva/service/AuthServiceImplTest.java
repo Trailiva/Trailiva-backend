@@ -8,6 +8,7 @@ import com.trailiva.security.JwtTokenProvider;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.TokenException;
+import com.trailiva.web.exceptions.UserVerificationException;
 import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.request.ResetPasswordRequest;
@@ -27,12 +28,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMailMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,6 +76,12 @@ class AuthServiceImplTest {
     @Mock
     private TokenRepository tokenRepository;
 
+    @Mock
+    private JavaMailSender javaMailSender;
+
+    @Mock
+    private MimeMessageHelper helper;
+
     private  User mockedUser;
 
     @InjectMocks
@@ -90,22 +103,44 @@ class AuthServiceImplTest {
 
 
     @Test
-    void userCanRegister() throws AuthException {
+    void userCanRegister() throws AuthException, MessagingException, UnsupportedEncodingException {
         UserRequest userRequest = new UserRequest();
         userRequest.setEmail("ismail@gmail.com");
+        MimeMessage message = javaMailSender.createMimeMessage();
+
         //Given
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(modelMapper.map(userRequest, User.class)).thenReturn(mockedUser);
         when(userRepository.save(any(User.class))).thenReturn(mockedUser);
+        when(javaMailSender.createMimeMessage()).thenReturn(message);
+        doNothing().when(javaMailSender).send(message);
+        doNothing().when(helper).setFrom(anyString());
+        doNothing().when(helper).setTo(anyString());
+        doNothing().when(helper).setSubject(anyString());
 
         //When
-       authService.register(userRequest);
+       authService.register(userRequest, "localhost://8080/api/v1/trailiva/auth/register");
 
         //Assert
         verify(userRepository, times(1)).existsByEmail(mockedUser.getEmail());
         verify(userRepository, times(1)).save(mockedUser);
     }
 
+
+    @Test
+    void registeredUserCanBeVerified() throws UserVerificationException {
+        // Given
+        String verificationCode = UUID.randomUUID().toString();
+        when(userRepository.findByVerificationCode(anyString())).thenReturn(Optional.ofNullable(mockedUser));
+        mockedUser.setVerificationCode(verificationCode);
+
+        // When
+        boolean isVerified = authService.verify(verificationCode);
+
+        // Assert
+        verify(userRepository, times(1)).findByVerificationCode(verificationCode);
+        assertTrue(isVerified);
+    }
 
     @Test
     void whenLoginMethodIsCalled_ThenFindUserByEmailIsCalledOnce() {

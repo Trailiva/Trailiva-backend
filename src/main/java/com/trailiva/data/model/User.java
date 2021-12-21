@@ -34,6 +34,10 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+    @Column(name = "verification_code", length = 64)
+    private String verificationCode;
+    private boolean enabled;
+
     @CreationTimestamp
     private LocalDate datePublished;
     @UpdateTimestamp
