@@ -27,6 +27,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register")
+
     public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest, HttpServletRequest request) {
         try {
             authService.register(userRequest, getSiteUrl(request));

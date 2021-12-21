@@ -65,6 +65,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException {
+
+
+    @Override
+    public void register(UserRequest userRequest) throws AuthException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
@@ -187,7 +191,7 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.existsByEmail(email);
     }
 
-    private User save(User user) {
-        return userRepository.save(user);
+    private void save(User user) {
+        userRepository.save(user);
     }
 }
