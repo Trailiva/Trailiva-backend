@@ -13,7 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -23,13 +26,20 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest) {
+    public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest, HttpServletRequest request) {
         try {
-            authService.register(userRequest);
+            authService.register(userRequest, getSiteUrl(request));
             return new ResponseEntity<>(new ApiResponse(true, "User successfully created"), HttpStatus.CREATED);
-        } catch (AuthException e) {
+        } catch (AuthException | MessagingException | UnsupportedEncodingException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
+    }
+
+
+
+    private String getSiteUrl(HttpServletRequest request) {
+        String url = request.getRequestURL().toString();
+        return url.replace(request.getServletPath(), "");
     }
 
     @PostMapping("/login")
