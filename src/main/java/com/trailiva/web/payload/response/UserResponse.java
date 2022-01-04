@@ -11,6 +11,7 @@ public class UserResponse {
     private String lastName;
     private String email;
     private String phoneNumber;
+    private String verificationCode;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDate datePublished;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")

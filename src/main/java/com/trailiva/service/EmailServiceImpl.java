@@ -26,7 +26,7 @@ public class EmailServiceImpl implements EmailService{
     public void sendUserVerificationEmail(EmailRequest emailRequest) {
 
         // the sender email should be the same as we used to Create a Single Sender Verification
-        Email from = new Email(emailRequest.getFrom());
+        Email from = new Email("ohida2001@gmail.com");
         Email to = new Email(emailRequest.getEmail());
         Mail mail = new Mail();
         // we create an object of our static class feel free to change the class on it's own file

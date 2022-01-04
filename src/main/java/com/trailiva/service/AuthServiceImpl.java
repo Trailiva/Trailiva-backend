@@ -13,6 +13,7 @@ import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserVerificationException;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
+import com.trailiva.web.payload.response.UserResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public void register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException {
+    public UserResponse register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
@@ -74,8 +75,8 @@ public class AuthServiceImpl implements AuthService {
 
         // Setup Email verification
         EmailRequest emailRequest = modelMapper.map(savedUser, EmailRequest.class);
-        emailRequest.setFrom("ohida2001@gmail.com");
         emailService.sendUserVerificationEmail(emailRequest);
+        return modelMapper.map(savedUser, UserResponse.class);
     }
 
     @Override
@@ -150,32 +151,6 @@ public class AuthServiceImpl implements AuthService {
 
     private User save(User user) {
        return userRepository.save(user);
-    }
-
-    @Override
-    public void sendVerificationEmail(User user, String siteUrl) throws MessagingException, UnsupportedEncodingException {
-//        String toAddress = user.getEmail();
-//        String fromAddress = "ohida2001@gmail.com";
-//        String senderName = "Trailiva Task Management";
-//        String subject = "Please verify your registration";
-//        String content = "Dear [[name]],<br>"
-//                + "Please click the link below to verify your registration:<br>"
-//                + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
-//                + "Thank you,<br>"
-//                + "Trailiva Task Management";
-//
-//        MimeMessage message = mailSender.createMimeMessage();
-//        MimeMessageHelper helper = new MimeMessageHelper(message);
-//        helper.setFrom(fromAddress, senderName);
-//        helper.setTo(toAddress);
-//        helper.setSubject(subject);
-//
-//        content = content.replace("[[name]]", format("%s %s", user.getFirstName(), user.getLastName()));
-//        String verifyURL = siteUrl + "/api/v1/trailiva/auth/verify?code=" + user.getVerificationCode();
-//        content = content.replace("[[URL]]", verifyURL);
-//        helper.setText(content, true);
-//
-//        mailSender.send(message);
     }
 
     @Override

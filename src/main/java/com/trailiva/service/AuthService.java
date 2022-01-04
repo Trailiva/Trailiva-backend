@@ -16,11 +16,10 @@ import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 
 public interface AuthService {
-    void register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException;
+    UserResponse register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException;
     JwtTokenResponse login(LoginRequest loginRequest);
     void updatePassword(PasswordRequest passwordRequest) throws AuthException;
     void  resetPassword(ResetPasswordRequest resetPasswordRequest, String passwordResetToken) throws AuthException, TokenException;
     Token generatePasswordResetToken(String email) throws AuthException;
-    void sendVerificationEmail(User user, String siteUrl) throws MessagingException, UnsupportedEncodingException;
     boolean verify(String verificationToken) throws UserVerificationException;
 }

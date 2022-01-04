@@ -8,10 +8,7 @@ import com.trailiva.security.JwtTokenProvider;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.TokenException;
-import com.trailiva.web.payload.request.LoginRequest;
-import com.trailiva.web.payload.request.PasswordRequest;
-import com.trailiva.web.payload.request.ResetPasswordRequest;
-import com.trailiva.web.payload.request.UserRequest;
+import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.UserResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +68,9 @@ class AuthServiceImplTest {
     @Mock
     private TokenRepository tokenRepository;
 
+    @Mock
+    private EmailService emailService;
+
     private  User mockedUser;
 
     @InjectMocks
@@ -91,22 +91,24 @@ class AuthServiceImplTest {
     }
 
 
-//    @Test
-//    void userCanRegister() throws AuthException, MessagingException, UnsupportedEncodingException {
-//        UserRequest userRequest = new UserRequest();
-//        userRequest.setEmail("ismail@gmail.com");
-//        //Given
-//        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-//        when(modelMapper.map(userRequest, User.class)).thenReturn(mockedUser);
-//        when(userRepository.save(any(User.class))).thenReturn(mockedUser);
-//
-//        //When
-//       authService.register(userRequest, "");
-//
-//        //Assert
-//        verify(userRepository, times(1)).existsByEmail(mockedUser.getEmail());
-//        verify(userRepository, times(1)).save(mockedUser);
-//    }
+    @Test
+    void userCanRegister() throws AuthException, MessagingException, UnsupportedEncodingException {
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("ismail@gmail.com");
+        EmailRequest emailRequest = new EmailRequest();
+        //Given
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+        when(modelMapper.map(userRequest, User.class)).thenReturn(mockedUser);
+        when(userRepository.save(any(User.class))).thenReturn(mockedUser);
+        doNothing().when(emailService).sendUserVerificationEmail(any());
+
+        //When
+       authService.register(userRequest, "");
+
+        //Assert
+        verify(userRepository, times(1)).existsByEmail(mockedUser.getEmail());
+        verify(userRepository, times(1)).save(mockedUser);
+    }
 
 
     @Test

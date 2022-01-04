@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public class EmailRequest {
     private String email;
-    private String from;
     private String firstName;
     private String lastName;
     private String phoneNumber;

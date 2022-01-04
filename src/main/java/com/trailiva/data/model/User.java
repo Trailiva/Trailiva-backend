@@ -38,9 +38,9 @@ public class User {
     private String verificationCode;
     private boolean enabled;
 
-    @CreationTimestamp
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDate datePublished;
     @UpdateTimestamp
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDate updatedDated;
 }
