@@ -10,11 +10,15 @@ import com.trailiva.security.JwtTokenProvider;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.TokenException;
+import com.trailiva.web.exceptions.UserVerificationException;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
+import com.trailiva.web.payload.response.UserResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,8 +26,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import static java.lang.String.format;
 
 @Service
 @Slf4j
@@ -50,26 +59,24 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    private EmailService emailService;
+
 
     @Override
-    public void register(UserRequest userRequest) throws AuthException {
+    public UserResponse register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
         User user = modelMapper.map(userRequest, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        save(user);
+        user.setVerificationCode(UUID.randomUUID().toString());
+        User savedUser = save(user);
 
-//        String otp = otpService.generateOtp(userDto.getEmail());
-//        try {
-//            emailNotificationService.sendEmailTo(user.getEmail(), "OTP Semicolon ORM", String.format("Your OTP is %s", otp));
-//            return save(user);
-//        } catch (UnirestException | URISyntaxException exception) {
-//            log.info("Exception --> {}", exception.getMessage());
-//            throw new AuthException(
-//                    String.format("Error sending email verification message to %s", user.getEmail()));
-//        }
-
+        // Setup Email verification
+        EmailRequest emailRequest = modelMapper.map(savedUser, EmailRequest.class);
+        emailService.sendUserVerificationEmail(emailRequest);
+        return modelMapper.map(savedUser, UserResponse.class);
     }
 
     @Override
@@ -114,7 +121,7 @@ public class AuthServiceImpl implements AuthService {
         User userToResetPassword = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("No user found with user name " + email));
         Token token = tokenRepository.findByToken(passwordResetToken)
-                .orElseThrow(() -> new TokenException(String.format("No token with value %s found", passwordResetToken)));
+                .orElseThrow(() -> new TokenException(format("No token with value %s found", passwordResetToken)));
         if (token.getExpiry().isBefore(LocalDateTime.now())) {
             throw new TokenException("This password reset token has expired ");
         }
@@ -142,7 +149,22 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.existsByEmail(email);
     }
 
-    private void save(User user) {
-        userRepository.save(user);
+    private User save(User user) {
+       return userRepository.save(user);
     }
+
+    @Override
+    public boolean verify(String verificationToken) throws UserVerificationException {
+        User user = userRepository.findByVerificationCode(verificationToken).orElseThrow(
+                () -> new UserVerificationException(format("No user found with verification code %s", verificationToken)));
+        if (user.isEnabled())
+            return false;
+        else {
+            user.setVerificationCode(null);
+            user.setEnabled(true);
+            save(user);
+            return true;
+        }
+    }
+
 }

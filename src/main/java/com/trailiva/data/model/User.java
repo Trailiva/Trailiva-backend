@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,9 +35,13 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @CreationTimestamp
-    private LocalDate datePublished;
+    @Column(name = "verification_code")
+    private String verificationCode;
+    private boolean enabled;
+
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime datePublished;
     @UpdateTimestamp
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    private LocalDate updatedDated;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedDated;
 }
