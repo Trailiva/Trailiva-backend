@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,8 +40,8 @@ public class User {
     private boolean enabled;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private LocalDate datePublished;
+    private LocalDateTime datePublished;
     @UpdateTimestamp
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private LocalDate updatedDated;
+    private LocalDateTime updatedDated;
 }
