@@ -1,1 +1,1 @@
-web: java -jar libs/trailiva-0.0.1-SNAPSHOT.jar
+web: java -jar build/libs/trailiva-0.0.1-SNAPSHOT.jar
