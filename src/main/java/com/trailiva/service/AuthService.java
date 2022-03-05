@@ -3,6 +3,7 @@ package com.trailiva.service;
 import com.trailiva.data.model.Token;
 import com.trailiva.data.model.User;
 import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.RoleNotFoundException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserVerificationException;
 import com.trailiva.web.payload.request.LoginRequest;
@@ -16,7 +17,7 @@ import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 
 public interface AuthService {
-    UserResponse register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException;
+    UserResponse register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException, RoleNotFoundException;
     JwtTokenResponse login(LoginRequest loginRequest);
     void updatePassword(PasswordRequest passwordRequest) throws AuthException;
     void  resetPassword(ResetPasswordRequest resetPasswordRequest, String passwordResetToken) throws AuthException, TokenException;

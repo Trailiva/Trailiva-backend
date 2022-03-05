@@ -7,6 +7,7 @@ import com.trailiva.security.CustomUserDetailService;
 import com.trailiva.security.JwtTokenProvider;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.RoleNotFoundException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
@@ -92,7 +93,7 @@ class AuthServiceImplTest {
 
 
     @Test
-    void userCanRegister() throws AuthException, MessagingException, UnsupportedEncodingException {
+    void userCanRegister() throws AuthException, MessagingException, UnsupportedEncodingException, RoleNotFoundException {
         UserRequest userRequest = new UserRequest();
         userRequest.setEmail("ismail@gmail.com");
         EmailRequest emailRequest = new EmailRequest();
