@@ -3,6 +3,7 @@ package com.trailiva.web.controller;
 import com.trailiva.data.model.Token;
 import com.trailiva.service.AuthService;
 import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.RoleNotFoundException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserVerificationException;
 import com.trailiva.web.payload.request.*;
@@ -33,7 +34,7 @@ public class AuthController {
         try {
             UserResponse userResponse = authService.register(userRequest, getSiteUrl(request));
             return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
-        } catch (AuthException | MessagingException | UnsupportedEncodingException e) {
+        } catch (AuthException | MessagingException | UnsupportedEncodingException | RoleNotFoundException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }

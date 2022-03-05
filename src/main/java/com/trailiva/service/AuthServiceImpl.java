@@ -1,14 +1,14 @@
 package com.trailiva.service;
 
-import com.trailiva.data.model.Token;
-import com.trailiva.data.model.TokenType;
-import com.trailiva.data.model.User;
+import com.trailiva.data.model.*;
+import com.trailiva.data.repository.RoleRepository;
 import com.trailiva.data.repository.TokenRepository;
 import com.trailiva.data.repository.UserRepository;
 import com.trailiva.security.CustomUserDetailService;
 import com.trailiva.security.JwtTokenProvider;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.RoleNotFoundException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserVerificationException;
 import com.trailiva.web.payload.request.*;
@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
@@ -62,15 +63,32 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
+
+    @PostConstruct
+    public void setup(){
+        Role userRole = new Role(RoleName.ROLE_USER);
+        Role adminRole = new Role(RoleName.ROLE_ADMIN);
+
+        if (roleRepository.findByName(userRole.getName()).isEmpty() || roleRepository.findByName(adminRole.getName()).isEmpty()){
+            roleRepository.save(userRole);
+            roleRepository.save(adminRole);
+        }
+    }
+
 
     @Override
-    public UserResponse register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException {
+    public UserResponse register(UserRequest userRequest, String siteUrl) throws AuthException,  RoleNotFoundException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
         User user = modelMapper.map(userRequest, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setVerificationCode(UUID.randomUUID().toString());
+        Role userRole = roleRepository.findByName(RoleName.ROLE_USER).orElseThrow(()-> new RoleNotFoundException("User role is not created"));
+        user.getRoles().add(userRole);
         User savedUser = save(user);
 
         // Setup Email verification

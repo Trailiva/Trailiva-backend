@@ -55,7 +55,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return format("%s %s", firstName, lastName);
+        return email;
     }
 
     @Override

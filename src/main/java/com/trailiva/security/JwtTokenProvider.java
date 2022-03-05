@@ -20,7 +20,7 @@ public class JwtTokenProvider {
 
     public String generateToken(UserPrincipal fetchedUser) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, fetchedUser.getUsername());
+        return createToken(claims, fetchedUser.getEmail());
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
@@ -47,9 +47,9 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token, UserDetails user) {
-        final String username = extractEmail(token);
+        final String email = extractEmail(token);
         log.info("Has expired ==> {}", !isTokenExpired(token));
-        return username.equals(user.getUsername()) && isTokenExpired(token);
+        return (email.equals(user.getUsername()) && !isTokenExpired(token));
     }
 
     public boolean isTokenExpired(String token) {
