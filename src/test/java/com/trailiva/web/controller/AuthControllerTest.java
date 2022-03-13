@@ -9,6 +9,7 @@ import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.request.ResetPasswordRequest;
 import com.trailiva.web.payload.request.UserRequest;
+import com.trailiva.web.payload.response.TokenResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,7 +100,7 @@ class AuthControllerTest {
 
     @Test
     void whenUserForgetPassword_thenReturn201() throws Exception{
-        when(authService.generatePasswordResetToken(anyString())).thenReturn(new Token());
+        when(authService.generatePasswordResetToken(anyString())).thenReturn(new TokenResponse());
         MvcResult mvcResult = mockMvc.perform(get("/api/v1/trailiva/auth/password/reset/whale")
                         .contentType("application.json"))
                 .andDo(print())

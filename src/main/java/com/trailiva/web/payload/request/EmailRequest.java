@@ -8,4 +8,5 @@ public class EmailRequest {
     private String firstName;
     private String lastName;
     private String phoneNumber;
+    private String verificationCode;
 }

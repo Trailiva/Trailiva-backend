@@ -1,14 +1,12 @@
 package com.trailiva.web.controller;
 
-import com.trailiva.data.model.Token;
-import com.trailiva.security.CurrentUser;
-import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.AuthService;
 import com.trailiva.service.CloudinaryService;
 import com.trailiva.web.exceptions.*;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.ApiResponse;
 import com.trailiva.web.payload.response.JwtTokenResponse;
+import com.trailiva.web.payload.response.TokenResponse;
 import com.trailiva.web.payload.response.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -66,10 +64,10 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/password/reset/{username}")
-    public ResponseEntity<?> forgotPassword(@Valid @PathVariable String username) {
+    @GetMapping("/password/reset/{email}")
+    public ResponseEntity<?> forgotPassword(@Valid @PathVariable String email) {
         try {
-            Token passwordResetToken = authService.generatePasswordResetToken(username);
+            TokenResponse passwordResetToken = authService.generatePasswordResetToken(email);
             return new ResponseEntity<>(passwordResetToken, HttpStatus.CREATED);
         } catch (AuthException exception) {
             return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
@@ -90,21 +88,18 @@ public class AuthController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("file") MultipartFile file, @PathVariable Long userId) {
         try {
-            String  url = cloudinaryService.uploadImage(file, userId);
+            String url = cloudinaryService.uploadImage(file, userId);
             return new ResponseEntity<>(new ApiResponse(true, "profile image is successfully uploaded", url), HttpStatus.OK);
         } catch (IOException | UserException exception) {
             return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping("/verify")
+    @GetMapping("/registrationConfirm")
     public ResponseEntity<?> verifyUser(@RequestParam("code") String code) {
         try {
-            if (authService.verify(code)) {
-                return new ResponseEntity<>(new ApiResponse(true, "User is successfully verify"), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(new ApiResponse(true, "User already verified"), HttpStatus.OK);
-            }
+            authService.verify(code);
+            return new ResponseEntity<>(new ApiResponse(true, "User is successfully verify"), HttpStatus.OK);
         } catch (UserVerificationException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

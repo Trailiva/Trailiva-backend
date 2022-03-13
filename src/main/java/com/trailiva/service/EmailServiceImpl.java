@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -41,7 +42,7 @@ public class EmailServiceImpl implements EmailService{
         // This is the first_name variable that we created on the template
         personalization.addDynamicTemplateData("first_name", emailRequest.getFirstName());
         personalization.addDynamicTemplateData("last_name", emailRequest.getLastName());
-        personalization.addDynamicTemplateData("token", "-NAI8dyK5zc");
+        personalization.addDynamicTemplateData("token", emailRequest.getVerificationCode());
 
         mail.addPersonalization(personalization);
         mail.setTemplateId(System.getenv("API_ID"));
@@ -71,10 +72,7 @@ public class EmailServiceImpl implements EmailService{
 
         @JsonProperty("dynamic_template_data")
         public Map<String, Object> getDynamicTemplateData() {
-            if (dynamic_template_data == null) {
-                return Collections.emptyMap();
-            }
-            return dynamic_template_data;
+            return Objects.requireNonNullElse(dynamic_template_data, Collections.emptyMap());
         }
 
         public void addDynamicTemplateData(String key, String value) {

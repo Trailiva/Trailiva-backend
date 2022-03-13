@@ -1,13 +1,9 @@
 package com.trailiva.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.trailiva.service.WorkspaceService;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -47,10 +43,16 @@ public class User {
 
     @Column(name = "verification_code")
     private String verificationCode;
+
+    private LocalDate verificationDate;
+
+    @Column(name = "enabled")
     private boolean enabled;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @CreationTimestamp
     private LocalDateTime datePublished;
+
     @UpdateTimestamp
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDated;

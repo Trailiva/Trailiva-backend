@@ -13,6 +13,7 @@ import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserVerificationException;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
+import com.trailiva.web.payload.response.TokenResponse;
 import com.trailiva.web.payload.response.UserResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -30,6 +31,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -87,14 +89,17 @@ public class AuthServiceImpl implements AuthService {
         User user = modelMapper.map(userRequest, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setVerificationCode(UUID.randomUUID().toString());
+        user.setVerificationDate(LocalDate.now().plusDays(1));
         Role userRole = roleRepository.findByName(RoleName.ROLE_USER).orElseThrow(()-> new RoleNotFoundException("User role is not created"));
         user.getRoles().add(userRole);
         User savedUser = save(user);
 
         // Setup Email verification
         EmailRequest emailRequest = modelMapper.map(savedUser, EmailRequest.class);
+        log.info("Email request ==> {}", emailRequest);
+        //emailRequest.setAppUrl(siteUrl.concat("/registrationConfirm?token="+ user.getVerificationCode()));
         emailService.sendUserVerificationEmail(emailRequest);
-        return modelMapper.map(savedUser, UserResponse.class);
+        return modelMapper.map(user, UserResponse.class);
     }
 
     @Override
@@ -152,7 +157,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Token generatePasswordResetToken(String email) throws AuthException {
+    public TokenResponse generatePasswordResetToken(String email) throws AuthException {
         User userToResetPassword = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("No user found with user name " + email));
         Token token = new Token();
@@ -160,7 +165,7 @@ public class AuthServiceImpl implements AuthService {
         token.setUserId(userToResetPassword.getUserId());
         token.setToken(UUID.randomUUID().toString());
         token.setExpiry(LocalDateTime.now().plusMinutes(30));
-        return tokenRepository.save(token);
+        return modelMapper.map(tokenRepository.save(token), TokenResponse.class);
     }
 
     private boolean validateEmail(String email) {
@@ -172,16 +177,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean verify(String verificationToken) throws UserVerificationException {
+    public void verify(String verificationToken) throws UserVerificationException {
+
         User user = userRepository.findByVerificationCode(verificationToken).orElseThrow(
                 () -> new UserVerificationException(format("No user found with verification code %s", verificationToken)));
-        if (user.isEnabled())
-            return false;
+        if (user.getVerificationDate().isBefore(LocalDate.now())){
+            throw new UserVerificationException("Token has expired");
+        }
+        if (user.getVerificationCode() == null){
+            throw new UserVerificationException("Invalid Token !");
+        }
         else {
             user.setVerificationCode(null);
+            user.setVerificationDate(null);
             user.setEnabled(true);
             save(user);
-            return true;
         }
     }
 
