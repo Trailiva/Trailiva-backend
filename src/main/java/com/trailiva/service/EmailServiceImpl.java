@@ -42,7 +42,7 @@ public class EmailServiceImpl implements EmailService{
         // This is the first_name variable that we created on the template
         personalization.addDynamicTemplateData("first_name", emailRequest.getFirstName());
         personalization.addDynamicTemplateData("last_name", emailRequest.getLastName());
-        personalization.addDynamicTemplateData("token", emailRequest.getVerificationCode());
+        personalization.addDynamicTemplateData("token", emailRequest.getVerificationToken());
 
         mail.addPersonalization(personalization);
         mail.setTemplateId(System.getenv("API_ID"));

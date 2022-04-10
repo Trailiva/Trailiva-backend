@@ -1,9 +1,11 @@
 package com.trailiva.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -15,9 +17,10 @@ import java.util.Set;
 
 @Data
 @Entity
-public class User {
+public class User extends RepresentationModel<User> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private Long userId;
     private String firstName;
     private String lastName;
@@ -26,24 +29,30 @@ public class User {
     private String email;
 
     private String phoneNumber;
+    @JsonIgnore
     private String password;
+
     private String imageUrl;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JsonIgnore
     private Set<Role> roles = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_workspaces",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "workspace_id"))
+    @JsonIgnore
     private List<WorkSpace> workspaces = new ArrayList<>();
 
     @Column(name = "verification_code")
-    private String verificationCode;
+    @JsonIgnore
+    private String verificationToken;
 
+    @JsonIgnore
     private LocalDate verificationDate;
 
     @Column(name = "enabled")

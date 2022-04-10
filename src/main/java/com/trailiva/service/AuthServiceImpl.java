@@ -7,19 +7,14 @@ import com.trailiva.data.repository.UserRepository;
 import com.trailiva.security.CustomUserDetailService;
 import com.trailiva.security.JwtTokenProvider;
 import com.trailiva.security.UserPrincipal;
-import com.trailiva.web.exceptions.AuthException;
-import com.trailiva.web.exceptions.RoleNotFoundException;
-import com.trailiva.web.exceptions.TokenException;
-import com.trailiva.web.exceptions.UserVerificationException;
+import com.trailiva.web.exceptions.*;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.TokenResponse;
-import com.trailiva.web.payload.response.UserResponse;
+import com.trailiva.web.payload.response.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,9 +23,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -82,24 +74,25 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public UserResponse register(UserRequest userRequest, String siteUrl) throws AuthException,  RoleNotFoundException {
+    public UserProfile register(UserRequest userRequest, String siteUrl) throws AuthException,  RoleNotFoundException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
         User user = modelMapper.map(userRequest, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setVerificationCode(UUID.randomUUID().toString());
+        user.setVerificationToken(UUID.randomUUID().toString());
         user.setVerificationDate(LocalDate.now().plusDays(1));
         Role userRole = roleRepository.findByName(RoleName.ROLE_USER).orElseThrow(()-> new RoleNotFoundException("User role is not created"));
         user.getRoles().add(userRole);
         User savedUser = save(user);
 
-        // Setup Email verification
+        sendVerificationToken(savedUser);
+        return modelMapper.map(user, UserProfile.class);
+    }
+
+    private void sendVerificationToken(User savedUser) {
         EmailRequest emailRequest = modelMapper.map(savedUser, EmailRequest.class);
-        log.info("Email request ==> {}", emailRequest);
-        //emailRequest.setAppUrl(siteUrl.concat("/registrationConfirm?token="+ user.getVerificationCode()));
         emailService.sendUserVerificationEmail(emailRequest);
-        return modelMapper.map(user, UserResponse.class);
     }
 
     @Override
@@ -179,20 +172,30 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void verify(String verificationToken) throws UserVerificationException {
 
-        User user = userRepository.findByVerificationCode(verificationToken).orElseThrow(
+        User user = userRepository.findByVerificationToken(verificationToken).orElseThrow(
                 () -> new UserVerificationException(format("No user found with verification code %s", verificationToken)));
         if (user.getVerificationDate().isBefore(LocalDate.now())){
             throw new UserVerificationException("Token has expired");
         }
-        if (user.getVerificationCode() == null){
+        if (user.getVerificationToken() == null){
             throw new UserVerificationException("Invalid Token !");
         }
         else {
-            user.setVerificationCode(null);
+            user.setVerificationToken(null);
             user.setVerificationDate(null);
             user.setEnabled(true);
             save(user);
         }
+    }
+
+    @Override
+    public void resendVerificationToken(String email) throws UserException {
+        User userToSendToken = userRepository.findByEmail(email)
+                .orElseThrow(()-> new UserException(String.format("User not found with email %s", email)));
+        String verificationToken = UUID.randomUUID().toString();
+        userToSendToken.setVerificationToken(verificationToken);
+        userToSendToken.setVerificationDate(LocalDate.now().plusDays(1));
+        sendVerificationToken(userToSendToken);
     }
 
 }

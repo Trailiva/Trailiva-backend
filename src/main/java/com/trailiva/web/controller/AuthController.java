@@ -3,13 +3,15 @@ package com.trailiva.web.controller;
 import com.trailiva.service.AuthService;
 import com.trailiva.service.CloudinaryService;
 import com.trailiva.web.exceptions.*;
-import com.trailiva.web.payload.request.*;
+import com.trailiva.web.payload.request.LoginRequest;
+import com.trailiva.web.payload.request.PasswordRequest;
+import com.trailiva.web.payload.request.ResetPasswordRequest;
+import com.trailiva.web.payload.request.UserRequest;
 import com.trailiva.web.payload.response.ApiResponse;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.TokenResponse;
-import com.trailiva.web.payload.response.UserResponse;
+import com.trailiva.web.payload.response.UserProfile;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,8 +37,8 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest, HttpServletRequest request) {
         try {
-            UserResponse userResponse = authService.register(userRequest, getSiteUrl(request));
-            return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
+            UserProfile userProfile = authService.register(userRequest, getSiteUrl(request));
+            return new ResponseEntity<>(userProfile, HttpStatus.CREATED);
         } catch (AuthException | MessagingException | UnsupportedEncodingException | RoleNotFoundException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
@@ -96,7 +98,7 @@ public class AuthController {
     }
 
     @GetMapping("/registrationConfirm")
-    public ResponseEntity<?> verifyUser(@RequestParam("code") String code) {
+    public ResponseEntity<?> verifyUser(@RequestParam("token") String code) {
         try {
             authService.verify(code);
             return new ResponseEntity<>(new ApiResponse(true, "User is successfully verify"), HttpStatus.OK);
@@ -104,5 +106,14 @@ public class AuthController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-}
 
+    @GetMapping("/resend-token")
+    public ResponseEntity<?> resendToken(@RequestParam("email") String email) {
+        try {
+            authService.resendVerificationToken(email);
+            return new ResponseEntity<>(new ApiResponse(true, "Verification token is successfully sent to your email address"), HttpStatus.OK);
+        } catch (UserException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+}

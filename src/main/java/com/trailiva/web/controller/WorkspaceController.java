@@ -1,35 +1,106 @@
 package com.trailiva.web.controller;
 
+import com.trailiva.data.model.Project;
+import com.trailiva.data.model.WorkSpace;
+import com.trailiva.security.CurrentUser;
+import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.WorkspaceService;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.WorkspaceRequest;
 import com.trailiva.web.payload.response.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import com.trailiva.web.payload.response.WorkspaceList;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("api/v1/trailiva/workspace")
 public class WorkspaceController {
 
-    @Autowired
-    private WorkspaceService workspaceService;
 
-    @PostMapping("/create/{id}")
+    private final WorkspaceService workspaceService;
+
+    public WorkspaceController(WorkspaceService workspaceService) {
+        this.workspaceService = workspaceService;
+    }
+
+
+    @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> createWorkspace(@Valid @PathVariable Long id, @RequestBody WorkspaceRequest request){
+    public ResponseEntity<?> createWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody WorkspaceRequest request){
         try {
-            workspaceService.create(request, id);
+            workspaceService.create(request, currentUser.getId());
             return  new ResponseEntity<>(new ApiResponse(true, "Successfully created workspace"), HttpStatus.CREATED);
         } catch (WorkspaceException | UserException e) {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
+
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getWorkspacesByUserId(@PathVariable Long userId) {
+        WorkspaceList workSpaceList = new WorkspaceList();
+        try {
+            List<WorkSpace> workSpaces = workspaceService.getWorkspaces(userId);
+
+            for (WorkSpace workSpace : workSpaces){
+
+                ResponseEntity<WorkSpace> getWorkspaceLink = (ResponseEntity<WorkSpace>) methodOn(WorkspaceController.class).getWorkspace(workSpace.getWorkspaceId());
+                Link getSpaceLink = linkTo(getWorkspaceLink).withRel("my-workspace");
+                workSpace.add(getSpaceLink);
+
+                ResponseEntity<Project> getProjectsLink =
+                        methodOn(ProjectController.class)
+                                .getProjectsByWorkspaceId(workSpace.getWorkspaceId());
+
+                Link projectLink = linkTo(getProjectsLink).withRel("workspace-projects");
+
+                workSpace.add(projectLink);
+                workSpaceList.getWorkSpaces().add(workSpace);
+            }
+
+            Link selfLink =
+                    linkTo(methodOn(WorkspaceController.class).getWorkspacesByUserId(userId)).withSelfRel();
+
+            workSpaceList.add(selfLink);
+
+            return  new ResponseEntity<>(workSpaceList, HttpStatus.OK);
+        } catch (UserException e) {
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("my-workspace/{workspaceId}")
+    public ResponseEntity<?> getWorkspace(@PathVariable Long workspaceId){
+        try {
+            WorkSpace workSpace = workspaceService.getWorkspace(workspaceId);
+
+            ResponseEntity<Project> getProjectsLink =
+                    methodOn(ProjectController.class)
+                            .getProjectsByWorkspaceId(workSpace.getWorkspaceId());
+
+
+            Link projectLink = linkTo(getProjectsLink).withRel("workspace-projects");
+
+            workSpace.add(projectLink);
+
+            return new ResponseEntity<>(workSpace, HttpStatus.OK);
+        }
+            catch (WorkspaceException e) {
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+
 }

@@ -12,6 +12,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class WorkspaceServiceImpl implements WorkspaceService{
@@ -41,6 +43,19 @@ public class WorkspaceServiceImpl implements WorkspaceService{
         user.addWorkSpace(workSpace);
         userRepository.save(user);
     }
+
+    @Override
+    public List<WorkSpace> getWorkspaces(Long userId) throws UserException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
+        return user.getWorkspaces();
+    }
+
+    @Override
+    public WorkSpace getWorkspace(Long workspaceId) throws WorkspaceException {
+       return workspaceRepository.findById(workspaceId).orElseThrow(
+               ()-> new  WorkspaceException("Workspace not found"));
+    }
+
 
     private boolean existByName(String name) {
         return workspaceRepository.existsByName(name);
