@@ -17,6 +17,7 @@ import java.util.Set;
 
 @Data
 @Entity
+@Table(name = "user_data")
 public class User extends RepresentationModel<User> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
