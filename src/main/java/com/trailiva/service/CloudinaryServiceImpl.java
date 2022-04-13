@@ -34,7 +34,21 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         return  imageUrl;
     }
 
+    @Override
+    public void deleteImage(String publicId, Long userId) throws IOException, UserException {
+        User user = getAUser(userId);
+        Map deleteParams = ObjectUtils.asMap("invalidate", true );
+        cloudinary.uploader().destroy(publicId ,deleteParams);
+        user.setPublicId(null);
+        user.setImageUrl(null);
+        userRepository.save(user);
+    }
+
     private String extractFileName(String name) {
         return name.split("\\.")[0];
+    }
+
+    private User getAUser(Long userId) throws UserException {
+        return userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
     }
 }

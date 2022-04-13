@@ -33,6 +33,7 @@ public class User extends RepresentationModel<User> {
     private String password;
 
     private String imageUrl;
+    private String publicId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",

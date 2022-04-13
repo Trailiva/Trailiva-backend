@@ -1,7 +1,6 @@
 package com.trailiva.web.controller;
 
 import com.trailiva.service.AuthService;
-import com.trailiva.service.CloudinaryService;
 import com.trailiva.web.exceptions.*;
 import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
@@ -11,28 +10,28 @@ import com.trailiva.web.payload.response.ApiResponse;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.TokenResponse;
 import com.trailiva.web.payload.response.UserProfile;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@Slf4j
 @RequestMapping("api/v1/trailiva/auth")
 public class AuthController {
-    @Autowired
-    private AuthService authService;
 
-    @Autowired
-    private CloudinaryService cloudinaryService;
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest, HttpServletRequest request) {
@@ -86,16 +85,6 @@ public class AuthController {
         }
     }
 
-    @PostMapping(value = "/upload/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> uploadProfilePicture(@RequestParam("file") MultipartFile file, @PathVariable Long userId) {
-        try {
-            String url = cloudinaryService.uploadImage(file, userId);
-            return new ResponseEntity<>(new ApiResponse(true, "profile image is successfully uploaded", url), HttpStatus.OK);
-        } catch (IOException | UserException exception) {
-            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
-        }
-    }
 
     @GetMapping("/registrationConfirm")
     public ResponseEntity<?> verifyUser(@RequestParam("token") String code) {

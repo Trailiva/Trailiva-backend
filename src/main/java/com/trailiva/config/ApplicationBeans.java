@@ -5,9 +5,14 @@ import com.cloudinary.utils.ObjectUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+
+import javax.servlet.MultipartConfigElement;
 
 @Configuration
 public class ApplicationBeans {
@@ -38,4 +43,6 @@ public class ApplicationBeans {
                 "api_key", apiKey,
                 "api_secret", apiSecret, "secure", true));
     }
+    
+
 }
