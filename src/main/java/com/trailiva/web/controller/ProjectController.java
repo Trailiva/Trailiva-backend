@@ -31,9 +31,9 @@ public class ProjectController {
     public ResponseEntity<?> createProject(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
         try {
             projectService.createProject(request, id);
-            return  new ResponseEntity<>(new ApiResponse(true, "project successfully created"), HttpStatus.CREATED);
+            return  ResponseEntity.ok(new ApiResponse(true, "project successfully created", HttpStatus.OK));
         } catch (WorkspaceException | UserException | ProjectException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 

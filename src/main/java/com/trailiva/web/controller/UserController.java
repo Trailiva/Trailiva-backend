@@ -57,7 +57,7 @@ public class UserController {
 
             return new ResponseEntity<>(userProfile, HttpStatus.OK);
         } catch (UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -66,9 +66,9 @@ public class UserController {
     public ResponseEntity<?> uploadProfileData(@CurrentUser UserPrincipal currentUser, @RequestBody ImageRequest imageProperties) {
         try {
             userService.saveImageProperties(imageProperties, currentUser.getId());
-            return new ResponseEntity<>(new ApiResponse(true, "profile image is successfully uploaded"), HttpStatus.OK);
+            return ResponseEntity.ok(new ApiResponse(true, "profile image is successfully uploaded", HttpStatus.OK));
         } catch (UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -80,7 +80,7 @@ public class UserController {
             return new ResponseEntity<>(userProfile, HttpStatus.OK);
 
         } catch (UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -90,9 +90,9 @@ public class UserController {
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("file") MultipartFile file, @CurrentUser UserPrincipal currentUser) {
         try {
             String url = cloudinaryService.uploadImage(file, currentUser.getId());
-            return new ResponseEntity<>(new ApiResponse(true, "file is successfully uploaded", url), HttpStatus.OK);
+            return ResponseEntity.ok(new ApiResponse(true, "file is successfully uploaded", url, HttpStatus.OK));
         } catch (IOException | UserException exception) {
-            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -101,9 +101,9 @@ public class UserController {
     public ResponseEntity<?> deleteUploadedImage(@CurrentUser UserPrincipal currentUser,  @RequestParam("public_id") String publicId) {
         try {
             cloudinaryService.deleteImage(publicId, currentUser.getId());
-            return new ResponseEntity<>(new ApiResponse(true, "image deleted successfully"), HttpStatus.OK);
+            return ResponseEntity.ok(new ApiResponse(true, "image deleted successfully", HttpStatus.OK));
         } catch (IOException | UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 }

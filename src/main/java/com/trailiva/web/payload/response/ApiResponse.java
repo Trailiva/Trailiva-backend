@@ -18,15 +18,17 @@ public class ApiResponse {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime localDateTime;
     private Object data;
+    private HttpStatus status;
 
-    public ApiResponse(boolean isSuccessful, String message) {
+    public ApiResponse(boolean isSuccessful, String message, HttpStatus status) {
         this.isSuccessful = isSuccessful;
         this.message = message;
         localDateTime = LocalDateTime.now();
+        this.status = status;
     }
 
-    public ApiResponse(boolean isSuccessful, String message, Object data) {
-        this(isSuccessful, message);
+    public ApiResponse(boolean isSuccessful, String message, Object data, HttpStatus status) {
+        this(isSuccessful, message, status);
         this.data = data;
     }
 }

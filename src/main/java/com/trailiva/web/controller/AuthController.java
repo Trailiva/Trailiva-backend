@@ -39,7 +39,7 @@ public class AuthController {
             UserProfile userProfile = authService.register(userRequest, getSiteUrl(request));
             return new ResponseEntity<>(userProfile, HttpStatus.CREATED);
         } catch (AuthException | MessagingException | UnsupportedEncodingException | RoleNotFoundException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -59,9 +59,9 @@ public class AuthController {
     public ResponseEntity<?> updatePassword(@Valid @RequestBody PasswordRequest passwordRequest) {
         try {
             authService.updatePassword(passwordRequest);
-            return new ResponseEntity<>(new ApiResponse(true, "User password is successfully updated"), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "User password is successfully updated", HttpStatus.OK), HttpStatus.OK);
         } catch (AuthException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -71,7 +71,7 @@ public class AuthController {
             TokenResponse passwordResetToken = authService.generatePasswordResetToken(email);
             return new ResponseEntity<>(passwordResetToken, HttpStatus.CREATED);
         } catch (AuthException exception) {
-            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -79,9 +79,9 @@ public class AuthController {
     public ResponseEntity<?> resetPassword(@Valid @PathVariable String token, @RequestBody ResetPasswordRequest request) {
         try {
             authService.resetPassword(request, token);
-            return new ResponseEntity<>(new ApiResponse(true, "Password reset is successful"), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "Password reset is successful", HttpStatus.OK), HttpStatus.OK);
         } catch (AuthException | TokenException exception) {
-            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -90,7 +90,7 @@ public class AuthController {
     public ResponseEntity<?> verifyUser(@RequestParam("token") String code) {
         try {
             authService.verify(code);
-            return new ResponseEntity<>(new ApiResponse(true, "User is successfully verify"), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "User is successfully verify", HttpStatus.OK), HttpStatus.OK);
         } catch (UserVerificationException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -100,7 +100,7 @@ public class AuthController {
     public ResponseEntity<?> resendToken(@RequestParam("email") String email) {
         try {
             authService.resendVerificationToken(email);
-            return new ResponseEntity<>(new ApiResponse(true, "Verification token is successfully sent to your email address"), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "Verification token is successfully sent to your email address", HttpStatus.OK), HttpStatus.OK);
         } catch (UserException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

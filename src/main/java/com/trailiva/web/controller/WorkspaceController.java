@@ -39,9 +39,9 @@ public class WorkspaceController {
     public ResponseEntity<?> createWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody WorkspaceRequest request){
         try {
             workspaceService.create(request, currentUser.getId());
-            return  new ResponseEntity<>(new ApiResponse(true, "Successfully created workspace"), HttpStatus.CREATED);
+            return  ResponseEntity.ok(new ApiResponse(true, "Successfully created workspace", HttpStatus.OK));
         } catch (WorkspaceException | UserException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -75,7 +75,7 @@ public class WorkspaceController {
 
             return  new ResponseEntity<>(workSpaceList, HttpStatus.OK);
         } catch (UserException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -96,7 +96,7 @@ public class WorkspaceController {
             return new ResponseEntity<>(workSpace, HttpStatus.OK);
         }
             catch (WorkspaceException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
