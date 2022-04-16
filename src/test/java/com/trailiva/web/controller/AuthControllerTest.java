@@ -2,15 +2,13 @@ package com.trailiva.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trailiva.data.model.Token;
 import com.trailiva.data.repository.UserRepository;
 import com.trailiva.service.AuthService;
 import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
-import com.trailiva.web.payload.request.ResetPasswordRequest;
+import com.trailiva.web.payload.request.ForgetPasswordRequest;
 import com.trailiva.web.payload.request.UserRequest;
 import com.trailiva.web.payload.response.TokenResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -115,7 +113,7 @@ class AuthControllerTest {
     @Test
     void whenUserResetPassword_theReturn200() throws Exception{
         //Given
-        ResetPasswordRequest passwordReset = new ResetPasswordRequest("test@gmail.com", "test123");
+        ForgetPasswordRequest passwordReset = new ForgetPasswordRequest("test@gmail.com", "test123");
 
         //When
         MvcResult mvcResult = mockMvc.perform(post("/api/v1/trailiva/auth/password/reset/93j34fh8wnj43n8a")

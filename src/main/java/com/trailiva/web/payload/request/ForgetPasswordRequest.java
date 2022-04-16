@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResetPasswordRequest {
+public class ForgetPasswordRequest {
     @Email(message = "email cannot be blank")
     private String email;
     @NotBlank(message = "Password cannot be blank")

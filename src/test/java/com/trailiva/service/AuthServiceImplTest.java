@@ -161,7 +161,7 @@ class AuthServiceImplTest {
         //When
         String expected = passwordRequest.getOldPassword();
         String actual = mockedUser.getPassword();
-        authService.updatePassword(passwordRequest);
+        authService.resetPassword(passwordRequest);
 
         //Assert
         verify(passwordEncoder, times(1)).matches(expected, actual);
@@ -214,7 +214,7 @@ class AuthServiceImplTest {
     void savedUserCanResetPassword() throws AuthException, TokenException {
         // Given
         String randomEncoder = UUID.randomUUID().toString();
-        ResetPasswordRequest passwordResetRequest = new ResetPasswordRequest("ismail@gmail.com", "pass1234");
+        ForgetPasswordRequest passwordResetRequest = new ForgetPasswordRequest("ismail@gmail.com", "pass1234");
         String passwordResetToken = UUID.randomUUID().toString();
 
         Token mockToken = new Token();
@@ -229,7 +229,7 @@ class AuthServiceImplTest {
         when(passwordEncoder.encode(anyString())).thenReturn(randomEncoder);
 
         ArgumentCaptor<User> tokenArgumentCaptor = ArgumentCaptor.forClass(User.class);
-        authService.resetPassword(passwordResetRequest, passwordResetToken);
+        authService.forgetPassword(passwordResetRequest, passwordResetToken);
 
         verify(userRepository, times(1)).save(tokenArgumentCaptor.capture());
         verify(tokenRepository, times(1)).delete(mockToken);

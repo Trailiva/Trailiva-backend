@@ -4,7 +4,7 @@ import com.trailiva.service.AuthService;
 import com.trailiva.web.exceptions.*;
 import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
-import com.trailiva.web.payload.request.ResetPasswordRequest;
+import com.trailiva.web.payload.request.ForgetPasswordRequest;
 import com.trailiva.web.payload.request.UserRequest;
 import com.trailiva.web.payload.response.ApiResponse;
 import com.trailiva.web.payload.response.JwtTokenResponse;
@@ -55,18 +55,18 @@ public class AuthController {
         return new ResponseEntity<>(authenticationDetail, HttpStatus.OK);
     }
 
-    @PostMapping("/password/update")
-    public ResponseEntity<?> updatePassword(@Valid @RequestBody PasswordRequest passwordRequest) {
+    @PostMapping("/password/reset")
+    public ResponseEntity<?> forgetPassword(@Valid @RequestBody PasswordRequest passwordRequest) {
         try {
-            authService.updatePassword(passwordRequest);
+            authService.resetPassword(passwordRequest);
             return new ResponseEntity<>(new ApiResponse(true, "User password is successfully updated", HttpStatus.OK), HttpStatus.OK);
         } catch (AuthException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping("/password/reset/{email}")
-    public ResponseEntity<?> forgotPassword(@Valid @PathVariable String email) {
+    @GetMapping("/password/token/{email}")
+    public ResponseEntity<?> getForgetPasswordToken(@Valid @PathVariable String email) {
         try {
             TokenResponse passwordResetToken = authService.generatePasswordResetToken(email);
             return new ResponseEntity<>(passwordResetToken, HttpStatus.CREATED);
@@ -75,10 +75,10 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/password/reset/{token}")
-    public ResponseEntity<?> resetPassword(@Valid @PathVariable String token, @RequestBody ResetPasswordRequest request) {
+    @PostMapping("/password/forget-password/{token}")
+    public ResponseEntity<?> forgetPassword(@Valid @PathVariable String token, @RequestBody ForgetPasswordRequest request) {
         try {
-            authService.resetPassword(request, token);
+            authService.forgetPassword(request, token);
             return new ResponseEntity<>(new ApiResponse(true, "Password reset is successful", HttpStatus.OK), HttpStatus.OK);
         } catch (AuthException | TokenException exception) {
             return new ResponseEntity<>(new ApiResponse(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);

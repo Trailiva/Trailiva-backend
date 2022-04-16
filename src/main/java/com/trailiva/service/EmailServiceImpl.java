@@ -12,6 +12,7 @@ import com.trailiva.web.payload.request.EmailRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,6 +24,13 @@ import java.util.Objects;
 @Service
 @Slf4j
 public class EmailServiceImpl implements EmailService{
+
+    @Value("${SEND_GRID_API_KEY}")
+    private String API_KEY;
+
+    @Value("${SEND_GRID_API_ID}")
+    private String API_ID;
+
     @Override
     public void sendUserVerificationEmail(EmailRequest emailRequest) {
 
@@ -45,9 +53,9 @@ public class EmailServiceImpl implements EmailService{
         personalization.addDynamicTemplateData("token", emailRequest.getVerificationToken());
 
         mail.addPersonalization(personalization);
-        mail.setTemplateId(System.getenv("API_ID"));
+        mail.setTemplateId(API_ID);
         // this is the api key
-        SendGrid sg = new SendGrid(System.getenv("API_KEY"));
+        SendGrid sg = new SendGrid(API_KEY);
         Request request = new Request();
 
         try {

@@ -115,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void updatePassword(PasswordRequest request) throws AuthException {
+    public void resetPassword(PasswordRequest request) throws AuthException {
         String email = request.getEmail();
         String oldPassword = request.getOldPassword();
         String newPassword = request.getPassword();
@@ -131,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resetPassword(ResetPasswordRequest request, String passwordResetToken) throws AuthException, TokenException {
+    public void forgetPassword(ForgetPasswordRequest request, String passwordResetToken) throws AuthException, TokenException {
         String email = request.getEmail();
         String newPassword = request.getPassword();
         User userToResetPassword = userRepository.findByEmail(email)
