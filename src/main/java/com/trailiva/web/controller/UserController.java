@@ -67,7 +67,7 @@ public class UserController {
         try {
             userService.saveImageProperties(imageProperties, currentUser.getId());
             return ResponseEntity.ok(new ApiResponse(true, "profile image is successfully uploaded", HttpStatus.OK));
-        } catch (UserException e) {
+        } catch (UserException | IOException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }

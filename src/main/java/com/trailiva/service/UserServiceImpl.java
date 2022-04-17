@@ -9,17 +9,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.util.Objects;
+
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final  ModelMapper modelMapper;
+    private final CloudinaryService cloudinaryService;
 
 
-    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, ModelMapper modelMapper1) {
+    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, ModelMapper modelMapper1, CloudinaryService cloudinaryService) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper1;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Override
@@ -38,8 +43,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void saveImageProperties(ImageRequest imageProperties, Long userId) throws UserException {
+    public void saveImageProperties(ImageRequest imageProperties, Long userId) throws UserException, IOException {
         User user = getAUser(userId);
+        String url = user.getImageUrl();
+        String publicId = user.getPublicId();
+
+        if(!Objects.isNull(url) && !Objects.isNull(publicId))
+            cloudinaryService.deleteImage(publicId, userId);
+
         user.setImageUrl(imageProperties.getUrl());
         user.setPublicId(imageProperties.getPublicId());
         saveAUser(user);
