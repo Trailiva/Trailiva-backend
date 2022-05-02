@@ -49,7 +49,7 @@ public class UserController {
 
 
             ResponseEntity<WorkSpace> methodLinkBuilder = (ResponseEntity<WorkSpace>) methodOn(WorkspaceController.class)
-                    .getWorkspacesByUserId(userProfile.getUserId());
+                    .getWorkspacesByUserId(currentUser);
 
             Link workspaceLink = linkTo(methodLinkBuilder).withRel("user-workspace");
 

@@ -27,9 +27,9 @@ public class WorkspaceServiceImpl implements WorkspaceService{
     private UserRepository userRepository;
 
     @Override
-    public void create(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException {
+    public WorkSpace createWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException {
         User  user = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
-        if(existByName(request.getName())){
+        if(existByName(request.getName()) || existByReferenceName(request.getReferenceName())){
             throw new WorkspaceException("Workspace with name already exist");
         }
         WorkSpace workSpace = new WorkSpace();
@@ -42,6 +42,11 @@ public class WorkspaceServiceImpl implements WorkspaceService{
         log.info("Workspace data ==> {}", space);
         user.addWorkSpace(workSpace);
         userRepository.save(user);
+        return space;
+    }
+
+    private boolean existByReferenceName(String referenceName) {
+       return workspaceRepository.existsByReferenceName(referenceName);
     }
 
     @Override

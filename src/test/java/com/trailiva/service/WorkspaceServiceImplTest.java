@@ -2,7 +2,6 @@ package com.trailiva.service;
 
 import com.trailiva.data.model.User;
 import com.trailiva.data.model.WorkSpace;
-import com.trailiva.data.model.WorkSpaceType;
 import com.trailiva.data.repository.UserRepository;
 import com.trailiva.data.repository.WorkspaceRepository;
 import com.trailiva.web.exceptions.UserException;
@@ -19,12 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
 import static com.trailiva.data.model.WorkSpaceType.PERSONAL;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -68,14 +65,14 @@ class WorkspaceServiceImplTest {
     @Test
     void testThat_workSpaceIsCreated() throws UserException, WorkspaceException {
         //Given
-        doNothing().when(workspaceService).create(any(WorkspaceRequest.class), anyLong());
+        doNothing().when(workspaceService).createWorkspace(any(WorkspaceRequest.class), anyLong());
         doNothing().when(workspaceRepository).save(new WorkSpace());
         when(workspaceRepository.existsByName(anyString())).thenReturn(false);
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(new User()));
         when(modelMapper.map(any(), User.class)).thenReturn(new User());
 
         //When
-        workspaceService.create(workspaceRequest, 1L);
+        workspaceService.createWorkspace(workspaceRequest, 1L);
 
         //Assertion
         verify(userRepository, times(1)).findById(1L);

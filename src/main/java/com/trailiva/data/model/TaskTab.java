@@ -12,12 +12,6 @@ public class TaskTab {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tab;
+    private Tab tab;
 
-    @OneToOne(mappedBy = "tab")
-    private Task task;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workspace")
-    private WorkSpace workSpace;
 }

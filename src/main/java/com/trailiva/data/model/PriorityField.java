@@ -1,6 +1,7 @@
 package com.trailiva.data.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,9 +16,6 @@ public class PriorityField {
     private Long id;
 
     private Priority priority;
-
-    @OneToOne(mappedBy = "priorityField")
-    private Task task;
 
     public PriorityField(Priority priority) {
         this.priority = priority;

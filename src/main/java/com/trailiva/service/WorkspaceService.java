@@ -8,7 +8,7 @@ import com.trailiva.web.payload.request.WorkspaceRequest;
 import java.util.List;
 
 public interface WorkspaceService {
-    void create(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException;
+    WorkSpace createWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException;
     List<WorkSpace> getWorkspaces(Long userId) throws UserException;
     WorkSpace getWorkspace(Long workspaceId) throws WorkspaceException;
 }

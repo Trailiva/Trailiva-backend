@@ -16,29 +16,31 @@ import java.util.List;
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
-    private final WorkspaceRepository workspaceRepository;
-    private final ModelMapper modelMapper;
     private final ProjectRepository projectRepository;
+    private final ModelMapper modelMapper;
+    private final WorkspaceRepository workspaceRepository;
 
-    public ProjectServiceImpl(WorkspaceRepository workspaceRepository, ModelMapper modelMapper, ProjectRepository projectRepository) {
-        this.workspaceRepository = workspaceRepository;
+    public ProjectServiceImpl(ProjectRepository workspaceRepository, ModelMapper modelMapper, ProjectRepository projectRepository, WorkspaceRepository workspaceRepository1) {
         this.modelMapper = modelMapper;
         this.projectRepository = projectRepository;
+        this.workspaceRepository = workspaceRepository1;
     }
 
 
     @Override
-    public void createProject(ProjectRequest request, Long workspaceId) throws WorkspaceException, UserException, ProjectException {
+    public Project createProject(ProjectRequest request, Long workspaceId) throws WorkspaceException, UserException, ProjectException {
         WorkSpace workSpace = workspaceRepository.findById(workspaceId).orElseThrow(
                 ()-> new WorkspaceException("Workspace does not exist"));
         List<Project> projects = workSpace.getProjects();
+
 
         if(!isValidProject(projects, request.getName())){
             Project project = modelMapper.map(request, Project.class);
             Project savedProject = projectRepository.save(project);
             workSpace.addProject(savedProject);
             workspaceRepository.save(workSpace);
-        }else throw new ProjectException("Project name " + request.getName() + "Already exist on your project list");
+            return savedProject;
+        }else throw new ProjectException("Project name already exist on your project list");
     }
 
     @Override
@@ -49,6 +51,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void deleteProject(Long projectId) {
 
+    }
+
+    @Override
+    public Project getProjectById(Long projectId) throws ProjectException {
+        return projectRepository.findById(projectId).orElseThrow(() -> new ProjectException("Project not found"));
     }
 
     private boolean isValidProject(List<Project> projects, String name) {

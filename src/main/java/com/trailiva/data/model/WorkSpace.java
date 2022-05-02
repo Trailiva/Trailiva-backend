@@ -17,7 +17,6 @@ import java.util.List;
 public class WorkSpace extends RepresentationModel<WorkSpace> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private Long workspaceId;
 
     private String name;
@@ -36,10 +35,6 @@ public class WorkSpace extends RepresentationModel<WorkSpace> {
     @OneToMany(fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Task> tasks;
-
-    @OneToMany(fetch = FetchType.EAGER)
-    @JsonIgnore
-    private List<TaskTab> tabs;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JsonIgnore

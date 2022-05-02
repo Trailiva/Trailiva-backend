@@ -1,9 +1,11 @@
 package com.trailiva.web.controller;
 
 import com.trailiva.data.model.Project;
+import com.trailiva.data.model.Task;
 import com.trailiva.data.model.WorkSpace;
 import com.trailiva.security.CurrentUser;
 import com.trailiva.security.UserPrincipal;
+import com.trailiva.service.TaskService;
 import com.trailiva.service.WorkspaceService;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
@@ -38,19 +40,19 @@ public class WorkspaceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> createWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody WorkspaceRequest request){
         try {
-            workspaceService.create(request, currentUser.getId());
-            return  ResponseEntity.ok(new ApiResponse(true, "Successfully created workspace", HttpStatus.OK));
+           WorkSpace workSpace =  workspaceService.createWorkspace(request, currentUser.getId());
+            return  ResponseEntity.ok(workSpace);
         } catch (WorkspaceException | UserException e) {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getWorkspacesByUserId(@PathVariable Long userId) {
+    @GetMapping()
+    public ResponseEntity<?> getWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
         WorkspaceList workSpaceList = new WorkspaceList();
         try {
-            List<WorkSpace> workSpaces = workspaceService.getWorkspaces(userId);
+            List<WorkSpace> workSpaces = workspaceService.getWorkspaces(userPrincipal.getId());
 
             for (WorkSpace workSpace : workSpaces){
 
@@ -69,7 +71,7 @@ public class WorkspaceController {
             }
 
             Link selfLink =
-                    linkTo(methodOn(WorkspaceController.class).getWorkspacesByUserId(userId)).withSelfRel();
+                    linkTo(methodOn(WorkspaceController.class).getWorkspacesByUserId(userPrincipal)).withSelfRel();
 
             workSpaceList.add(selfLink);
 
@@ -84,12 +86,9 @@ public class WorkspaceController {
         try {
             WorkSpace workSpace = workspaceService.getWorkspace(workspaceId);
 
-            ResponseEntity<Project> getProjectsLink =
-                    methodOn(ProjectController.class)
-                            .getProjectsByWorkspaceId(workSpace.getWorkspaceId());
+            ResponseEntity<Task> getTasksLink = (ResponseEntity<Task>) methodOn(TaskController.class).getAllTaskInWorkspace(workSpace.getWorkspaceId());
 
-
-            Link projectLink = linkTo(getProjectsLink).withRel("workspace-projects");
+            Link projectLink = linkTo(getTasksLink).withRel("workspace-tasks");
 
             workSpace.add(projectLink);
 
@@ -99,6 +98,8 @@ public class WorkspaceController {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
+
+
 
 
 

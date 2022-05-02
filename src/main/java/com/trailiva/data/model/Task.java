@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.http.ResponseEntity;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -20,33 +21,27 @@ public class Task {
 
     private String name;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "task_priority")
-    private PriorityField priorityField;
+    @Enumerated(value = EnumType.STRING)
+    private Priority priority;
 
     private String description;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
-    @JsonIgnore
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    @JsonIgnore
     private LocalDateTime updatedAt;
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    @JsonIgnore
-    private LocalDateTime dueDate;
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private LocalDate dueDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workspace_task")
+    @JsonIgnore
     private WorkSpace workSpace;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "tab", referencedColumnName = "id")
-    private TaskTab tab;
-
-
+    @Enumerated(value = EnumType.STRING)
+    private Tab tab;
 }

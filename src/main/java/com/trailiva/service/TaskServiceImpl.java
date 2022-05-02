@@ -1,29 +1,30 @@
 package com.trailiva.service;
 
 import com.trailiva.data.model.*;
-import com.trailiva.data.repository.ProjectRepository;
 import com.trailiva.data.repository.TaskPriorityRepository;
 import com.trailiva.data.repository.TaskRepository;
 import com.trailiva.data.repository.WorkspaceRepository;
 import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
-import com.trailiva.web.payload.response.TaskResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.trailiva.data.model.Tab.PENDING;
+
 @Service
+@Slf4j
 public class TaskServiceImpl implements TaskService{
 
     @Autowired
     private TaskRepository taskRepository;
 
     @Autowired
-    private ProjectRepository projectRepository;
+    private WorkspaceRepository workspaceRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -35,19 +36,15 @@ public class TaskServiceImpl implements TaskService{
     @Override
     public Task createTask(TaskRequest request, Long workSpaceId) throws TaskException, WorkspaceException {
         if (existByName(request.getName())) throw new TaskException("This task already exist");
-        Project project = projectRepository.findById(workSpaceId).orElseThrow(()-> new WorkspaceException("Project not found"));
-
-        Priority priority = Priority.fetchPriority(request.getPriority());
-        PriorityField priorityField = new PriorityField(priority);
-        taskPriorityRepository.save(priorityField);
+        WorkSpace workSpace = workspaceRepository.findById(workSpaceId).orElseThrow(()-> new WorkspaceException("Project not found"));
 
         Task newTask = modelMapper.map(request, Task.class);
-        newTask.setPriorityField(priorityField);
+        newTask.setTab(PENDING);
 
-        taskRepository.save(newTask);
-        project.getTasks().add(newTask);
-        projectRepository.save(project);
-        return newTask;
+        Task task = taskRepository.save(newTask);
+        workSpace.getTasks().add(newTask);
+        workspaceRepository.save(workSpace);
+        return task;
     }
 
     @Override
@@ -66,15 +63,24 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public List<Task> getAllProjectTask(Long projectId) {
-        Project project = projectRepository.getById(projectId);
-        return project.getTasks();
+    public List<Task> getTasksByWorkspaceId(Long workspaceId) throws WorkspaceException {
+        WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(()-> new WorkspaceException("No workspace found"));
+        return workspace.getTasks();
     }
 
     @Override
     public Task getTaskDetail(Long taskId) throws TaskException {
         return taskRepository.findById(taskId).orElseThrow(
                 ()-> new TaskException("Task not found"));
+    }
+
+    @Override
+    public Task updateTaskTag(Long taskId, String taskTab) throws TaskException {
+        Task taskToUpdate = taskRepository.findById(taskId).orElseThrow(
+                ()-> new TaskException("Task not found"));
+        taskToUpdate.setTab(Tab.tabMapper(taskTab));
+        Task task = taskRepository.save(taskToUpdate);
+        return task;
     }
 
 

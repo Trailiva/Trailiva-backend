@@ -10,6 +10,7 @@ import com.trailiva.web.payload.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -22,10 +23,11 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-    @PostMapping("/create/{projectId}")
-    public ResponseEntity<?> register(@Valid @RequestBody TaskRequest request, @PathVariable Long projectId) {
+    @PostMapping("/create/{workspaceId}")
+     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<?> register(@Valid @RequestBody TaskRequest request, @PathVariable Long workspaceId) {
         try {
-            Task task = taskService.createTask(request, projectId);
+            Task task = taskService.createTask(request, workspaceId);
             return new ResponseEntity<>(task, HttpStatus.CREATED);
         } catch (WorkspaceException | TaskException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
@@ -52,10 +54,16 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/{projectId}")
-    public ResponseEntity<?> getAllTaskInProject(@Valid @PathVariable Long projectId){
-        List<Task> task = taskService.getAllProjectTask(projectId);
-        return new ResponseEntity<>(task, HttpStatus.OK);
+    @GetMapping("workspace/{workspaceId}")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<?> getAllTaskInWorkspace(@Valid @PathVariable Long workspaceId){
+        try {
+            List<Task> tasks = taskService.getTasksByWorkspaceId(workspaceId);
+            return ResponseEntity.ok(tasks);
+        }
+        catch (WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(),  HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping("/{taskId}")

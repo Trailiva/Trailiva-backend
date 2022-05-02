@@ -30,8 +30,8 @@ public class ProjectController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> createProject(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
         try {
-            projectService.createProject(request, id);
-            return  ResponseEntity.ok(new ApiResponse(true, "project successfully created", HttpStatus.OK));
+            Project project = projectService.createProject(request, id);
+            return  ResponseEntity.ok(project);
         } catch (WorkspaceException | UserException | ProjectException e) {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
@@ -40,5 +40,15 @@ public class ProjectController {
     @GetMapping("/{workspaceId}")
     public ResponseEntity<Project> getProjectsByWorkspaceId(@PathVariable Long workspaceId) {
         return new ResponseEntity<>(new Project(), HttpStatus.OK);
+    }
+
+    @GetMapping("/{projectId}")
+    public ResponseEntity<?> getProjectsByProjectId(@PathVariable Long projectId) {
+        try {
+            Project project = projectService.getProjectById(projectId);
+            return  ResponseEntity.ok(project);
+        } catch ( ProjectException e) {
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
     }
 }
