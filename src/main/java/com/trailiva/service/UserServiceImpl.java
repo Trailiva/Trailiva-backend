@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User getUserProfile(Long userId) throws UserException {
+        log.info("Got Here ==> {}", userId);
         return getAUser(userId);
     }
 

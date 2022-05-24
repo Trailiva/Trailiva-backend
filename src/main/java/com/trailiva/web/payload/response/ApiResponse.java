@@ -27,6 +27,11 @@ public class ApiResponse {
         this.status = status;
     }
 
+    public ApiResponse(boolean isSuccessful, String message){
+        this.isSuccessful = isSuccessful;
+        this.message = message;
+    }
+
     public ApiResponse(boolean isSuccessful, String message, Object data, HttpStatus status) {
         this(isSuccessful, message, status);
         this.data = data;
