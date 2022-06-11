@@ -2,6 +2,7 @@ package com.trailiva.service;
 
 
 import com.trailiva.data.model.Priority;
+import com.trailiva.data.model.Tab;
 import com.trailiva.data.model.Task;
 import com.trailiva.data.repository.TaskRepository;
 import com.trailiva.web.exceptions.TaskException;
@@ -39,11 +40,13 @@ public class TaskServiceTest {
         firstTask.setId(1L);
         firstTask.setDescription("first task");
         firstTask.setPriority(Priority.HIGH);
+        firstTask.setTab(Tab.IN_PROGRESS);
 
         secondTask = new Task();
         secondTask.setId(2L);
         secondTask.setDescription("second task");
         secondTask.setPriority(Priority.LOW);
+        secondTask.setTab(Tab.PENDING);
     }
 
     @Test
@@ -56,7 +59,11 @@ public class TaskServiceTest {
     }
 
     @Test
-    void testThatATaskCanBeFilteredByTab(){
-
+    void testThatATaskCanBeFilteredByTab() throws TaskException {
+        List<Task> allTask = List.of(firstTask, secondTask);
+        when(taskRepository.findAll()).thenReturn(allTask);
+        List<Task> filteredTask = taskService.filterTaxByTab(Tab.PENDING);
+        assertThat(filteredTask.size()).isEqualTo(1);
+        assertThat(filteredTask.get(0).getDescription()).isEqualTo(secondTask.getDescription());
     }
 }

@@ -93,6 +93,16 @@ public class TaskServiceImpl implements TaskService{
         return filteredTask;
     }
 
+    @Override
+    public List<Task> filterTaxByTab(Tab taskTab) throws TaskException {
+        List<Task> allTask = taskRepository.findAll();
+        List<Task> filteredTask = new ArrayList<>();
+        allTask.forEach(task -> {
+            if (task.getTab().equals(taskTab)) filteredTask.add(task);
+        });
+        return filteredTask;
+    }
+
 
     private boolean existByName(String name) {
         return taskRepository.existsTaskByName(name);

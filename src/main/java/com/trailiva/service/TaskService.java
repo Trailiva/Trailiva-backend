@@ -2,6 +2,7 @@ package com.trailiva.service;
 
 
 import com.trailiva.data.model.Priority;
+import com.trailiva.data.model.Tab;
 import com.trailiva.data.model.Task;
 import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.WorkspaceException;
@@ -19,4 +20,5 @@ public interface TaskService {
     Task getTaskDetail(Long taskId) throws TaskException;
     Task updateTaskTag(Long taskId, String taskTag) throws TaskException;
     List<Task> filterTaxByPriority(Priority taskPriority) throws TaskException;
+    List<Task> filterTaxByTab(Tab taskTab) throws TaskException;
 }
