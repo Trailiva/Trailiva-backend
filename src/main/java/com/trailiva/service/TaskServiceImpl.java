@@ -85,6 +85,8 @@ public class TaskServiceImpl implements TaskService{
 
     @Override
     public List<Task> filterTaxByPriority(Priority taskPriority) throws TaskException {
+        //Todo: Don't fetch all task from DB, instead fetch task that contain the task priority
+        //Todo: This operation will be done in the task repository.
         List<Task> allTask = taskRepository.findAll();
         List<Task> filteredTask = new ArrayList<>();
         allTask.forEach(task -> {
