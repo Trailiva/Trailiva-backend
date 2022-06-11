@@ -52,5 +52,11 @@ public class TaskServiceTest {
         when(taskRepository.findAll()).thenReturn(allTask);
         List<Task> filteredTask = taskService.filterTaxByPriority(Priority.LOW);
         assertThat(filteredTask.size()).isEqualTo(1);
+        assertThat(filteredTask.get(0).getDescription()).isEqualTo(secondTask.getDescription());
+    }
+
+    @Test
+    void testThatATaskCanBeFilteredByTab(){
+
     }
 }
