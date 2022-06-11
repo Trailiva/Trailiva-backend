@@ -1,8 +1,11 @@
 package com.trailiva.service;
 
 
+import com.trailiva.data.model.PagedResponse;
 import com.trailiva.data.model.Task;
+import com.trailiva.security.UserPrincipal;
 import com.trailiva.web.exceptions.TaskException;
+import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
 import com.trailiva.web.payload.response.TaskResponse;
@@ -17,5 +20,5 @@ public interface TaskService {
     List<Task> getTasksByWorkspaceId(Long workspaceId) throws WorkspaceException;
     Task getTaskDetail(Long taskId) throws TaskException;
     Task updateTaskTag(Long taskId, String taskTag) throws TaskException;
-
+    PagedResponse<Task> getAllTask(UserPrincipal currentUser, int page, int size) throws UserException;
 }

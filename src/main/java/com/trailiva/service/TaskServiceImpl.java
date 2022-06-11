@@ -4,17 +4,25 @@ import com.cloudinary.api.exceptions.BadRequest;
 import com.trailiva.data.model.*;
 import com.trailiva.data.repository.TaskPriorityRepository;
 import com.trailiva.data.repository.TaskRepository;
+import com.trailiva.data.repository.UserRepository;
 import com.trailiva.data.repository.WorkspaceRepository;
+import com.trailiva.security.UserPrincipal;
 import com.trailiva.util.AppConstants;
 import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.TaskException;
+import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
+import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.PageRequest;
+
+import java.util.Collections;
 import java.util.List;
 
 import static com.trailiva.data.model.Tab.PENDING;
@@ -31,6 +39,9 @@ public class TaskServiceImpl implements TaskService{
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private TaskPriorityRepository taskPriorityRepository;
@@ -84,6 +95,19 @@ public class TaskServiceImpl implements TaskService{
         taskToUpdate.setTab(Tab.tabMapper(taskTab));
         return taskRepository.save(taskToUpdate);
     }
+
+    @Override
+    public PagedResponse<Task> getAllTask(UserPrincipal currentUser, int page, int size) throws UserException {
+        validatePageNumberAndSize(page, size);
+
+        //Retrieve Tasks
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        Page<Task> tasks = taskRepository.findAll(pageable);
+
+        return null;
+
+    }
+
 
 
     private boolean existByName(String name) {
