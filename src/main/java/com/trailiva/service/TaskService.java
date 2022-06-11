@@ -17,4 +17,5 @@ public interface TaskService {
     List<Task> getTasksByWorkspaceId(Long workspaceId) throws WorkspaceException;
     Task getTaskDetail(Long taskId) throws TaskException;
     Task updateTaskTag(Long taskId, String taskTag) throws TaskException;
+
 }

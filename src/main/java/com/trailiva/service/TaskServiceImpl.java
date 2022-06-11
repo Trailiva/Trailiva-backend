@@ -1,9 +1,12 @@
 package com.trailiva.service;
 
+import com.cloudinary.api.exceptions.BadRequest;
 import com.trailiva.data.model.*;
 import com.trailiva.data.repository.TaskPriorityRepository;
 import com.trailiva.data.repository.TaskRepository;
 import com.trailiva.data.repository.WorkspaceRepository;
+import com.trailiva.util.AppConstants;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
@@ -87,8 +90,13 @@ public class TaskServiceImpl implements TaskService{
         return taskRepository.existsTaskByName(name);
     }
 
-
-
-
+    private void validatePageNumberAndSize(int page, int size){
+        if (page < 0){
+            throw new BadRequestException("Page number cannot be less than zero.");
+        }
+        if(size > AppConstants.MAX_PAGE_SIZE) {
+            throw new BadRequestException("Page size must not be greater than " + AppConstants.MAX_PAGE_SIZE);
+        }
+    }
 
 }
