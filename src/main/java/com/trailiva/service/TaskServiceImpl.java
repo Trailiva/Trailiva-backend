@@ -12,7 +12,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.trailiva.data.model.Tab.PENDING;
 
@@ -80,6 +84,22 @@ public class TaskServiceImpl implements TaskService{
                 ()-> new TaskException("Task not found"));
         taskToUpdate.setTab(Tab.tabMapper(taskTab));
         return taskRepository.save(taskToUpdate);
+    }
+
+    @Override
+    public List<Task> filterTaskByPriority(Long workspaceId, Priority taskPriority) throws WorkspaceException {
+        WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(()-> new WorkspaceException("No workspace found"));
+        return workspace.getTasks().stream()
+                .filter(task -> task.getPriority() == taskPriority)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public List<Task> filterTaskByTab(Long workspaceId, Tab taskTab) throws WorkspaceException {
+        WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(()-> new WorkspaceException("No workspace found"));
+        return workspace.getTasks().stream()
+                .filter(task -> task.getTab() == taskTab)
+                .collect(Collectors.toUnmodifiableList());
     }
 
 
