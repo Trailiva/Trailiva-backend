@@ -7,7 +7,6 @@ import com.trailiva.data.model.Task;
 import com.trailiva.data.model.WorkSpace;
 import com.trailiva.data.repository.TaskRepository;
 import com.trailiva.data.repository.WorkspaceRepository;
-import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +23,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -65,7 +63,7 @@ public class TaskServiceTest {
     }
 
     @Test
-    void testThatATaskCanBeFilteredByPriority() throws TaskException, WorkspaceException {
+    void testThatATaskCanBeFilteredByPriority() throws WorkspaceException {
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.ofNullable(mockedWorkSpace));
         List<Task> filteredTask = taskService.filterTaskByPriority(1L, Priority.LOW);
         verify(workspaceRepository, times(1)).findById(1L);
@@ -74,13 +72,13 @@ public class TaskServiceTest {
     }
 
     @Test
-    void testThatIfWorkspaceIsNotFound_ThrowException() throws TaskException, WorkspaceException {
+    void testThatIfWorkspaceIsNotFound_ThrowException() {
         assertThatThrownBy(()-> taskService.filterTaskByPriority(2L, Priority.LOW))
                 .isInstanceOf(WorkspaceException.class).hasMessage("No workspace found");
     }
 
     @Test
-    void testThatWhenTaskFilteredByPriority_IsNotFound_ReturnsAnEmptyList() throws TaskException, WorkspaceException {
+    void testThatWhenTaskFilteredByPriority_IsNotFound_ReturnsAnEmptyList() throws WorkspaceException {
        WorkSpace workSpace = new WorkSpace();
        workSpace.setTasks(List.of(firstTask));
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.of(workSpace));
@@ -89,7 +87,7 @@ public class TaskServiceTest {
     }
 
     @Test
-    void testThatATaskCanBeFilteredByTab() throws TaskException, WorkspaceException {
+    void testThatATaskCanBeFilteredByTab() throws WorkspaceException {
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.ofNullable(mockedWorkSpace));
         List<Task> filteredTask = taskService.filterTaskByTab(1L, Tab.PENDING);
         verify(workspaceRepository, times(1)).findById(1L);
@@ -98,13 +96,13 @@ public class TaskServiceTest {
     }
 
     @Test
-    void testThatIfWorkspaceForFiterByTabIsNotFound_ThrowException() throws TaskException, WorkspaceException {
+    void testThatIfWorkspaceForFiterByTabIsNotFound_ThrowException() {
         assertThatThrownBy(()-> taskService.filterTaskByTab(2L, Tab.PENDING))
                 .isInstanceOf(WorkspaceException.class).hasMessage("No workspace found");
     }
 
     @Test
-    void testThatWhenTaskFilteredByTab_IsNotFound_ReturnsAnEmptyList() throws TaskException, WorkspaceException {
+    void testThatWhenTaskFilteredByTab_IsNotFound_ReturnsAnEmptyList() throws WorkspaceException {
         WorkSpace workSpace = new WorkSpace();
         workSpace.setTasks(List.of(firstTask));
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.of(workSpace));
@@ -113,9 +111,16 @@ public class TaskServiceTest {
     }
 
     @Test
-    void testThatListIsUnModifiableWhenFilteredByTab() throws TaskException, WorkspaceException {
+    void testThatListIsUnModifiableWhenFilteredByTab() throws WorkspaceException {
       when(workspaceRepository.findById(anyLong())).thenReturn(Optional.of(mockedWorkSpace));
         List<Task> filteredTask = taskService.filterTaskByTab(1L, Tab.PENDING);
+        assertThatThrownBy(()-> filteredTask.add(new Task())).isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void testThatListIsUnModifiableWhenFilteredByPriority() throws WorkspaceException {
+        when(workspaceRepository.findById(anyLong())).thenReturn(Optional.of(mockedWorkSpace));
+        List<Task> filteredTask = taskService.filterTaskByPriority(1L, Priority.LOW);
         assertThatThrownBy(()-> filteredTask.add(new Task())).isInstanceOf(UnsupportedOperationException.class);
     }
 
