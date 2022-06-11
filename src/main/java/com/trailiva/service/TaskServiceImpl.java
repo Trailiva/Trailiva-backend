@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.trailiva.data.model.Tab.PENDING;
@@ -80,6 +81,16 @@ public class TaskServiceImpl implements TaskService{
                 ()-> new TaskException("Task not found"));
         taskToUpdate.setTab(Tab.tabMapper(taskTab));
         return taskRepository.save(taskToUpdate);
+    }
+
+    @Override
+    public List<Task> filterTaxByPriority(Priority taskPriority) throws TaskException {
+        List<Task> allTask = taskRepository.findAll();
+        List<Task> filteredTask = new ArrayList<>();
+        allTask.forEach(task -> {
+            if(task.getPriority().equals(taskPriority)) filteredTask.add(task);
+        });
+        return filteredTask;
     }
 
 
