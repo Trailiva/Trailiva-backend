@@ -197,5 +197,4 @@ public class AuthServiceImpl implements AuthService {
         userToSendToken.setVerificationDate(LocalDate.now().plusDays(1));
         sendVerificationToken(userToSendToken);
     }
-
 }

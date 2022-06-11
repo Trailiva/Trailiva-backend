@@ -20,4 +20,5 @@ public interface AuthService {
     TokenResponse generatePasswordResetToken(String email) throws AuthException;
     void verify(String verificationToken) throws UserVerificationException;
     void resendVerificationToken(String email) throws UserException;
+
 }

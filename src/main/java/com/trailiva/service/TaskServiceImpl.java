@@ -79,8 +79,7 @@ public class TaskServiceImpl implements TaskService{
         Task taskToUpdate = taskRepository.findById(taskId).orElseThrow(
                 ()-> new TaskException("Task not found"));
         taskToUpdate.setTab(Tab.tabMapper(taskTab));
-        Task task = taskRepository.save(taskToUpdate);
-        return task;
+        return taskRepository.save(taskToUpdate);
     }
 
 
