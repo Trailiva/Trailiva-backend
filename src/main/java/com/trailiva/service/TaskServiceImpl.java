@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.trailiva.data.model.Tab.PENDING;
@@ -70,9 +72,10 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public Task getTaskDetail(Long taskId) throws TaskException {
-        return taskRepository.findById(taskId).orElseThrow(
-                ()-> new TaskException("Task with id not found"));
+    public Task getTaskDetail(Long workspaceId, Long taskId)throws WorkspaceException {
+        WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
+                ()-> new WorkspaceException("No workspace found"));
+        return workspace.getTasks().stream().filter(task -> Objects.equals(task.getId(), taskId)).findFirst().get();
     }
 
     @Override
