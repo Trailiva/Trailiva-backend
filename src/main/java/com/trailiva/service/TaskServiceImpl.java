@@ -34,14 +34,21 @@ public class TaskServiceImpl implements TaskService{
     @Autowired
     private ModelMapper modelMapper;
 
+    private static int taskReferenceId = 1;
+
 
     @Override
     public Task createTask(TaskRequest request, Long workSpaceId) throws TaskException, WorkspaceException {
-        if (existByName(request.getName())) throw new TaskException("This task already exist");
-        WorkSpace workSpace = workspaceRepository.findById(workSpaceId).orElseThrow(()-> new WorkspaceException("Project not found"));
+        WorkSpace workSpace = workspaceRepository.findById(workSpaceId).orElseThrow(()-> new WorkspaceException("workspace not found"));
+
+        boolean existByName = workSpace.getTasks().stream().anyMatch(task -> task.getName().equals(request.getName()));
+        if (existByName)  throw new TaskException("This task already exist");
 
         Task newTask = modelMapper.map(request, Task.class);
         newTask.setTab(PENDING);
+        String formattedId = String.format("%02d", taskReferenceId);
+        taskReferenceId++;
+        newTask.setTaskReference(workSpace.getReferenceName().concat("-").concat(formattedId));
 
         Task task = taskRepository.save(newTask);
         workSpace.getTasks().add(newTask);

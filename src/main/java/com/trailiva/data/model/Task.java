@@ -41,6 +41,8 @@ public class Task {
     @JsonIgnore
     private WorkSpace workSpace;
 
+    private String taskReference;
+
     @Enumerated(value = EnumType.STRING)
     private Tab tab;
 }
