@@ -46,7 +46,7 @@ public class TaskServiceImpl implements TaskService{
         newTask.setTab(PENDING);
 
         Task task = taskRepository.save(newTask);
-        workSpace.getTasks().add(newTask);
+//        workSpace.getTasks().add(newTask);
         workspaceRepository.save(workSpace);
         return task;
     }
