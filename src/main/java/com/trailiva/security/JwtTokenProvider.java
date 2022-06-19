@@ -48,13 +48,10 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token, UserDetails user) {
         final String email = extractEmail(token);
-        log.info("Has expired ==> {}", !isTokenExpired(token));
         return (email.equals(user.getUsername()) && !isTokenExpired(token));
     }
 
     public boolean isTokenExpired(String token) {
-        log.info("Extracted time => {}", extractExpirationDate(token));
-        log.info("has token expired ==> {}", extractExpirationDate(token).before(new Date(System.currentTimeMillis())));
         return extractExpirationDate(token).before(new Date(System.currentTimeMillis()));
     }
 

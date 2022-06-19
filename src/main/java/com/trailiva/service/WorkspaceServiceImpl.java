@@ -29,7 +29,7 @@ public class WorkspaceServiceImpl implements WorkspaceService{
     @Override
     public WorkSpace createWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException {
         User  user = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
-        if(existByName(request.getName()) || existByReferenceName(request.getReferenceName())){
+        if(existByName(request.getName())){
             throw new WorkspaceException("Workspace with name already exist");
         }
         WorkSpace workSpace = new WorkSpace();
@@ -39,7 +39,6 @@ public class WorkspaceServiceImpl implements WorkspaceService{
         workSpace.setReferenceName(request.getReferenceName());
 
         WorkSpace space = saveWorkspace(workSpace);
-        log.info("Workspace data ==> {}", space);
         user.addWorkSpace(workSpace);
         userRepository.save(user);
         return space;
