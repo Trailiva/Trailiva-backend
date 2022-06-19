@@ -85,13 +85,12 @@ public class TaskServiceTest {
 
         when(modelMapper.map(taskRequest, Task.class)).thenReturn(secondTask);
         when(taskRepository.save(any(Task.class))).thenReturn(secondTask);
-//        when(mockedWorkSpace.getTasks()).thenReturn(List.of(firstTask));
         when(workspaceRepository.save(any(WorkSpace.class))).thenReturn(mockedWorkSpace);
         taskService.createTask(taskRequest, 1L);
 
         verify(taskRepository, times(1)).existsTaskByName("first task request");
         verify(workspaceRepository, times(1)).findById(mockedWorkSpace.getWorkspaceId());
-        verify(taskRepository, times(1)).save(firstTask);
+        verify(taskRepository, times(1)).save(secondTask);
     }
 
     @Test

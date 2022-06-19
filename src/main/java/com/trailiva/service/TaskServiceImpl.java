@@ -33,8 +33,6 @@ public class TaskServiceImpl implements TaskService{
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private TaskPriorityRepository taskPriorityRepository;
 
 
     @Override
@@ -46,7 +44,9 @@ public class TaskServiceImpl implements TaskService{
         newTask.setTab(PENDING);
 
         Task task = taskRepository.save(newTask);
-//        workSpace.getTasks().add(newTask);
+        // workspace.getTasks return unmodifiable list. creating a new instance makes it updatable
+        List<Task> workspaceTasks = new ArrayList<>(workSpace.getTasks());
+        workspaceTasks.add(newTask);
         workspaceRepository.save(workSpace);
         return task;
     }
