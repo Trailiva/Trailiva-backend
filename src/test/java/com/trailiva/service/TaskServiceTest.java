@@ -1,6 +1,7 @@
 package com.trailiva.service;
 
 
+import com.sun.xml.bind.v2.TODO;
 import com.trailiva.data.model.Priority;
 import com.trailiva.data.model.Tab;
 import com.trailiva.data.model.Task;
@@ -82,7 +83,6 @@ public class TaskServiceTest {
         when(taskRepository.existsTaskByName(anyString())).thenReturn(false);
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.of(mockedWorkSpace));
 
-
         when(modelMapper.map(taskRequest, Task.class)).thenReturn(secondTask);
         when(taskRepository.save(any(Task.class))).thenReturn(secondTask);
 //        when(mockedWorkSpace.getTasks()).thenReturn(List.of(firstTask));
@@ -91,16 +91,18 @@ public class TaskServiceTest {
 
         verify(taskRepository, times(1)).existsTaskByName("first task request");
         verify(workspaceRepository, times(1)).findById(mockedWorkSpace.getWorkspaceId());
-        verify(taskRepository, times(1)).save(firstTask);
+        verify(taskRepository, times(1)).save(secondTask);
     }
-
+    
     @Test
     void testThatTaskCanBeUpdated() throws TaskException {
-        when(taskRepository.findById(1L)).thenReturn(Optional.ofNullable(firstTask));
+        Task updatedTask = new Task();
+        updatedTask.setDescription(taskRequest.getDescription());
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(firstTask));
         when(modelMapper.map(taskRequest, Task.class)).thenReturn(firstTask);
-        when(taskRepository.save(any(Task.class))).thenReturn(firstTask);
+        when(taskRepository.save(any(Task.class))).thenReturn(updatedTask);
         taskService.updateTask(taskRequest, anyLong());
-        assertThat(firstTask.getDescription()).isEqualTo("test task");
+        assertThat(updatedTask.getDescription()).isEqualTo("test task");
     }
 
     @Test

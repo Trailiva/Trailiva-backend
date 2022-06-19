@@ -12,10 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.trailiva.data.model.Tab.PENDING;
@@ -46,17 +43,20 @@ public class TaskServiceImpl implements TaskService{
         newTask.setTab(PENDING);
 
         Task task = taskRepository.save(newTask);
-//        workSpace.getTasks().add(newTask);
+        workSpace.getTasks().add(newTask);
         workspaceRepository.save(workSpace);
         return task;
     }
 
     @Override
     public Task updateTask(TaskRequest taskRequest, Long id) throws TaskException {
-        Task taskToUpdate = taskRepository.findById(id).orElseThrow(
-                ()-> new TaskException("Task not found"));
+        Optional<Task> taskToUpdate = taskRepository.findById(id);
+        Task taskToUpdate2=null;
+        if (taskToUpdate.isPresent()) {
+            taskToUpdate2 = taskToUpdate.get();
+        }
         modelMapper.map(taskRequest, taskToUpdate);
-        return taskRepository.save(taskToUpdate);
+        return taskRepository.save(taskToUpdate2);
     }
 
     @Override
