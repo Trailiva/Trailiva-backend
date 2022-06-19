@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,7 +42,7 @@ public class WorkspaceController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> createWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody WorkspaceRequest request) {
+    public ResponseEntity<?> createWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody @Valid WorkspaceRequest request) {
         try {
             String referenceName = request.getName().substring(0, 2).toUpperCase();
             request.setReferenceName(referenceName);

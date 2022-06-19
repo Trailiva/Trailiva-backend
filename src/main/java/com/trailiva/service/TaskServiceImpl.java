@@ -110,11 +110,4 @@ public class TaskServiceImpl implements TaskService{
                 .filter(task -> task.getTab() == taskTab)
                 .collect(Collectors.toUnmodifiableList());
     }
-
-
-    private boolean existByName(String name) {
-        return taskRepository.existsTaskByName(name);
-    }
-
-
 }
