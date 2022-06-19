@@ -49,6 +49,11 @@ class WorkspaceServiceImplTest {
 
     private WorkspaceRequest workspaceRequest;
 
+    Long workspaceId = 1L;
+    Long userId = 1L;
+    User user;
+
+
     @BeforeEach
     void setUp() {
         workspaceRequest = new WorkspaceRequest();
@@ -56,6 +61,8 @@ class WorkspaceServiceImplTest {
         workspaceRequest.setDescription("Build a todo app");
         workspaceRequest.setWorkSpaceType(PERSONAL);
         workspaceRequest.setReferenceName("TD");
+        user = new User();
+        user.setWorkspaces(List.of(new WorkSpace(), new WorkSpace()));
     }
 
     @AfterEach
@@ -64,6 +71,7 @@ class WorkspaceServiceImplTest {
         workspaceRepository = null;
         userRepository = null;
         workspaceService = null;
+        user = null;
     }
 
     @Test
@@ -106,9 +114,6 @@ class WorkspaceServiceImplTest {
     @Test
     void userCanGetAllWorkspaceWithUserId() throws UserException {
 //        Given
-        Long userId = 1L;
-        User user = new User();
-        user.setWorkspaces(List.of(new WorkSpace(), new WorkSpace()));
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
 //        When
@@ -122,9 +127,6 @@ class WorkspaceServiceImplTest {
     @Test
     void throwExceptionWhenUserCanGetAllWorkspaceWithUserIdThatDoesNotValid() throws UserException {
 //        Given
-        Long userId = 1L;
-        User user = new User();
-        user.setWorkspaces(List.of(new WorkSpace(), new WorkSpace()));
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
 //        When
@@ -137,9 +139,6 @@ class WorkspaceServiceImplTest {
     @Test
     void testThatListIsUnModifiableWhenUserGetAllWorkspaceWithUserId() throws UserException {
 //        Given
-        Long userId = 1L;
-        User user = new User();
-        user.setWorkspaces(List.of(new WorkSpace(), new WorkSpace()));
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
 //        When
@@ -152,7 +151,6 @@ class WorkspaceServiceImplTest {
     @Test
     void userCanGetWorkspaceWithUserId() throws  WorkspaceException {
 //        Given
-        Long workspaceId = 1L;
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.of(new WorkSpace()));
 
 //        When
@@ -167,7 +165,6 @@ class WorkspaceServiceImplTest {
     @Test
     void throwExceptionWhenUserCanGetWorkspaceWithUserIdThatDoesNotValid() throws  WorkspaceException {
 //        Given
-        Long workspaceId = 1L;
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.empty());
 
 //        When
