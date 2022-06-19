@@ -32,20 +32,11 @@ public class WorkspaceServiceImpl implements WorkspaceService{
         if(existByName(request.getName())){
             throw new WorkspaceException("Workspace with name already exist");
         }
-        WorkSpace workSpace = new WorkSpace();
-        workSpace.setWorkSpaceType(request.getWorkSpaceType());
-        workSpace.setName(request.getName());
-        workSpace.setDescription(request.getDescription());
-        workSpace.setReferenceName(request.getReferenceName());
-
+        WorkSpace workSpace = modelMapper.map(request, WorkSpace.class);
         WorkSpace space = saveWorkspace(workSpace);
-        user.addWorkSpace(workSpace);
+        user.addWorkSpace(space);
         userRepository.save(user);
         return space;
-    }
-
-    private boolean existByReferenceName(String referenceName) {
-       return workspaceRepository.existsByReferenceName(referenceName);
     }
 
     @Override
