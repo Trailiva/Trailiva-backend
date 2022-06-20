@@ -54,6 +54,8 @@ public class TaskServiceTest {
     private Task secondTask;
     private WorkSpace mockedWorkSpace;
     private TaskRequest taskRequest;
+    private List<Task> listOfTask = new ArrayList<>();
+
     @BeforeEach
     void setUp(){
         firstTask = new Task();
@@ -73,7 +75,6 @@ public class TaskServiceTest {
         mockedWorkSpace = new WorkSpace();
         mockedWorkSpace.setWorkspaceId(1L);
         mockedWorkSpace.setReferenceName("referenced workspace");
-        List<Task> listOfTask = new ArrayList<>();
         listOfTask.add(firstTask);
         listOfTask.add(secondTask);
         mockedWorkSpace.setTasks(listOfTask);
@@ -137,9 +138,9 @@ public class TaskServiceTest {
 
     @Test
     void testThatTaskCanBeRetreivedByWorkspace() throws WorkspaceException {
-        when(workspaceRepository.findById(1L)).thenReturn(Optional.of(new WorkSpace()));
-
-        taskService.getTasksByWorkspaceId(1L);
+        when(workspaceRepository.findById(1L)).thenReturn(Optional.of(mockedWorkSpace));
+        List<Task> workspacetasks = taskService.getTasksByWorkspaceId(1L);
+        assertThat(workspacetasks.size()).isEqualTo(2);
     }
 
     @Test
