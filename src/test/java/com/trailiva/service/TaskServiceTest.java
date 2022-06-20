@@ -166,6 +166,12 @@ public class TaskServiceTest {
                 .hasMessage("No workspace found");
     }
 
+
+//    @Test
+//    void testThatTaskTagCanBeUpdated() throws TaskException {
+//        when(taskRepository.findById(1L)).thenReturn(Optional.of(firstTask));
+//        taskService.updateTaskTag(1L,  "IN-PROGRESS");
+//    }
     @Test
     void testThatATaskCanBeFilteredByPriority() throws WorkspaceException {
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.ofNullable(mockedWorkSpace));
