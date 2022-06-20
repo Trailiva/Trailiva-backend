@@ -108,9 +108,4 @@ public class TaskServiceImpl implements TaskService{
                 .collect(Collectors.toUnmodifiableList());
     }
 
-
-    private boolean existByName(String name) {
-        return taskRepository.existsTaskByName(name);
-    }
-
 }
