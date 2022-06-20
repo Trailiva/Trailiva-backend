@@ -144,6 +144,18 @@ public class TaskServiceTest {
     }
 
     @Test
+    void testThatWhenTaskIsNotFoundThrowsException(){
+        assertThatThrownBy(()-> taskService.getTasksByWorkspaceId(7L))
+                .isInstanceOf(WorkspaceException.class)
+                .hasMessage("No workspace found");
+    }
+
+    @Test
+    void testThatTaskDetailsCanBeRetreived() throws WorkspaceException {
+        taskService.getTaskDetail(1L, 1L);
+    }
+
+    @Test
     void testThatATaskCanBeFilteredByPriority() throws WorkspaceException {
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.ofNullable(mockedWorkSpace));
         List<Task> filteredTask = taskService.filterTaskByPriority(1L, Priority.LOW);
