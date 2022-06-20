@@ -95,6 +95,7 @@ public class TaskServiceTest {
         verify(workspaceRepository, times(1)).findById(mockedWorkSpace.getWorkspaceId());
         verify(taskRepository, times(1)).save(secondTask);
     }
+
     
     @Test
     void testThatTaskCanBeUpdated() throws TaskException {
@@ -116,6 +117,15 @@ public class TaskServiceTest {
         assertThatThrownBy(()-> taskService.updateTask(taskRequest, anyLong()))
                 .isInstanceOf(TaskException.class)
                 .hasMessage("Task does not exist");
+    }
+
+
+    @Test
+    void testThatTaskCanBeDeleted() throws TaskException {
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(firstTask));
+        doNothing().when(taskRepository).delete(firstTask);
+        taskService.deleteTask(firstTask.getId());
+        assertThat(taskRepository.findById(anyLong())).isNotPresent();
     }
 
     @Test
