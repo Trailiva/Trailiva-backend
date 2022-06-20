@@ -158,6 +158,14 @@ public class TaskServiceTest {
         assertThat(taskDetails.getName()).isEqualTo("first task");
     }
 
+
+    @Test
+    void testThatWhenTaskDoesNotExistThrowsException(){
+        assertThatThrownBy(()-> taskService.getTaskDetail(2L, 1L))
+                .isInstanceOf(WorkspaceException.class)
+                .hasMessage("No workspace found");
+    }
+
     @Test
     void testThatATaskCanBeFilteredByPriority() throws WorkspaceException {
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.ofNullable(mockedWorkSpace));
