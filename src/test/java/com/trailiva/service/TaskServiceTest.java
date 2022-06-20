@@ -9,6 +9,7 @@ import com.trailiva.data.model.WorkSpace;
 import com.trailiva.data.repository.TaskRepository;
 import com.trailiva.data.repository.WorkspaceRepository;
 import com.trailiva.web.exceptions.TaskException;
+import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -104,6 +105,17 @@ public class TaskServiceTest {
         when(taskRepository.save(any(Task.class))).thenReturn(updatedTask);
         taskService.updateTask(taskRequest, 1L);
         assertThat(updatedTask.getDescription()).isEqualTo("test task");
+    }
+
+    @Test
+    void testThatWhenTaskDoesNotExistThrowsExcepion() throws TaskException {
+        Task updatedTask = new Task();
+        updatedTask.setDescription(taskRequest.getDescription());
+        when(taskRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(()-> taskService.updateTask(taskRequest, anyLong()))
+                .isInstanceOf(TaskException.class)
+                .hasMessage("Task does not exist");
     }
 
     @Test
