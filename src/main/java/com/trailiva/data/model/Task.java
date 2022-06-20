@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private Long id;
 
     private String name;
@@ -41,6 +40,8 @@ public class Task {
     @JoinColumn(name = "workspace_task")
     @JsonIgnore
     private WorkSpace workSpace;
+
+    private String taskReference;
 
     @Enumerated(value = EnumType.STRING)
     private Tab tab;

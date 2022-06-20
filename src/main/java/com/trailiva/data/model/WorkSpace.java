@@ -14,6 +14,7 @@ import java.util.List;
 
 @Data
 @Entity
+
 public class WorkSpace extends RepresentationModel<WorkSpace> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
