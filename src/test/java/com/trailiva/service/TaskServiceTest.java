@@ -152,7 +152,10 @@ public class TaskServiceTest {
 
     @Test
     void testThatTaskDetailsCanBeRetreived() throws WorkspaceException {
-        taskService.getTaskDetail(1L, 1L);
+        when(workspaceRepository.findById(1L)).thenReturn(Optional.of(mockedWorkSpace));
+        Task taskDetails = taskService.getTaskDetail(1L, 1L);
+        assertThat(mockedWorkSpace.getWorkspaceId()).isEqualTo(1L);
+        assertThat(taskDetails.getName()).isEqualTo("first task");
     }
 
     @Test
