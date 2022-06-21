@@ -167,11 +167,25 @@ public class TaskServiceTest {
     }
 
 
-//    @Test
-//    void testThatTaskTagCanBeUpdated() throws TaskException {
-//        when(taskRepository.findById(1L)).thenReturn(Optional.of(firstTask));
-//        taskService.updateTaskTag(1L,  "IN-PROGRESS");
-//    }
+    @Test
+    void testThatTaskTagCanBeUpdated() throws TaskException {
+        Task updatedTask = new Task();
+        updatedTask.setTab(Tab.COMPLETED);
+        updatedTask.setDescription("first task");
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(firstTask));
+        when(taskRepository.save(firstTask)).thenReturn(updatedTask);
+        taskService.updateTaskTag(1L,  "IN-PROGRESS");
+        verify(taskRepository, times(1)).findById(1L);
+        verify(taskRepository, times(1)).save(any(Task.class));
+    }
+
+    @Test
+    void testThatWhenTaskDoesNotExistThrowExeption(){
+        assertThatThrownBy(()-> taskService.updateTaskTag(12L, "COMPLETED"))
+                .isInstanceOf(TaskException.class)
+                .hasMessage("Task not found");
+    }
+
     @Test
     void testThatATaskCanBeFilteredByPriority() throws WorkspaceException {
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.ofNullable(mockedWorkSpace));
