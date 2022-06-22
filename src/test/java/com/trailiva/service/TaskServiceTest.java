@@ -9,6 +9,7 @@ import com.trailiva.data.model.WorkSpace;
 import com.trailiva.data.repository.TaskRepository;
 import com.trailiva.data.repository.WorkspaceRepository;
 import com.trailiva.web.exceptions.TaskException;
+import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,8 @@ public class TaskServiceTest {
     private Task secondTask;
     private WorkSpace mockedWorkSpace;
     private TaskRequest taskRequest;
+    private List<Task> listOfTask = new ArrayList<>();
+
     @BeforeEach
     void setUp(){
         firstTask = new Task();
@@ -72,7 +75,6 @@ public class TaskServiceTest {
         mockedWorkSpace = new WorkSpace();
         mockedWorkSpace.setWorkspaceId(1L);
         mockedWorkSpace.setReferenceName("referenced workspace");
-        List<Task> listOfTask = new ArrayList<>();
         listOfTask.add(firstTask);
         listOfTask.add(secondTask);
         mockedWorkSpace.setTasks(listOfTask);
@@ -94,6 +96,7 @@ public class TaskServiceTest {
         verify(workspaceRepository, times(1)).findById(mockedWorkSpace.getWorkspaceId());
         verify(taskRepository, times(1)).save(secondTask);
     }
+
     
     @Test
     void testThatTaskCanBeUpdated() throws TaskException {
@@ -107,6 +110,89 @@ public class TaskServiceTest {
     }
 
     @Test
+    void testThatWhenTaskDoesNotExistThrowsExcepion() throws TaskException {
+        Task updatedTask = new Task();
+        updatedTask.setDescription(taskRequest.getDescription());
+        when(taskRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(()-> taskService.updateTask(taskRequest, anyLong()))
+                .isInstanceOf(TaskException.class)
+                .hasMessage("Task does not exist");
+    }
+
+
+    @Test
+    void testThatTaskCanBeDeleted() throws TaskException {
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(firstTask));
+        doNothing().when(taskRepository).delete(firstTask);
+        taskService.deleteTask(firstTask.getId());
+        assertThat(taskRepository.findById(anyLong())).isNotPresent();
+    }
+
+    @Test
+    void testThatWhenTaskDoesNotExistThrowException(){
+        when(taskRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatThrownBy(()-> taskService.deleteTask(anyLong()))
+                .isInstanceOf(TaskException.class)
+                .hasMessage("Task not found");
+    }
+
+    @Test
+    void testThatTaskCanBeRetreivedByWorkspace() throws WorkspaceException {
+        when(workspaceRepository.findById(1L)).thenReturn(Optional.of(mockedWorkSpace));
+        List<Task> workspacetasks = taskService.getTasksByWorkspaceId(1L);
+        assertThat(workspacetasks.size()).isEqualTo(2);
+    }
+
+    @Test
+    void testThatWhenTaskIsNotFoundThrowsException(){
+        when(workspaceRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatThrownBy(()-> taskService.getTasksByWorkspaceId(7L))
+                .isInstanceOf(WorkspaceException.class)
+                .hasMessage("No workspace found");
+    }
+
+    @Test
+    void testThatTaskDetailsCanBeRetreived() throws WorkspaceException {
+        when(workspaceRepository.findById(1L)).thenReturn(Optional.of(mockedWorkSpace));
+        Task taskDetails = taskService.getTaskDetail(1L, 1L);
+        assertThat(mockedWorkSpace.getWorkspaceId()).isEqualTo(1L);
+        assertThat(taskDetails.getName()).isEqualTo("first task");
+    }
+
+
+    @Test
+    void testThatWhenTaskDoesNotExistThrowsException(){
+        when(workspaceRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatThrownBy(()-> taskService.getTaskDetail(2L, 1L))
+                .isInstanceOf(WorkspaceException.class)
+                .hasMessage("No workspace found");
+    }
+
+
+    @Test
+    void testThatTaskTagCanBeUpdated() throws TaskException {
+
+        Task updatedTask = new Task();
+        updatedTask.setTab(Tab.COMPLETED);
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(firstTask));
+
+        when(taskRepository.save(firstTask)).thenReturn(updatedTask);
+        taskService.updateTaskTag(1L,  "COMPLETED");
+        verify(taskRepository, times(1)).findById(1L);
+        verify(taskRepository, times(1)).save(any(Task.class));
+        assertThat(updatedTask.getTab().toString()).isEqualTo("COMPLETED");
+    }
+
+    @Test
+    void testThatWhenTaskDoesNotExistThrowExeption(){
+        when(taskRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatThrownBy(()-> taskService.updateTaskTag(12L, "COMPLETED"))
+                .isInstanceOf(TaskException.class)
+                .hasMessage("Task not found");
+    }
+
+    @Test
     void testThatATaskCanBeFilteredByPriority() throws WorkspaceException {
         when(workspaceRepository.findById(anyLong())).thenReturn(Optional.ofNullable(mockedWorkSpace));
         List<Task> filteredTask = taskService.filterTaskByPriority(1L, Priority.LOW);
@@ -117,6 +203,7 @@ public class TaskServiceTest {
 
     @Test
     void testThatIfWorkspaceIsNotFound_ThrowException() {
+        when(workspaceRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThatThrownBy(()-> taskService.filterTaskByPriority(2L, Priority.LOW))
                 .isInstanceOf(WorkspaceException.class).hasMessage("No workspace found");
     }
@@ -141,6 +228,7 @@ public class TaskServiceTest {
 
     @Test
     void testThatIfWorkspaceForFiterByTabIsNotFound_ThrowException() {
+        when(workspaceRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThatThrownBy(()-> taskService.filterTaskByTab(2L, Tab.PENDING))
                 .isInstanceOf(WorkspaceException.class).hasMessage("No workspace found");
     }
