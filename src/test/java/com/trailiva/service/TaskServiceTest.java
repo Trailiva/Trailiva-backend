@@ -131,6 +131,7 @@ public class TaskServiceTest {
 
     @Test
     void testThatWhenTaskDoesNotExistThrowException(){
+        when(taskRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThatThrownBy(()-> taskService.deleteTask(anyLong()))
                 .isInstanceOf(TaskException.class)
                 .hasMessage("Task not found");
@@ -145,6 +146,7 @@ public class TaskServiceTest {
 
     @Test
     void testThatWhenTaskIsNotFoundThrowsException(){
+        when(workspaceRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThatThrownBy(()-> taskService.getTasksByWorkspaceId(7L))
                 .isInstanceOf(WorkspaceException.class)
                 .hasMessage("No workspace found");
@@ -161,6 +163,7 @@ public class TaskServiceTest {
 
     @Test
     void testThatWhenTaskDoesNotExistThrowsException(){
+        when(workspaceRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThatThrownBy(()-> taskService.getTaskDetail(2L, 1L))
                 .isInstanceOf(WorkspaceException.class)
                 .hasMessage("No workspace found");
@@ -169,18 +172,24 @@ public class TaskServiceTest {
 
     @Test
     void testThatTaskTagCanBeUpdated() throws TaskException {
+        Task myTask = new Task();
+        myTask.setTab(Tab.PENDING);
+        myTask.setId(3L);
         Task updatedTask = new Task();
         updatedTask.setTab(Tab.COMPLETED);
-        updatedTask.setDescription("first task");
-        when(taskRepository.findById(1L)).thenReturn(Optional.of(firstTask));
-        when(taskRepository.save(firstTask)).thenReturn(updatedTask);
-        taskService.updateTaskTag(1L,  "IN-PROGRESS");
-        verify(taskRepository, times(1)).findById(1L);
+        when(taskRepository.findById(3L)).thenReturn(Optional.of(myTask));
+
+        System.out.println(myTask.getTab());
+        when(taskRepository.save(myTask)).thenReturn(updatedTask);
+        taskService.updateTaskTag(3L,  "IN-PROGRESS");
+        verify(taskRepository, times(1)).findById(3L);
         verify(taskRepository, times(1)).save(any(Task.class));
+        assertThat(myTask.getTab()).isEqualTo("COMPLETED");
     }
 
     @Test
     void testThatWhenTaskDoesNotExistThrowExeption(){
+        when(taskRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThatThrownBy(()-> taskService.updateTaskTag(12L, "COMPLETED"))
                 .isInstanceOf(TaskException.class)
                 .hasMessage("Task not found");
@@ -197,6 +206,7 @@ public class TaskServiceTest {
 
     @Test
     void testThatIfWorkspaceIsNotFound_ThrowException() {
+        when(workspaceRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThatThrownBy(()-> taskService.filterTaskByPriority(2L, Priority.LOW))
                 .isInstanceOf(WorkspaceException.class).hasMessage("No workspace found");
     }
@@ -221,6 +231,7 @@ public class TaskServiceTest {
 
     @Test
     void testThatIfWorkspaceForFiterByTabIsNotFound_ThrowException() {
+        when(workspaceRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThatThrownBy(()-> taskService.filterTaskByTab(2L, Tab.PENDING))
                 .isInstanceOf(WorkspaceException.class).hasMessage("No workspace found");
     }
