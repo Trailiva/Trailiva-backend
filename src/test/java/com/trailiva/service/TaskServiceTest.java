@@ -172,19 +172,16 @@ public class TaskServiceTest {
 
     @Test
     void testThatTaskTagCanBeUpdated() throws TaskException {
-        Task myTask = new Task();
-        myTask.setTab(Tab.PENDING);
-        myTask.setId(3L);
+
         Task updatedTask = new Task();
         updatedTask.setTab(Tab.COMPLETED);
-        when(taskRepository.findById(3L)).thenReturn(Optional.of(myTask));
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(firstTask));
 
-        System.out.println(myTask.getTab());
-        when(taskRepository.save(myTask)).thenReturn(updatedTask);
-        taskService.updateTaskTag(3L,  "IN-PROGRESS");
-        verify(taskRepository, times(1)).findById(3L);
+        when(taskRepository.save(firstTask)).thenReturn(updatedTask);
+        taskService.updateTaskTag(1L,  "COMPLETED");
+        verify(taskRepository, times(1)).findById(1L);
         verify(taskRepository, times(1)).save(any(Task.class));
-        assertThat(myTask.getTab()).isEqualTo("COMPLETED");
+        assertThat(updatedTask.getTab().toString()).isEqualTo("COMPLETED");
     }
 
     @Test
