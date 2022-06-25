@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -14,5 +15,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     boolean existsTaskByName(String name);
     List<Task> findByPriority(Priority priority);
     List<Task> findByTab(Tab tab);
-    Task findByDueDate(LocalDate dueDate);
+    List<Task> findByDueDate(LocalDate dueDate);
 }

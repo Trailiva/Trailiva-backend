@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import java.util.stream.Collectors;
@@ -109,9 +112,11 @@ public class TaskServiceImpl implements TaskService{
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    @Scheduled()
-    public String verifyDueTask() {
-        return null;
+    @Override
+    public List<Task> getDueTasks(LocalDate time) {
+        return  taskRepository.findByDueDate(time);
     }
+
+
 
 }
