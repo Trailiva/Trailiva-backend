@@ -61,6 +61,7 @@ public class TaskServiceTest {
         firstTask = new Task();
         firstTask.setId(1L);
         firstTask.setDescription("first task");
+//        firstTask.setDueDate();
         firstTask.setPriority(Priority.HIGH);
         firstTask.setTab(Tab.IN_PROGRESS);
         firstTask.setName("first task");
