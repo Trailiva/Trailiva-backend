@@ -22,7 +22,8 @@ public class TrailivaTaskScheduler {
     @Scheduled(cron = "0 12 * * * ?")
     public void verifyDueTask() throws TaskException {
         List<Task> dueTask = taskService.getDueTasks(LocalDate.now());
-        dueTask.forEach(this::changeTaskStatus);
+        //noinspection Convert2MethodRef
+        dueTask.forEach(task -> changeTaskStatus(task));
     }
     private void changeTaskStatus(Task task) {
         task.setDue(true);
