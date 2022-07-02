@@ -12,14 +12,12 @@ import com.trailiva.web.payload.request.TaskRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
-
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.trailiva.data.model.Tab.PENDING;
@@ -40,13 +38,19 @@ public class TaskServiceImpl implements TaskService{
     private static int taskReferenceId = 1;
 
     @Override
+    @Transactional
     public Task createTask(TaskRequest request, Long workSpaceId) throws TaskException, WorkspaceException {
         WorkSpace workSpace = workspaceRepository.findById(workSpaceId).orElseThrow(()-> new WorkspaceException("workspace not found"));
+        boolean existByName = false;
 
-        boolean existByName = workSpace.getTasks().stream().anyMatch(task -> task.getName().equals(request.getName()));
+
+        if (workSpace.getTasks().size() > 0)
+            existByName = workSpace.getTasks().stream().anyMatch(task -> task.getName().equals(request.getName()));
+
         if (existByName)  throw new TaskException("This task already exist");
 
         Task newTask = modelMapper.map(request, Task.class);
+        newTask.setPriority(Priority.fetchPriority(request.getPriority()));
         newTask.setTab(PENDING);
         String formattedId = String.format("%02d", taskReferenceId);
         taskReferenceId++;

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class WorkspaceServiceImpl implements WorkspaceService{
     private UserRepository userRepository;
 
     @Override
+    @Transactional
     public WorkSpace createWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException {
         User  user = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
         if(existByName(request.getName())){

@@ -49,7 +49,7 @@ public class WorkspaceController {
             WorkSpace workSpace = workspaceService.createWorkspace(request, currentUser.getId());
             return ResponseEntity.ok(workSpace);
         } catch (WorkspaceException | UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -83,7 +83,7 @@ public class WorkspaceController {
 
             return new ResponseEntity<>(workSpaceList, HttpStatus.OK);
         } catch (UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -100,7 +100,7 @@ public class WorkspaceController {
 
             return new ResponseEntity<>(workSpace, HttpStatus.OK);
         } catch (WorkspaceException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 

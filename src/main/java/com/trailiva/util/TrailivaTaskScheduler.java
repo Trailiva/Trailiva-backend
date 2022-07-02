@@ -26,6 +26,6 @@ public class TrailivaTaskScheduler {
         dueTask.forEach(task -> changeTaskStatus(task));
     }
     private void changeTaskStatus(Task task) {
-        task.setDue(true);
+        task.setElapse(true);
     }
 }

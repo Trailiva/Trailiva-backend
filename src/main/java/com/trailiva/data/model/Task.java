@@ -2,7 +2,10 @@ package com.trailiva.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jdk.jfr.Timestamp;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,8 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +30,6 @@ public class Task {
 
     private String description;
 
-    private boolean due = false;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -37,6 +41,8 @@ public class Task {
 
     @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate dueDate;
+
+    private boolean elapse = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workspace_task")

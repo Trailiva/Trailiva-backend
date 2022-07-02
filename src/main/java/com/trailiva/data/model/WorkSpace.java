@@ -14,6 +14,7 @@ import javax.persistence.*;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -41,7 +42,7 @@ public class WorkSpace extends RepresentationModel<WorkSpace> {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<Task> tasks;
+    private List<Task> tasks = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY)
     @JsonIgnore
