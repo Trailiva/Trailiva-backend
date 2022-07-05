@@ -79,6 +79,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
+    @Transactional
     public List<Task> getTasksByWorkspaceId(Long workspaceId) throws WorkspaceException {
         WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
                 ()-> new WorkspaceException("No workspace found"));
@@ -123,5 +124,7 @@ public class TaskServiceImpl implements TaskService{
     public List<Task> getDueTasks(LocalDate time) {
         return  taskRepository.findByDueDate(time);
     }
+
+
 
 }
