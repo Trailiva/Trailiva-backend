@@ -18,12 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.trailiva.data.model.Tab.PENDING;
 
 @Service
 @Slf4j
+
 public class TaskServiceImpl implements TaskService{
 
     @Autowired
@@ -87,7 +89,8 @@ public class TaskServiceImpl implements TaskService{
     public Task getTaskDetail(Long workspaceId, Long taskId)throws WorkspaceException {
         WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
                 ()-> new WorkspaceException("No workspace found"));
-        return workspace.getTasks().stream().filter(task -> Objects.equals(task.getId(), taskId)).findFirst().get();
+        Optional<Task> task = workspace.getTasks().stream().filter(data -> Objects.equals(data.getId(), taskId)).findFirst();
+        return task.orElse(null);
     }
 
     @Override
@@ -120,7 +123,5 @@ public class TaskServiceImpl implements TaskService{
     public List<Task> getDueTasks(LocalDate time) {
         return  taskRepository.findByDueDate(time);
     }
-
-
 
 }

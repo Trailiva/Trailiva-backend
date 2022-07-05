@@ -40,7 +40,7 @@ public class WorkSpace extends RepresentationModel<WorkSpace> {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDated;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Task> tasks = new ArrayList<>();
 
