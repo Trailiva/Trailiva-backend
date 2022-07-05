@@ -72,17 +72,6 @@ public class UserController {
         }
     }
 
-    @GetMapping("{userId}")
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> getUserDetails(@PathVariable Long userId) {
-        try {
-            UserProfile userProfile = userService.getUserDetails(userId);
-            return new ResponseEntity<>(userProfile, HttpStatus.OK);
-
-        } catch (UserException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
-        }
-    }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
