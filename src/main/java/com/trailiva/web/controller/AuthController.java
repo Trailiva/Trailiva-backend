@@ -36,7 +36,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest, HttpServletRequest request) {
         try {
-            UserProfile userProfile = authService.register(userRequest, getSiteUrl(request));
+            UserProfile userProfile = authService.registerNewUserAccount(userRequest, getSiteUrl(request));
             return new ResponseEntity<>(userProfile, HttpStatus.CREATED);
         } catch (AuthException | MessagingException | UnsupportedEncodingException | RoleNotFoundException e) {
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);

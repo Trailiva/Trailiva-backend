@@ -1,7 +1,6 @@
 package com.trailiva.security;
 
 import com.trailiva.data.model.Role;
-import com.trailiva.data.model.RoleName;
 import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +45,7 @@ class SecurityTest {
         mockedUser.setLastName("Abdullah");
         mockedUser.setEmail("ohida2001@gmail.com");
         mockedUser.setPassword("pass1234");
-        Role role = new Role(RoleName.ROLE_USER);
+        Role role = new Role("ROLE_USER");
         mockedUser.getRoles().add(role);
         MockitoAnnotations.openMocks(this);
     }
