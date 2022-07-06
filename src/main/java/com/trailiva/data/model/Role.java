@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
+import java.util.Collection;
 
 @Entity
 @Table(name = "roles")
@@ -18,12 +19,14 @@ public class Role {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long roleId;
 
-  @Enumerated(EnumType.STRING)
   @NaturalId
   @Column(length = 60)
-  private RoleName name;
+  private String name;
 
-  public Role(RoleName name) {
+  @ManyToMany(mappedBy = "roles")
+  private Collection<User> users;
+
+  public Role(String name) {
     this.name = name;
   }
 }

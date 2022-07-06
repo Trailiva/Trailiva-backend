@@ -85,7 +85,7 @@ class AuthServiceImplTest {
         mockedUser.setLastName("Abdullah");
         mockedUser.setEmail("ismail@gmail.com");
         mockedUser.setPassword("pass1234");
-        Role role = new Role(RoleName.ROLE_USER);
+        Role role = new Role("ROLE_USER");
         mockedUser.getRoles().add(role);
         MockitoAnnotations.openMocks(this);
     }
@@ -103,7 +103,7 @@ class AuthServiceImplTest {
         doNothing().when(emailService).sendUserVerificationEmail(any());
 
         //When
-       authService.register(userRequest, "");
+       authService.registerNewUserAccount(userRequest, "");
 
         //Assert
         verify(userRepository, times(1)).existsByEmail(mockedUser.getEmail());

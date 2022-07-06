@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
@@ -61,20 +63,10 @@ public class AuthServiceImpl implements AuthService {
     private RoleRepository roleRepository;
 
 
-    @PostConstruct
-    public void setup(){
-        Role userRole = new Role(RoleName.ROLE_USER);
-        Role adminRole = new Role(RoleName.ROLE_ADMIN);
-
-        if (roleRepository.findByName(userRole.getName()).isEmpty() || roleRepository.findByName(adminRole.getName()).isEmpty()){
-            roleRepository.save(userRole);
-            roleRepository.save(adminRole);
-        }
-    }
 
 
     @Override
-    public UserProfile register(UserRequest userRequest, String siteUrl) throws AuthException,  RoleNotFoundException {
+    public UserProfile registerNewUserAccount(UserRequest userRequest, String siteUrl) throws AuthException,  RoleNotFoundException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
@@ -82,8 +74,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setVerificationToken(UUID.randomUUID().toString());
         user.setVerificationDate(LocalDate.now().plusDays(1));
-        Role userRole = roleRepository.findByName(RoleName.ROLE_USER).orElseThrow(()-> new RoleNotFoundException("User role is not created"));
-        user.getRoles().add(userRole);
+        user.setRoles(List.of(roleRepository.findByName("ROLE_USER")));
         User savedUser = save(user);
 
         sendVerificationToken(savedUser);

@@ -13,7 +13,7 @@ import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 
 public interface AuthService {
-    UserProfile register(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException, RoleNotFoundException;
+    UserProfile registerNewUserAccount(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException, RoleNotFoundException;
     JwtTokenResponse login(LoginRequest loginRequest);
     void resetPassword(PasswordRequest passwordRequest) throws AuthException;
     void forgetPassword(ForgetPasswordRequest forgetPasswordRequest, String passwordResetToken) throws AuthException, TokenException;
