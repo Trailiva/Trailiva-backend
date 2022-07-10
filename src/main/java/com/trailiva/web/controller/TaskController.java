@@ -76,8 +76,8 @@ public class TaskController {
     }
 
 
-    @PatchMapping("/updateTag/{taskId}/{tag}")
-    public ResponseEntity<?> updateTaskTag(@PathVariable String tag, @PathVariable Long taskId) {
+    @PatchMapping("/updateTag/{taskId}")
+    public ResponseEntity<?> updateTaskTag(@RequestParam String tag, @PathVariable Long taskId) {
         try {
             Task task = taskService.updateTaskTag(taskId, tag);
             return new ResponseEntity<>(task, HttpStatus.OK);
