@@ -74,4 +74,15 @@ public class TaskController {
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
+
+
+    @PatchMapping("/updateTab/{taskId}")
+    public ResponseEntity<?> updateTaskTag(@RequestParam String tab, @PathVariable Long taskId) {
+        try {
+            Task task = taskService.updateTaskTag(taskId, tab);
+            return new ResponseEntity<>(task, HttpStatus.OK);
+        } catch (TaskException e) {
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
