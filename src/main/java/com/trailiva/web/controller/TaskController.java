@@ -87,8 +87,8 @@ public class TaskController {
         }
     }
 
-    @PatchMapping("/updateTab/{workspaceId}")
-    public ResponseEntity<?> updateTaskPriority(@RequestParam Priority taskPriority, @PathVariable Long workspaceId) {
+    @GetMapping("/priority/{taskPriority}/{workspaceId}")
+    public ResponseEntity<?> updateTaskPriority(@PathVariable Priority taskPriority, @PathVariable Long workspaceId) {
         try {
             List<Task> tasks = taskService.filterTaskByPriority(workspaceId, taskPriority);
             return new ResponseEntity<>(tasks, HttpStatus.OK);

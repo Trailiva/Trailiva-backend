@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
@@ -86,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
         emailService.sendUserVerificationEmail(emailRequest);
     }
 
+    @Transactional
     @Override
     public JwtTokenResponse login(LoginRequest loginRequest) {
         final Authentication authentication = authenticationManager.authenticate(
