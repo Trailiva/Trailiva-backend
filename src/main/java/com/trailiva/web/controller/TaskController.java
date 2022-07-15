@@ -1,6 +1,7 @@
 package com.trailiva.web.controller;
 
 
+import com.trailiva.data.model.Priority;
 import com.trailiva.data.model.Task;
 import com.trailiva.service.TaskService;
 import com.trailiva.web.exceptions.TaskException;
@@ -83,6 +84,16 @@ public class TaskController {
             return new ResponseEntity<>(task, HttpStatus.OK);
         } catch (TaskException e) {
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/priority/{taskPriority}/{workspaceId}")
+    public ResponseEntity<?> updateTaskPriority(@PathVariable Priority taskPriority, @PathVariable Long workspaceId) {
+        try {
+            List<Task> tasks = taskService.filterTaskByPriority(workspaceId, taskPriority);
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
+        } catch (TaskException | WorkspaceException exception) {
+            return new ResponseEntity<>(new ApiResponse<>(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 }
