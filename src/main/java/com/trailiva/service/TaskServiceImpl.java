@@ -127,8 +127,8 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public Task searchTaskByName(String taskName) {
-        return null;
+    public Task searchTaskByName(String taskName) throws TaskException {
+        return taskRepository.findByName(taskName).orElseThrow(()-> new TaskException("No task with the task name found"));
     }
 
     @Override
