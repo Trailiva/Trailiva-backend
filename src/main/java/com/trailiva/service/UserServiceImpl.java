@@ -1,6 +1,5 @@
 package com.trailiva.service;
 
-import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
@@ -28,23 +27,23 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User getUserProfile(Long userId) throws UserException {
+    public com.trailiva.data.model.User getUserProfile(Long userId) throws UserException {
         return getAUser(userId);
     }
 
-    private User getAUser(Long userId) throws UserException {
+    private com.trailiva.data.model.User getAUser(Long userId) throws UserException {
         return userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
     }
 
     @Override
     public UserProfile getUserDetails(Long userId) throws UserException {
-        User user = getAUser(userId);
+        com.trailiva.data.model.User user = getAUser(userId);
         return modelMapper.map(user, UserProfile.class);
     }
 
     @Override
     public void saveImageProperties(ImageRequest imageProperties, Long userId) throws UserException, IOException {
-        User user = getAUser(userId);
+        com.trailiva.data.model.User user = getAUser(userId);
         String url = user.getImageUrl();
         String publicId = user.getPublicId();
 
@@ -56,7 +55,7 @@ public class UserServiceImpl implements UserService{
         saveAUser(user);
     }
 
-    private User saveAUser(User user) {
+    private com.trailiva.data.model.User saveAUser(com.trailiva.data.model.User user) {
         return userRepository.save(user);
     }
 }

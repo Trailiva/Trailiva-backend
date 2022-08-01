@@ -9,7 +9,6 @@ import com.trailiva.service.UserService;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
 import com.trailiva.web.payload.response.ApiResponse;
-import com.trailiva.web.payload.response.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
