@@ -11,9 +11,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity
@@ -25,6 +23,7 @@ public class User extends RepresentationModel<User> {
     private Long userId;
     private String firstName;
     private String lastName;
+    private boolean isEnabled;
 
     @Column(unique = true)
     private String email;
@@ -49,16 +48,6 @@ public class User extends RepresentationModel<User> {
             inverseJoinColumns = @JoinColumn(name = "workspace_id"))
     @JsonIgnore
     private List<WorkSpace> workspaces = new ArrayList<>();
-
-    @Column(name = "verification_code")
-    @JsonIgnore
-    private String verificationToken;
-
-    @JsonIgnore
-    private LocalDate verificationDate;
-
-    @Column(name = "enabled")
-    private boolean enabled;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp

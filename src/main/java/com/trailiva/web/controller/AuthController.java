@@ -1,7 +1,12 @@
 package com.trailiva.web.controller;
 
+import com.trailiva.data.model.User;
+import com.trailiva.event.OnRegistrationCompleteEvent;
 import com.trailiva.service.AuthService;
-import com.trailiva.web.exceptions.*;
+import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.RoleNotFoundException;
+import com.trailiva.web.exceptions.TokenException;
+import com.trailiva.web.exceptions.UserVerificationException;
 import com.trailiva.web.payload.request.ForgetPasswordRequest;
 import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
@@ -10,7 +15,10 @@ import com.trailiva.web.payload.response.ApiResponse;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.TokenResponse;
 import com.trailiva.web.payload.response.UserProfile;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,29 +32,26 @@ import java.io.UnsupportedEncodingException;
 @RestController
 @Slf4j
 @RequestMapping("api/v1/trailiva/auth")
+@AllArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+    private final ApplicationEventPublisher eventPublisher;
+    private final ModelMapper modelMapper;
 
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest, HttpServletRequest request) {
         try {
-            UserProfile userProfile = authService.registerNewUserAccount(userRequest, getSiteUrl(request));
-            return new ResponseEntity<>(userProfile, HttpStatus.CREATED);
+            User user = authService.registerNewUserAccount(userRequest);
+            String appUrl = request.getContextPath();
+            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale(), appUrl));
+            return new ResponseEntity<>(modelMapper.map(user, UserProfile.class), HttpStatus.CREATED);
         } catch (AuthException | MessagingException | UnsupportedEncodingException | RoleNotFoundException e) {
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
-    private String getSiteUrl(HttpServletRequest request) {
-        String url = request.getRequestURL().toString();
-        return url.replace(request.getServletPath(), "");
-    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -85,23 +90,23 @@ public class AuthController {
     }
 
 
-    @GetMapping("/registrationConfirm")
-    public ResponseEntity<?> verifyUser(@RequestParam("token") String code) {
+    @GetMapping("/verify-token")
+    public ResponseEntity<?> verifyUser(@RequestParam("token") String token) {
         try {
-            authService.verify(code);
-            return new ResponseEntity<>(new ApiResponse<>(true, "User is successfully verify", HttpStatus.OK), HttpStatus.OK);
+            authService.comfirmVerificationToken(token);
+            return new ResponseEntity<>(new ApiResponse<>(true, "User is successfully verified", HttpStatus.OK), HttpStatus.OK);
         } catch (UserVerificationException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/resend-token")
-    public ResponseEntity<?> resendToken(@RequestParam("email") String email) {
+    public ResponseEntity<?> resendToken(@RequestParam("token") String token) {
         try {
-            authService.resendVerificationToken(email);
+            authService.resendVerificationToken(token);
             return new ResponseEntity<>(new ApiResponse<>(true, "Verification token is successfully sent to your email address", HttpStatus.OK), HttpStatus.OK);
-        } catch (UserException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (UserVerificationException e) {
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 }

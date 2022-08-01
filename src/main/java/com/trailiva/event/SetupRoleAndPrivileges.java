@@ -1,4 +1,4 @@
-package com.trailiva.config;
+package com.trailiva.event;
 
 import com.trailiva.data.model.Role;
 import com.trailiva.data.model.User;
