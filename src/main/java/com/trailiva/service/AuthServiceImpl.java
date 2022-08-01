@@ -76,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
         emailService.sendUserVerificationEmail(emailRequest);
     }
 
-
+    @Transactional
     @Override
     @Transactional
     public JwtTokenResponse login(LoginRequest loginRequest) {

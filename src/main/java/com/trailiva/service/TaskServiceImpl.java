@@ -103,6 +103,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
+    @Transactional
     public List<Task> filterTaskByPriority(Long workspaceId, Priority taskPriority) throws WorkspaceException {
         WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
                 ()-> new WorkspaceException("No workspace found"));
