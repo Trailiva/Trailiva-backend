@@ -1,30 +1,32 @@
 package com.trailiva.service;
 
+import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
+import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
+import com.trailiva.web.payload.request.UpdatePasswordRequest;
 import com.trailiva.web.payload.response.UserProfile;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Objects;
 
 @Service
+@AllArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final  ModelMapper modelMapper;
     private final CloudinaryService cloudinaryService;
+    private final PasswordEncoder passwordEncoder;
 
-
-    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, ModelMapper modelMapper1, CloudinaryService cloudinaryService) {
-        this.userRepository = userRepository;
-        this.modelMapper = modelMapper1;
-        this.cloudinaryService = cloudinaryService;
-    }
 
     @Override
     public com.trailiva.data.model.User getUserProfile(Long userId) throws UserException {
@@ -55,7 +57,22 @@ public class UserServiceImpl implements UserService{
         saveAUser(user);
     }
 
-    private com.trailiva.data.model.User saveAUser(com.trailiva.data.model.User user) {
+    private User saveAUser(com.trailiva.data.model.User user) {
         return userRepository.save(user);
     }
+
+
+    @Override
+    public void updatePassword(UpdatePasswordRequest request, String email) throws AuthException {
+       User userToChangePassword = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthException("No user found with email" + email));
+
+        boolean passwordMatch = passwordEncoder.matches(request.getOldPassword(), userToChangePassword.getPassword());
+        if (!passwordMatch) {
+            throw new AuthException("Passwords do not match");
+        }
+        userToChangePassword.setPassword(passwordEncoder.encode(request.getPassword()));
+        saveAUser(userToChangePassword);
+    }
+
 }

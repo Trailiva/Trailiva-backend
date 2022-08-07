@@ -1,5 +1,6 @@
 package com.trailiva.event;
 
+import com.trailiva.data.model.TokenType;
 import com.trailiva.data.model.User;
 import com.trailiva.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
+
+import static com.trailiva.data.model.TokenType.VERIFICATION;
 
 @Component
 @AllArgsConstructor
@@ -22,7 +25,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     private void confirmRegistration(OnRegistrationCompleteEvent event){
         User user = event.getUser();
         String token = UUID.randomUUID().toString();
-        authService.createVerificationToken(user, token);
+        authService.createVerificationToken(user, token, VERIFICATION.toString());
         authService.sendVerificationToken(user);
     }
 }

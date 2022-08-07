@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 public class TokenResponse {
         private String token;
-        private TokenType type;
+        private String tokenType;
         @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime expiry;
+        private LocalDateTime expiryDate;
 }
