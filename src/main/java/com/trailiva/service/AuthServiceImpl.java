@@ -72,9 +72,8 @@ public class AuthServiceImpl implements AuthService {
         emailService.sendUserVerificationEmail(emailRequest);
     }
 
-
-    @Override
     @Transactional
+    @Override
     public JwtTokenResponse login(LoginRequest loginRequest) {
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
