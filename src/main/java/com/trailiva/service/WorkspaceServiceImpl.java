@@ -7,6 +7,7 @@ import com.trailiva.data.repository.WorkspaceRepository;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.WorkspaceRequest;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +18,12 @@ import java.util.List;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class WorkspaceServiceImpl implements WorkspaceService{
-    @Autowired
-    private ModelMapper modelMapper;
 
-    @Autowired
-    private WorkspaceRepository workspaceRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final ModelMapper modelMapper;
+    private final WorkspaceRepository workspaceRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
