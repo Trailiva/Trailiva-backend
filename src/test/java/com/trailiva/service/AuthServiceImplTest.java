@@ -1,7 +1,6 @@
 package com.trailiva.service;
 
 import com.trailiva.data.model.*;
-import com.trailiva.data.repository.TokenRepository;
 import com.trailiva.data.repository.UserRepository;
 import com.trailiva.security.CustomUserDetailService;
 import com.trailiva.security.JwtTokenProvider;
@@ -32,7 +31,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,9 +62,6 @@ class AuthServiceImplTest {
 
     @Mock
     private BCryptPasswordEncoder passwordEncoder;
-
-    @Mock
-    private TokenRepository tokenRepository;
 
     @Mock
     private EmailService emailService;
@@ -103,7 +98,7 @@ class AuthServiceImplTest {
         doNothing().when(emailService).sendUserVerificationEmail(any());
 
         //When
-       authService.registerNewUserAccount(userRequest, "");
+       authService.registerNewUserAccount(userRequest);
 
         //Assert
         verify(userRepository, times(1)).existsByEmail(mockedUser.getEmail());
@@ -150,7 +145,7 @@ class AuthServiceImplTest {
 
     @Test
     @DisplayName("Saved user can update password")
-    void checkIfSavedUserCanUpdatePassword() throws AuthException {
+    void checkIfSavedUserCanUpdatePassword() throws AuthException, TokenException {
         String randomEncoder = UUID.randomUUID().toString();
         //Given
         PasswordRequest passwordRequest = new PasswordRequest("ismail@gmail.com", "password123", "pass1234");
@@ -161,12 +156,11 @@ class AuthServiceImplTest {
         //When
         String expected = passwordRequest.getOldPassword();
         String actual = mockedUser.getPassword();
-        authService.resetPassword(passwordRequest);
+        authService.saveResetPassword(passwordRequest);
 
         //Assert
         verify(passwordEncoder, times(1)).matches(expected, actual);
         verify(passwordEncoder, times(1)).encode(passwordRequest.getPassword());
-        verify(userRepository, times(1)).findByEmail(passwordRequest.getEmail());
         verify(userRepository, times(1)).save(mockedUser);
 
         assertNotEquals(expected, mockedUser.getPassword());
@@ -194,19 +188,9 @@ class AuthServiceImplTest {
         //Given
         String email = mockedUser.getEmail();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockedUser));
-
-        //When
-        ArgumentCaptor<Token> tokenArgumentCaptor = ArgumentCaptor.forClass(Token.class);
-        authService.generatePasswordResetToken(email);
-
         // Assert
         verify(userRepository, times(1)).findByEmail(email);
-        verify(tokenRepository, times(1)).save(tokenArgumentCaptor.capture());
 
-        assertNotNull(tokenArgumentCaptor.getValue());
-        assertNotNull(tokenArgumentCaptor.getValue().getToken());
-        assertEquals(TokenType.PASSWORD_RESET, tokenArgumentCaptor.getValue().getType());
-        assertNotNull(tokenArgumentCaptor.getValue().getUserId());
     }
 
     @Test
@@ -214,25 +198,15 @@ class AuthServiceImplTest {
     void savedUserCanResetPassword() throws AuthException, TokenException {
         // Given
         String randomEncoder = UUID.randomUUID().toString();
-        ForgetPasswordRequest passwordResetRequest = new ForgetPasswordRequest("ismail@gmail.com", "pass1234");
+        UpdatePasswordRequest passwordResetRequest = new UpdatePasswordRequest("ismail@gmail.com", "pass1234");
         String passwordResetToken = UUID.randomUUID().toString();
 
-        Token mockToken = new Token();
-        mockToken.setId(1L);
-        mockToken.setToken(passwordResetToken);
-        mockToken.setType(TokenType.PASSWORD_RESET);
-        mockToken.setUserId(1L);
-        mockToken.setExpiry(LocalDateTime.now().plusMinutes(30));
-
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockedUser));
-        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(mockToken));
         when(passwordEncoder.encode(anyString())).thenReturn(randomEncoder);
 
         ArgumentCaptor<User> tokenArgumentCaptor = ArgumentCaptor.forClass(User.class);
-        authService.forgetPassword(passwordResetRequest, passwordResetToken);
 
         verify(userRepository, times(1)).save(tokenArgumentCaptor.capture());
-        verify(tokenRepository, times(1)).delete(mockToken);
         verify(passwordEncoder, times(1)).encode(passwordResetRequest.getPassword());
 
         assertThat(tokenArgumentCaptor.getValue()).isNotNull();

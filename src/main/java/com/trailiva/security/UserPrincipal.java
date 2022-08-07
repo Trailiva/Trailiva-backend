@@ -25,6 +25,7 @@ public class UserPrincipal implements UserDetails {
     private String email;
     private String phoneNumber;
     private String password;
+    private boolean isEnabled;
     private Collection<? extends GrantedAuthority> authorities;
 
 
@@ -40,6 +41,7 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getPhoneNumber(),
                 user.getPassword(),
+                user.isEnabled(),
                 authorities
         );
     }
@@ -76,6 +78,6 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isEnabled;
     }
 }

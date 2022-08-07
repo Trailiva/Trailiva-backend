@@ -1,17 +1,14 @@
 package com.trailiva.data.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 import java.util.Collection;
 
 @Entity
-@Table(name = "roles")
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 public class Role {
 

@@ -1,24 +1,28 @@
 package com.trailiva.service;
 
-import com.trailiva.web.exceptions.*;
+import com.trailiva.data.model.Token;
+import com.trailiva.data.model.User;
+import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.RoleNotFoundException;
+import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
-import com.trailiva.web.payload.request.ForgetPasswordRequest;
 import com.trailiva.web.payload.request.UserRequest;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.TokenResponse;
-import com.trailiva.web.payload.response.UserProfile;
 
 import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 
 public interface AuthService {
-    UserProfile registerNewUserAccount(UserRequest userRequest, String siteUrl) throws AuthException, MessagingException, UnsupportedEncodingException, RoleNotFoundException;
+    User registerNewUserAccount(UserRequest userRequest) throws AuthException, MessagingException, UnsupportedEncodingException, RoleNotFoundException;
     JwtTokenResponse login(LoginRequest loginRequest);
-    void resetPassword(PasswordRequest passwordRequest) throws AuthException;
-    void forgetPassword(ForgetPasswordRequest forgetPasswordRequest, String passwordResetToken) throws AuthException, TokenException;
-    TokenResponse generatePasswordResetToken(String email) throws AuthException;
-    void verify(String verificationToken) throws UserVerificationException;
-    void resendVerificationToken(String email) throws UserException;
-
+    void saveResetPassword(PasswordRequest passwordRequest) throws AuthException, TokenException;
+    void confirmVerificationToken(String verificationToken) throws TokenException;
+    void resendVerificationToken(String verificationToken) throws  TokenException;
+    Token createVerificationToken(User user, String token, String tokenType);
+    void sendVerificationToken(User user);
+    Token generateNewVerificationToken(String verificationCode) throws TokenException;
+    TokenResponse createPasswordResetTokenForUser(String email) throws AuthException;
+    boolean validatePasswordResetToken(String token) throws TokenException;
 }
