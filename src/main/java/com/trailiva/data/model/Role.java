@@ -1,16 +1,14 @@
 package com.trailiva.data.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
+import java.util.Collection;
 
 @Entity
-@Table(name = "roles")
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 public class Role {
 
@@ -18,12 +16,14 @@ public class Role {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long roleId;
 
-  @Enumerated(EnumType.STRING)
   @NaturalId
   @Column(length = 60)
-  private RoleName name;
+  private String name;
 
-  public Role(RoleName name) {
+  @ManyToMany(mappedBy = "roles")
+  private Collection<User> users;
+
+  public Role(String name) {
     this.name = name;
   }
 }

@@ -1,100 +1,78 @@
 package com.trailiva.service;
 
-import com.trailiva.data.model.*;
+import com.trailiva.data.model.Token;
+import com.trailiva.data.model.User;
 import com.trailiva.data.repository.RoleRepository;
 import com.trailiva.data.repository.TokenRepository;
 import com.trailiva.data.repository.UserRepository;
 import com.trailiva.security.CustomUserDetailService;
 import com.trailiva.security.JwtTokenProvider;
 import com.trailiva.security.UserPrincipal;
-import com.trailiva.web.exceptions.*;
+import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.payload.request.*;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.TokenResponse;
-import com.trailiva.web.payload.response.UserProfile;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
-import static java.lang.String.format;
+import static com.trailiva.data.model.TokenType.PASSWORD_RESET;
+
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private CustomUserDetailService customUserDetailService;
+    private final CustomUserDetailService customUserDetailService;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    @Autowired
-    private TokenRepository tokenRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private final EmailService emailService;
 
-    @Autowired
-    private EmailService emailService;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
-
-
-    @PostConstruct
-    public void setup(){
-        Role userRole = new Role(RoleName.ROLE_USER);
-        Role adminRole = new Role(RoleName.ROLE_ADMIN);
-
-        if (roleRepository.findByName(userRole.getName()).isEmpty() || roleRepository.findByName(adminRole.getName()).isEmpty()){
-            roleRepository.save(userRole);
-            roleRepository.save(adminRole);
-        }
-    }
-
+    private final TokenRepository tokenRepository;
 
     @Override
-    public UserProfile register(UserRequest userRequest, String siteUrl) throws AuthException,  RoleNotFoundException {
+    @Transactional
+    public User registerNewUserAccount(UserRequest userRequest) throws AuthException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
         User user = modelMapper.map(userRequest, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setVerificationToken(UUID.randomUUID().toString());
-        user.setVerificationDate(LocalDate.now().plusDays(1));
-        Role userRole = roleRepository.findByName(RoleName.ROLE_USER).orElseThrow(()-> new RoleNotFoundException("User role is not created"));
-        user.getRoles().add(userRole);
-        User savedUser = save(user);
-
-        sendVerificationToken(savedUser);
-        return modelMapper.map(user, UserProfile.class);
+        user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
+        return saveAUser(user);
     }
 
-    private void sendVerificationToken(User savedUser) {
+    public void sendVerificationToken(User savedUser) {
         EmailRequest emailRequest = modelMapper.map(savedUser, EmailRequest.class);
         emailService.sendUserVerificationEmail(emailRequest);
     }
 
+    @Transactional
     @Override
     public JwtTokenResponse login(LoginRequest loginRequest) {
         final Authentication authentication = authenticationManager.authenticate(
@@ -106,7 +84,7 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         final UserPrincipal userDetails = (UserPrincipal) customUserDetailService.loadUserByUsername(loginRequest.getEmail());
         final String token = jwtTokenProvider.generateToken(userDetails);
-        User user = internalFindUserByEmail(loginRequest.getEmail());
+        com.trailiva.data.model.User user = internalFindUserByEmail(loginRequest.getEmail());
         return new JwtTokenResponse(token, user.getEmail());
     }
 
@@ -114,88 +92,91 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.findByEmail(email).orElse(null);
     }
 
+    private boolean validateEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    private User saveAUser(com.trailiva.data.model.User user) {
+        return userRepository.save(user);
+    }
+
+    private boolean isValidToken(Token vCode) {
+        long minutes = ChronoUnit.MINUTES.between(LocalDateTime.now(), vCode.getExpiryDate());
+        return minutes <= 0;
+    }
+
     @Override
-    public void resetPassword(PasswordRequest request) throws AuthException {
-        String email = request.getEmail();
+    public void confirmVerificationToken(String verificationToken) throws TokenException {
+        Token vToken = getToken(verificationToken);
+
+        if (isValidToken(vToken))
+            throw new TokenException("Token has expired");
+
+        User user = vToken.getUser();
+        user.setEnabled(true);
+        saveAUser(user);
+        tokenRepository.delete(vToken);
+    }
+
+    @Override
+    public void resendVerificationToken(String verificationToken) throws TokenException {
+        Token token = generateNewVerificationToken(verificationToken);
+        sendVerificationToken(token.getUser());
+    }
+
+
+    @Override
+    public Token createVerificationToken(User user, String token, String tokenType) {
+        Token verificationToken = new Token(token, user, tokenType);
+        return tokenRepository.save(verificationToken);
+    }
+
+    @Override
+    public Token generateNewVerificationToken(String verificationToken) throws TokenException {
+        Token vCode = getToken(verificationToken);
+        vCode.updateToken(UUID.randomUUID().toString());
+        return tokenRepository.save(vCode);
+    }
+
+    @Override
+    public TokenResponse createPasswordResetTokenForUser(String email) throws AuthException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthException("No user found with email " + email));
+        String token = UUID.randomUUID().toString();
+        Token createdToken =  createVerificationToken(user, token, PASSWORD_RESET.toString());
+        return modelMapper.map(createdToken, TokenResponse.class);
+    }
+
+    @Override
+    public boolean validatePasswordResetToken(String token) throws TokenException {
+        final Token passToken = tokenRepository.findByToken(token).orElseThrow(()-> new TokenException("Token is invalid"));
+        if (isValidToken(passToken)) throw new TokenException("Token has expired");
+        return true;
+    }
+
+
+    private Token getToken(String token) throws TokenException {
+        return tokenRepository.findByToken(token)
+                .orElseThrow(() -> new TokenException("Invalid token"));
+    }
+
+    @Override
+    public void saveResetPassword(PasswordRequest request) throws AuthException, TokenException {
+        boolean isValidToken = validatePasswordResetToken(request.getToken());
+        Token pToken = getToken(request.getToken());
+            if (isValidToken)
+                throw new TokenException("Token has expired");
+
         String oldPassword = request.getOldPassword();
         String newPassword = request.getPassword();
-        User userToChangePassword = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthException("No user found with email" + email));
+        User userToChangePassword = pToken.getUser();
 
         boolean passwordMatch = passwordEncoder.matches(oldPassword, userToChangePassword.getPassword());
         if (!passwordMatch) {
             throw new AuthException("Passwords do not match");
         }
         userToChangePassword.setPassword(passwordEncoder.encode(newPassword));
-        save(userToChangePassword);
-    }
-
-    @Override
-    public void forgetPassword(ForgetPasswordRequest request, String passwordResetToken) throws AuthException, TokenException {
-        String email = request.getEmail();
-        String newPassword = request.getPassword();
-        User userToResetPassword = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthException("No user found with user name " + email));
-        Token token = tokenRepository.findByToken(passwordResetToken)
-                .orElseThrow(() -> new TokenException(format("No token with value %s found", passwordResetToken)));
-        if (token.getExpiry().isBefore(LocalDateTime.now())) {
-            throw new TokenException("This password reset token has expired ");
-        }
-        if (!token.getUserId().equals(userToResetPassword.getUserId())) {
-            throw new TokenException("This password rest token does not belong to this user");
-        }
-        userToResetPassword.setPassword(passwordEncoder.encode(newPassword));
-        save(userToResetPassword);
-        tokenRepository.delete(token);
-    }
-
-    @Override
-    public TokenResponse generatePasswordResetToken(String email) throws AuthException {
-        User userToResetPassword = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthException("No user found with user name " + email));
-        Token token = new Token();
-        token.setType(TokenType.PASSWORD_RESET);
-        token.setUserId(userToResetPassword.getUserId());
-        token.setToken(UUID.randomUUID().toString());
-        token.setExpiry(LocalDateTime.now().plusMinutes(30));
-        return modelMapper.map(tokenRepository.save(token), TokenResponse.class);
-    }
-
-    private boolean validateEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
-
-    private User save(User user) {
-       return userRepository.save(user);
-    }
-
-    @Override
-    public void verify(String verificationToken) throws UserVerificationException {
-
-        User user = userRepository.findByVerificationToken(verificationToken).orElseThrow(
-                () -> new UserVerificationException(format("No user found with verification code %s", verificationToken)));
-        if (user.getVerificationDate().isBefore(LocalDate.now())){
-            throw new UserVerificationException("Token has expired");
-        }
-        if (user.getVerificationToken() == null){
-            throw new UserVerificationException("Invalid Token !");
-        }
-        else {
-            user.setVerificationToken(null);
-            user.setVerificationDate(null);
-            user.setEnabled(true);
-            save(user);
-        }
-    }
-
-    @Override
-    public void resendVerificationToken(String email) throws UserException {
-        User userToSendToken = userRepository.findByEmail(email)
-                .orElseThrow(()-> new UserException(String.format("User not found with email %s", email)));
-        String verificationToken = UUID.randomUUID().toString();
-        userToSendToken.setVerificationToken(verificationToken);
-        userToSendToken.setVerificationDate(LocalDate.now().plusDays(1));
-        sendVerificationToken(userToSendToken);
+        saveAUser(userToChangePassword);
     }
 
 }

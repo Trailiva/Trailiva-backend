@@ -6,9 +6,8 @@ import com.trailiva.data.repository.UserRepository;
 import com.trailiva.service.AuthService;
 import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
-import com.trailiva.web.payload.request.ForgetPasswordRequest;
+import com.trailiva.web.payload.request.UpdatePasswordRequest;
 import com.trailiva.web.payload.request.UserRequest;
-import com.trailiva.web.payload.response.TokenResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -98,7 +95,6 @@ class AuthControllerTest {
 
     @Test
     void whenUserForgetPassword_thenReturn201() throws Exception{
-        when(authService.generatePasswordResetToken(anyString())).thenReturn(new TokenResponse());
         MvcResult mvcResult = mockMvc.perform(get("/api/v1/trailiva/auth/password/reset/whale")
                         .contentType("application.json"))
                 .andDo(print())
@@ -113,7 +109,7 @@ class AuthControllerTest {
     @Test
     void whenUserResetPassword_theReturn200() throws Exception{
         //Given
-        ForgetPasswordRequest passwordReset = new ForgetPasswordRequest("test@gmail.com", "test123");
+        UpdatePasswordRequest passwordReset = new UpdatePasswordRequest("test@gmail.com", "test123");
 
         //When
         MvcResult mvcResult = mockMvc.perform(post("/api/v1/trailiva/auth/password/reset/93j34fh8wnj43n8a")

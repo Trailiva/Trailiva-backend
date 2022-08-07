@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,13 +25,14 @@ public class UserPrincipal implements UserDetails {
     private String email;
     private String phoneNumber;
     private String password;
+    private boolean isEnabled;
     private Collection<? extends GrantedAuthority> authorities;
 
 
 
     public static UserDetails create(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
-                new SimpleGrantedAuthority(role.getName().name())
+                new SimpleGrantedAuthority(role.getName())
         ).collect(Collectors.toList());
         return new UserPrincipal(
                 user.getUserId(),
@@ -39,6 +41,7 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getPhoneNumber(),
                 user.getPassword(),
+                user.isEnabled(),
                 authorities
         );
     }
@@ -75,6 +78,6 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isEnabled;
     }
 }

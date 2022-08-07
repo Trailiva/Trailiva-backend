@@ -12,19 +12,24 @@ import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.WorkspaceRequest;
 import com.trailiva.web.payload.response.ApiResponse;
 import com.trailiva.web.payload.response.WorkspaceList;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@Slf4j
 @RequestMapping("api/v1/trailiva/workspace")
 public class WorkspaceController {
 
@@ -38,23 +43,27 @@ public class WorkspaceController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> createWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody WorkspaceRequest request){
+    public ResponseEntity<?> createWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody @Valid WorkspaceRequest request) {
         try {
-           WorkSpace workSpace =  workspaceService.createWorkspace(request, currentUser.getId());
-            return  ResponseEntity.ok(workSpace);
+            String referenceName = request.getName().substring(0, 2).toUpperCase();
+            request.setReferenceName(referenceName);
+            WorkSpace workSpace = workspaceService.createWorkspace(request, currentUser.getId());
+            return ResponseEntity.ok(workSpace);
         } catch (WorkspaceException | UserException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
 
     @GetMapping()
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @Transactional
     public ResponseEntity<?> getWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
         WorkspaceList workSpaceList = new WorkspaceList();
         try {
             List<WorkSpace> workSpaces = workspaceService.getWorkspaces(userPrincipal.getId());
 
-            for (WorkSpace workSpace : workSpaces){
+            for (WorkSpace workSpace : workSpaces) {
 
                 ResponseEntity<WorkSpace> getWorkspaceLink = (ResponseEntity<WorkSpace>) methodOn(WorkspaceController.class).getWorkspace(workSpace.getWorkspaceId());
                 Link getSpaceLink = linkTo(getWorkspaceLink).withRel("my-workspace");
@@ -75,14 +84,14 @@ public class WorkspaceController {
 
             workSpaceList.add(selfLink);
 
-            return  new ResponseEntity<>(workSpaceList, HttpStatus.OK);
+            return new ResponseEntity<>(workSpaceList, HttpStatus.OK);
         } catch (UserException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("my-workspace/{workspaceId}")
-    public ResponseEntity<?> getWorkspace(@PathVariable Long workspaceId){
+    public ResponseEntity<?> getWorkspace(@PathVariable Long workspaceId) {
         try {
             WorkSpace workSpace = workspaceService.getWorkspace(workspaceId);
 
@@ -93,15 +102,10 @@ public class WorkspaceController {
             workSpace.add(projectLink);
 
             return new ResponseEntity<>(workSpace, HttpStatus.OK);
-        }
-            catch (WorkspaceException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        } catch (WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
-
-
-
-
 
 
 }

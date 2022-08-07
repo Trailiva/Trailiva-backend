@@ -1,12 +1,10 @@
 package com.trailiva.web.payload.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.trailiva.data.model.PriorityField;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 public class TaskRequest {

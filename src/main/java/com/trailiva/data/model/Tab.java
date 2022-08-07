@@ -7,7 +7,7 @@ public enum Tab {
     IN_PROGRESS("progress"),
     COMPLETED("completed");
 
-    private String tab;
+    private final String tab;
 
     Tab(String tag) {
         this.tab = tag;
