@@ -21,6 +21,5 @@ public interface TaskService {
     Task updateTaskTag(Long taskId, String taskTag) throws TaskException;
     List<Task> filterTaskByPriority(Long workSpaceId, Priority taskPriority) throws TaskException, WorkspaceException;
     List<Task> filterTaskByTab(Long workspaceId,  Tab taskTab) throws TaskException, WorkspaceException;
-    List<Task> getDueTasks(LocalDate
-                                   time);
+    List<Task> getDueTasks(LocalDate time);
 }
