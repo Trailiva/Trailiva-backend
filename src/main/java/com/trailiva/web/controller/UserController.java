@@ -99,6 +99,17 @@ public class UserController {
         }
     }
 
+   @PostMapping("/delete")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteAUser(@RequestParam("email") String email){
+        try {
+            userService.deleteAUser(email);
+            return ResponseEntity.ok(new ApiResponse<>(true, "user deleted successfully", HttpStatus.OK));
+        } catch (UserException e) {
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping("/password/update")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> updatePassword(@CurrentUser UserPrincipal currentUser, @Valid @RequestBody UpdatePasswordRequest request) {
@@ -106,6 +117,7 @@ public class UserController {
             userService.updatePassword(request, currentUser.getEmail());
             return new ResponseEntity<>(new ApiResponse<>(true, "Password updated successful", HttpStatus.OK), HttpStatus.OK);
         } catch (AuthException e) {
+
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }

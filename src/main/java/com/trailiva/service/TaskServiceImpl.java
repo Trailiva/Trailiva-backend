@@ -126,6 +126,15 @@ public class TaskServiceImpl implements TaskService{
         return  taskRepository.findByDueDate(time);
     }
 
+    @Override
+    public Task searchTaskByName(String taskName) throws TaskException {
+        return taskRepository.findByName(taskName).orElseThrow(()-> new TaskException("No task with the task name found"));
+    }
+
+    @Override
+    public Task searchTaskByDescription(String description) {
+        return null;
+    }
 
 
 }

@@ -15,4 +15,6 @@ public interface UserService {
     void updatePassword(UpdatePasswordRequest updatePasswordRequest, String email) throws AuthException;
 
     void saveImageProperties(ImageRequest imageProperties, Long userId) throws UserException, IOException;
+
+    void deleteAUser(String email) throws UserException;
 }
