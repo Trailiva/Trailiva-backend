@@ -67,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public UserProfile registerNewUserAccount(UserRequest userRequest, String siteUrl) throws AuthException,  RoleNotFoundException {
+    public UserProfile registerNewUserAccount(UserRequest userRequest, String siteUrl) throws AuthException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }

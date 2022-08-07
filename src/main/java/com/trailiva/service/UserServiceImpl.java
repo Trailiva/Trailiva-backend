@@ -56,6 +56,12 @@ public class UserServiceImpl implements UserService{
         saveAUser(user);
     }
 
+    @Override
+    public void deleteAUser(String email) throws UserException {
+        User user =  userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found with email " + email));
+        userRepository.delete(user);
+    }
+
     private User saveAUser(User user) {
         return userRepository.save(user);
     }

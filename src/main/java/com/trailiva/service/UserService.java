@@ -13,4 +13,6 @@ public interface UserService {
     UserProfile getUserDetails(Long userId) throws UserException;
 
     void saveImageProperties(ImageRequest imageProperties, Long userId) throws UserException, IOException;
+
+    void deleteAUser(String email) throws UserException;
 }

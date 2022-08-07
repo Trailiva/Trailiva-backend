@@ -95,4 +95,15 @@ public class UserController {
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PostMapping("/delete")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteAUser(@RequestParam("email") String email){
+        try {
+            userService.deleteAUser(email);
+            return ResponseEntity.ok(new ApiResponse<>(true, "user deleted successfully", HttpStatus.OK));
+        } catch (UserException e) {
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
