@@ -5,17 +5,18 @@ import com.trailiva.data.repository.UserRepository;
 import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
-import com.trailiva.web.payload.request.UpdatePasswordRequest;
+import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.response.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Objects;
+
+import static com.trailiva.util.Helper.isNullOrEmpty;
 
 @Service
 @AllArgsConstructor
@@ -69,8 +70,10 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public void updatePassword(UpdatePasswordRequest request, String email) throws AuthException {
-       User userToChangePassword = userRepository.findByEmail(email)
+    public void updatePassword(PasswordRequest request, String email) throws AuthException {
+        if (isNullOrEmpty(request.getOldPassword())) throw new AuthException("Password must cannot be blank");
+
+        User userToChangePassword = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("No user found with email" + email));
 
         boolean passwordMatch = passwordEncoder.matches(request.getOldPassword(), userToChangePassword.getPassword());

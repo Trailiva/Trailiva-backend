@@ -19,10 +19,10 @@ public interface AuthService {
     JwtTokenResponse login(LoginRequest loginRequest);
     void saveResetPassword(PasswordRequest passwordRequest) throws AuthException, TokenException;
     void confirmVerificationToken(String verificationToken) throws TokenException;
-    void resendVerificationToken(String verificationToken) throws  TokenException;
+    void resendVerificationToken(String token) throws  TokenException;
+    void resendResetPasswordToken(String token) throws  TokenException;
     Token createVerificationToken(User user, String token, String tokenType);
     void sendVerificationToken(User user);
-    Token generateNewVerificationToken(String verificationCode) throws TokenException;
     TokenResponse createPasswordResetTokenForUser(String email) throws AuthException;
     boolean validatePasswordResetToken(String token) throws TokenException;
 }

@@ -198,7 +198,6 @@ class AuthServiceImplTest {
     void savedUserCanResetPassword() throws AuthException, TokenException {
         // Given
         String randomEncoder = UUID.randomUUID().toString();
-        UpdatePasswordRequest passwordResetRequest = new UpdatePasswordRequest("ismail@gmail.com", "pass1234");
         String passwordResetToken = UUID.randomUUID().toString();
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockedUser));
@@ -207,7 +206,6 @@ class AuthServiceImplTest {
         ArgumentCaptor<User> tokenArgumentCaptor = ArgumentCaptor.forClass(User.class);
 
         verify(userRepository, times(1)).save(tokenArgumentCaptor.capture());
-        verify(passwordEncoder, times(1)).encode(passwordResetRequest.getPassword());
 
         assertThat(tokenArgumentCaptor.getValue()).isNotNull();
         assertThat(tokenArgumentCaptor.getValue().getPassword()).isNotNull();

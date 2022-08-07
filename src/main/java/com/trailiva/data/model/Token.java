@@ -56,4 +56,10 @@ public class Token {
         this.tokenType = REFRESH.toString();
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
+
+    public void updateToken(String code, String tokenType){
+        this.token = code;
+        this.tokenType = tokenType;
+        this.expiryDate = calculateExpiryDate(EXPIRATION);
+    }
 }

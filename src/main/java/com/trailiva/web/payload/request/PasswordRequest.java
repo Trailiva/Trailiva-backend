@@ -12,12 +12,10 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PasswordRequest {
-    @NotBlank(message = "Token must be valid")
     private String token;
 
     @Size(min = 6, max = 20, message = "Password cannot be blank")
     private String password;
 
-    @NotBlank(message = "password cannot be blank")
     private String oldPassword;
 }

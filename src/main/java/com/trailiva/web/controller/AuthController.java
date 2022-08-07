@@ -94,11 +94,21 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/resend-token")
-    public ResponseEntity<?> resendToken(@RequestParam("token") String token) {
+    @PostMapping("verification/resend-token")
+    public ResponseEntity<?> resendVerificationToken(@RequestParam("token") String token) {
         try {
             authService.resendVerificationToken(token);
             return new ResponseEntity<>(new ApiResponse<>(true, "Verification token is successfully sent to your email address", HttpStatus.OK), HttpStatus.OK);
+        } catch (TokenException e) {
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("reset-password/resend-token")
+    public ResponseEntity<?> resendResetPasswordToken(@RequestParam("token") String token) {
+        try {
+            authService.resendResetPasswordToken(token);
+            return new ResponseEntity<>(new ApiResponse<>(true, "Reset password token is successfully sent to your email address", HttpStatus.OK), HttpStatus.OK);
         } catch (TokenException e) {
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }

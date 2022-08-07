@@ -7,10 +7,9 @@ import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.CloudinaryService;
 import com.trailiva.service.UserService;
 import com.trailiva.web.exceptions.AuthException;
-import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
-import com.trailiva.web.payload.request.UpdatePasswordRequest;
+import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Link;
@@ -112,7 +111,7 @@ public class UserController {
 
     @PostMapping("/password/update")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> updatePassword(@CurrentUser UserPrincipal currentUser, @Valid @RequestBody UpdatePasswordRequest request) {
+    public ResponseEntity<?> updatePassword(@CurrentUser UserPrincipal currentUser, @Valid @RequestBody PasswordRequest request) {
         try {
             userService.updatePassword(request, currentUser.getEmail());
             return new ResponseEntity<>(new ApiResponse<>(true, "Password updated successful", HttpStatus.OK), HttpStatus.OK);
