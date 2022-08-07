@@ -257,19 +257,5 @@ public class TaskServiceTest {
         assertThatThrownBy(()-> filteredTask.add(new Task())).isInstanceOf(UnsupportedOperationException.class);
     }
 
-    @Test
-    void testThatTaskCanBeSearchedByName() throws TaskException {
-        when(taskRepository.findByName(anyString())).thenReturn(Optional.of(firstTask));
-        Task foundTask = taskService.searchTaskByName("first task");
-        assertThat(foundTask.getName()).isEqualTo("first task");
-    }
-
-    @Test
-    void testThatWhenTaskDoesNotExist_ThrowsException(){
-        when(taskRepository.findByName("first task")).thenReturn(Optional.of(firstTask));
-        assertThatThrownBy(()-> taskService.searchTaskByName("not an existent task"))
-                .isInstanceOf(TaskException.class)
-                .hasMessage("No task with the task name found");
-    }
 
 }
