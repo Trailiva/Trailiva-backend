@@ -6,8 +6,6 @@ import com.trailiva.service.AuthService;
 import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.RoleNotFoundException;
 import com.trailiva.web.exceptions.TokenException;
-import com.trailiva.web.exceptions.UserVerificationException;
-import com.trailiva.web.payload.request.ForgetPasswordRequest;
 import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.request.UserRequest;
@@ -60,32 +58,28 @@ public class AuthController {
     }
 
     @PostMapping("/password/reset")
-    public ResponseEntity<?> forgetPassword(@Valid @RequestBody PasswordRequest passwordRequest) {
+    public ResponseEntity<?> resetPassword(@RequestParam("email") String email){
         try {
-            authService.resetPassword(passwordRequest);
-            return new ResponseEntity<>(new ApiResponse<>(true, "User password is successfully updated", HttpStatus.OK), HttpStatus.OK);
+            TokenResponse passwordResetToken = authService.createPasswordResetTokenForUser(email);
+            return new ResponseEntity<>(passwordResetToken, HttpStatus.CREATED);
         } catch (AuthException e) {
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping("/password/token/{email}")
-    public ResponseEntity<?> getForgetPasswordToken(@Valid @PathVariable String email) {
-        try {
-            TokenResponse passwordResetToken = authService.generatePasswordResetToken(email);
-            return new ResponseEntity<>(passwordResetToken, HttpStatus.CREATED);
-        } catch (AuthException exception) {
-            return new ResponseEntity<>(new ApiResponse<>(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
-        }
+    @GetMapping("/password/validate-token")
+    public ResponseEntity<?> validatePasswordToken(@RequestParam("token") String token) throws TokenException {
+        boolean isValid = authService.validatePasswordResetToken(token);
+        return new ResponseEntity<>(new ApiResponse<>(isValid, "Password token is valid", HttpStatus.OK), HttpStatus.OK);
     }
 
-    @PostMapping("/password/forget-password/{token}")
-    public ResponseEntity<?> forgetPassword(@Valid @PathVariable String token, @RequestBody ForgetPasswordRequest request) {
+    @PostMapping("/password/save-reset-password")
+    public ResponseEntity<?> updatePassword(@Valid @RequestBody PasswordRequest passwordRequest) {
         try {
-            authService.forgetPassword(request, token);
-            return new ResponseEntity<>(new ApiResponse<>(true, "Password reset is successful", HttpStatus.OK), HttpStatus.OK);
-        } catch (AuthException | TokenException exception) {
-            return new ResponseEntity<>(new ApiResponse<>(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            authService.saveResetPassword(passwordRequest);
+            return new ResponseEntity<>(new ApiResponse<>(true, "User password is successfully updated", HttpStatus.OK), HttpStatus.OK);
+        } catch (AuthException | TokenException e) {
+            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -93,9 +87,9 @@ public class AuthController {
     @GetMapping("/verify-token")
     public ResponseEntity<?> verifyUser(@RequestParam("token") String token) {
         try {
-            authService.comfirmVerificationToken(token);
+            authService.confirmVerificationToken(token);
             return new ResponseEntity<>(new ApiResponse<>(true, "User is successfully verified", HttpStatus.OK), HttpStatus.OK);
-        } catch (UserVerificationException e) {
+        } catch (TokenException e) {
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
@@ -105,7 +99,7 @@ public class AuthController {
         try {
             authService.resendVerificationToken(token);
             return new ResponseEntity<>(new ApiResponse<>(true, "Verification token is successfully sent to your email address", HttpStatus.OK), HttpStatus.OK);
-        } catch (UserVerificationException e) {
+        } catch (TokenException e) {
             return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
