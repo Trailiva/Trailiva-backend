@@ -4,6 +4,8 @@ import com.trailiva.data.model.*;
 import com.trailiva.data.repository.TaskRepository;
 import com.trailiva.data.repository.WorkspaceRepository;
 import com.trailiva.specification.TaskSpecifications;
+import com.trailiva.util.Helper;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
@@ -136,7 +138,8 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public Map<String, Object> searchTaskByNameAndDescription(Map<String, String> params, int page, int size) {
+    public Map<String, Object> searchTaskByNameAndDescription(Map<String, String> params, int page, int size) throws BadRequestException {
+        Helper.validatePageNumberAndSize(page, size);
         Specification<Task> searchByName = TaskSpecifications.withTaskName(params.get("name"));
         Specification<Task> searchByDesc = TaskSpecifications.withTaskDescription(params.get("description"));
 

@@ -8,6 +8,7 @@ import com.trailiva.service.CloudinaryService;
 import com.trailiva.service.UserService;
 import com.trailiva.util.AppConstants;
 import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
@@ -25,7 +26,6 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Map;
 
-import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -92,7 +92,7 @@ public class UserController {
 
     @PostMapping("/profile/delete")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> deleteUploadedImage(@CurrentUser UserPrincipal currentUser,  @RequestParam("public_id") String publicId) {
+    public ResponseEntity<?> deleteUploadedImage(@CurrentUser UserPrincipal currentUser, @RequestParam("public_id") String publicId) {
         try {
             cloudinaryService.deleteImage(publicId, currentUser.getId());
             return ResponseEntity.ok(new ApiResponse(true, "image deleted successfully", HttpStatus.OK));
@@ -101,9 +101,9 @@ public class UserController {
         }
     }
 
-   @PostMapping("/delete")
+    @PostMapping("/delete")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deleteAUser(@RequestParam("email") String email){
+    public ResponseEntity<?> deleteAUser(@RequestParam("email") String email) {
         try {
             userService.deleteAUser(email);
             return ResponseEntity.ok(new ApiResponse(true, "user deleted successfully", HttpStatus.OK));
@@ -129,7 +129,11 @@ public class UserController {
     public ResponseEntity<?> updatePassword(@RequestParam Map<String, String> params,
                                             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                             @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
-            Map<String, Object> response = userService.fetchUserBy(params, page, size);
-            return new ResponseEntity<>(new ApiResponse(true, "Data successfully filtered",  response), HttpStatus.OK);
+        try {
+            Map<String, Object> response = userService.SearchUserByName(params, page, size);
+            return new ResponseEntity<>(new ApiResponse(true, "Data successfully filtered", response), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
     }
 }

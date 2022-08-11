@@ -2,12 +2,12 @@ package com.trailiva.service;
 
 import com.trailiva.data.model.User;
 import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.response.UserProfile;
 
-import java.awt.print.Pageable;
 import java.io.IOException;
 import java.util.Map;
 
@@ -21,5 +21,5 @@ public interface UserService {
 
     void deleteAUser(String email) throws UserException;
 
-    Map<String, Object> fetchUserBy(Map<String, String> params, int page, int size);
+    Map<String, Object> SearchUserByName(Map<String, String> params, int page, int size) throws BadRequestException;
 }

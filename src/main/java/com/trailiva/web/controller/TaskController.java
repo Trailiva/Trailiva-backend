@@ -5,6 +5,7 @@ import com.trailiva.data.model.Priority;
 import com.trailiva.data.model.Task;
 import com.trailiva.service.TaskService;
 import com.trailiva.util.AppConstants;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
@@ -107,8 +108,11 @@ public class TaskController {
     public ResponseEntity<?> searchForTask(@RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                            @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
                                            @RequestParam Map<String, String> params) {
-        Map<String, Object> response = taskService.searchTaskByNameAndDescription(params, page, size);
-        return new ResponseEntity<>(new ApiResponse(true, "Data successfully filtered",  response), HttpStatus.OK);
-
+        try {
+            Map<String, Object> response = userService.SearchUserByName(params, page, size);
+            return new ResponseEntity<>(new ApiResponse(true, "Data successfully filtered", response), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
     }
 }

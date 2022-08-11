@@ -4,6 +4,7 @@ package com.trailiva.service;
 import com.trailiva.data.model.Priority;
 import com.trailiva.data.model.Tab;
 import com.trailiva.data.model.Task;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
@@ -23,5 +24,5 @@ public interface TaskService {
     List<Task> filterTaskByPriority(Long workSpaceId, Priority taskPriority) throws TaskException, WorkspaceException;
     List<Task> filterTaskByTab(Long workspaceId,  Tab taskTab) throws TaskException, WorkspaceException;
     List<Task> getDueTasks(LocalDate time);
-    Map<String, Object> searchTaskByNameAndDescription(Map<String, String> params, int page, int size);
+    Map<String, Object> searchTaskByNameAndDescription(Map<String, String> params, int page, int size) throws BadRequestException;
 }
