@@ -3,7 +3,9 @@ package com.trailiva.service;
 import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
 import com.trailiva.specification.UserSpecifications;
+import com.trailiva.util.Helper;
 import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
@@ -93,13 +95,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Map<String, Object> fetchUserBy(Map<String, String> params) {
+    public Map<String, Object> SearchUserByName(Map<String, String> params, int page, int size) throws BadRequestException {
+        Helper.validatePageNumberAndSize(page, size);
         Specification<User> withFirstName = UserSpecifications.withFirstName(params.get("firstName"));
 
-        int pageSize = Integer.parseInt(params.get("pageSize"));
-        int startPage = Integer.parseInt(params.get("startPage"));
-
-        Pageable pageable = PageRequest.of(startPage, pageSize, Sort.by(Sort.Direction.ASC, "firstName"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "firstName"));
         Page<User> result = userRepository.findAll(
                 Specification.where(withFirstName),
                 pageable
