@@ -4,6 +4,7 @@ import com.trailiva.data.model.Priority;
 import com.trailiva.data.model.Tab;
 import com.trailiva.data.model.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -12,11 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, Long> {
-    boolean existsTaskByName(String name);
-    List<Task> findByPriority(Priority priority);
-    List<Task> findByTab(Tab tab);
+public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
     List<Task> findByDueDate(LocalDate dueDate);
-
-    Optional<Task> findByName(String name);
 }

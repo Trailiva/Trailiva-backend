@@ -93,13 +93,10 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Map<String, Object> fetchUserBy(Map<String, String> params) {
+    public Map<String, Object> fetchUserBy(Map<String, String> params, int page, int size) {
         Specification<User> withFirstName = UserSpecifications.withFirstName(params.get("firstName"));
 
-        int pageSize = Integer.parseInt(params.get("pageSize"));
-        int startPage = Integer.parseInt(params.get("startPage"));
-
-        Pageable pageable = PageRequest.of(startPage, pageSize, Sort.by(Sort.Direction.ASC, "firstName"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "firstName"));
         Page<User> result = userRepository.findAll(
                 Specification.where(withFirstName),
                 pageable

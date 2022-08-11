@@ -11,6 +11,7 @@ import com.trailiva.web.payload.request.TaskRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface TaskService {
     Task createTask(TaskRequest request, Long taskId) throws TaskException, WorkspaceException;
@@ -22,4 +23,5 @@ public interface TaskService {
     List<Task> filterTaskByPriority(Long workSpaceId, Priority taskPriority) throws TaskException, WorkspaceException;
     List<Task> filterTaskByTab(Long workspaceId,  Tab taskTab) throws TaskException, WorkspaceException;
     List<Task> getDueTasks(LocalDate time);
+    Map<String, Object> searchTaskByNameAndDescription(Map<String, String> params, int page, int size);
 }

@@ -2,11 +2,12 @@ package com.trailiva.specification;
 
 import com.trailiva.data.model.User;
 import com.trailiva.util.Helper;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
-@NoArgsConstructor
-public class UserSpecifications {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class UserSpecifications {
     public static Specification<User> withFirstName(String firstName){
         if (Helper.isNullOrEmpty(firstName))
             return null;

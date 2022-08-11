@@ -1,43 +1,46 @@
 package com.trailiva.service;
 
-import com.trailiva.data.model.Priority;
-import com.trailiva.data.model.Tab;
-import com.trailiva.data.model.Task;
-import com.trailiva.data.model.WorkSpace;
+import com.trailiva.data.model.*;
 import com.trailiva.data.repository.TaskRepository;
 import com.trailiva.data.repository.WorkspaceRepository;
+import com.trailiva.specification.TaskSpecifications;
 import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.trailiva.data.model.Tab.PENDING;
 
 @Service
 @Slf4j
-
 public class TaskServiceImpl implements TaskService{
 
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private WorkspaceRepository workspaceRepository;
-
-    @Autowired
-    private ModelMapper modelMapper;
+    private final TaskRepository taskRepository;
+    private final WorkspaceRepository workspaceRepository;
+    private final ModelMapper modelMapper;
 
     private static int taskReferenceId = 1;
+
+    public TaskServiceImpl(TaskRepository taskRepository,
+                           WorkspaceRepository workspaceRepository,
+                           ModelMapper modelMapper) {
+        this.taskRepository = taskRepository;
+        this.workspaceRepository = workspaceRepository;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     @Transactional
@@ -65,6 +68,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
+    @Transactional
     public Task updateTask(TaskRequest taskRequest, Long id) throws TaskException {
         Task taskToUpdate = taskRepository.findById(id).orElseThrow(()-> new TaskException("Task does not exist"));
         modelMapper.map(taskRequest, taskToUpdate);
@@ -72,6 +76,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
+    @Transactional
     public void deleteTask(Long id) throws TaskException {
         Task taskToDelete = taskRepository.findById(id).orElseThrow(
                 ()-> new TaskException("Task not found"));
@@ -87,6 +92,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
+    @Transactional
     public Task getTaskDetail(Long workspaceId, Long taskId)throws WorkspaceException {
         WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
                 ()-> new WorkspaceException("No workspace found"));
@@ -95,6 +101,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
+    @Transactional
     public Task updateTaskTag(Long taskId, String taskTab) throws TaskException {
         Task taskToUpdate = taskRepository.findById(taskId).orElseThrow(
                 ()-> new TaskException("Task not found"));
@@ -113,6 +120,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
+    @Transactional
     public List<Task> filterTaskByTab(Long workspaceId, Tab taskTab) throws WorkspaceException {
         WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
                 ()-> new WorkspaceException("No workspace found"));
@@ -122,10 +130,27 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
+    @Transactional
     public List<Task> getDueTasks(LocalDate time) {
         return  taskRepository.findByDueDate(time);
     }
 
+    @Override
+    public Map<String, Object> searchTaskByNameAndDescription(Map<String, String> params, int page, int size) {
+        Specification<Task> searchByName = TaskSpecifications.withTaskName(params.get("name"));
+        Specification<Task> searchByDesc = TaskSpecifications.withTaskDescription(params.get("description"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        Page<Task> result = taskRepository.findAll(
+                Specification.where(searchByName)
+                        .and(searchByDesc),
+                pageable
+        );
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", result.getContent());
+        response.put("recordsTotal", result.getTotalElements());
+        response.put("recordsFiltered", result.getTotalElements());
+        return response;    }
 
 
 }

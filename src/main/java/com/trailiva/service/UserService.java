@@ -21,5 +21,5 @@ public interface UserService {
 
     void deleteAUser(String email) throws UserException;
 
-    Map<String, Object> fetchUserBy(Map<String, String> params);
+    Map<String, Object> fetchUserBy(Map<String, String> params, int page, int size);
 }

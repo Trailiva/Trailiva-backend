@@ -6,6 +6,7 @@ import com.trailiva.security.CurrentUser;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.CloudinaryService;
 import com.trailiva.service.UserService;
+import com.trailiva.util.AppConstants;
 import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
@@ -125,8 +126,10 @@ public class UserController {
 
     @GetMapping("/filter")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> updatePassword(@RequestParam Map<String, String> params) {
-            Map<String, Object> response = userService.fetchUserBy(params);
+    public ResponseEntity<?> updatePassword(@RequestParam Map<String, String> params,
+                                            @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                            @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+            Map<String, Object> response = userService.fetchUserBy(params, page, size);
             return new ResponseEntity<>(new ApiResponse(true, "Data successfully filtered",  response), HttpStatus.OK);
     }
 }
