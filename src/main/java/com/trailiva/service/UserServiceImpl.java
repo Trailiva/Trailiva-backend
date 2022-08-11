@@ -2,6 +2,7 @@ package com.trailiva.service;
 
 import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
+import com.trailiva.specification.UserSpecifications;
 import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
@@ -10,10 +11,17 @@ import com.trailiva.web.payload.response.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.trailiva.util.Helper.isNullOrEmpty;
@@ -82,6 +90,25 @@ public class UserServiceImpl implements UserService{
         }
         userToChangePassword.setPassword(passwordEncoder.encode(request.getPassword()));
         saveAUser(userToChangePassword);
+    }
+
+    @Override
+    public Map<String, Object> fetchUserBy(Map<String, String> params) {
+        Specification<User> withFirstName = UserSpecifications.withFirstName(params.get("firstName"));
+
+        int pageSize = Integer.parseInt(params.get("pageSize"));
+        int startPage = Integer.parseInt(params.get("startPage"));
+
+        Pageable pageable = PageRequest.of(startPage, pageSize, Sort.by(Sort.Direction.ASC, "firstName"));
+        Page<User> result = userRepository.findAll(
+                Specification.where(withFirstName),
+                pageable
+        );
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", result.getContent());
+        response.put("recordsTotal", result.getTotalElements());
+        response.put("recordsFiltered", result.getTotalElements());
+        return response;
     }
 
 }

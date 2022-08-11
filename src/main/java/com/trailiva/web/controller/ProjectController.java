@@ -33,7 +33,7 @@ public class ProjectController {
             Project project = projectService.createProject(request, id);
             return  ResponseEntity.ok(project);
         } catch (WorkspaceException | UserException | ProjectException e) {
-            return  new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -48,7 +48,7 @@ public class ProjectController {
             Project project = projectService.getProjectById(projectId);
             return  ResponseEntity.ok(project);
         } catch ( ProjectException e) {
-            return  new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 }

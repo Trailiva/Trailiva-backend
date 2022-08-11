@@ -30,7 +30,7 @@ public class TaskController {
             Task task = taskService.createTask(request, workspaceId);
             return new ResponseEntity<>(task, HttpStatus.CREATED);
         } catch (WorkspaceException | TaskException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -40,7 +40,7 @@ public class TaskController {
             Task task = taskService.updateTask(taskRequest, taskId);
             return new ResponseEntity<>(task, HttpStatus.OK);
         } catch (TaskException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -51,7 +51,7 @@ public class TaskController {
             Task task = taskService.getTaskDetail(workspaceId, taskId);
             return new ResponseEntity<>(task, HttpStatus.OK);
         } catch (WorkspaceException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -62,7 +62,7 @@ public class TaskController {
             List<Task> tasks = taskService.getTasksByWorkspaceId(workspaceId);
             return ResponseEntity.ok(tasks);
         } catch (WorkspaceException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -70,9 +70,9 @@ public class TaskController {
     public ResponseEntity<?> deleteTask(@PathVariable Long taskId) {
         try {
             taskService.deleteTask(taskId);
-            return ResponseEntity.ok(new ApiResponse<>(true, "Task is successfully deleted", HttpStatus.OK));
+            return ResponseEntity.ok(new ApiResponse(true, "Task is successfully deleted", HttpStatus.OK));
         } catch (TaskException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -83,7 +83,7 @@ public class TaskController {
             Task task = taskService.updateTaskTag(taskId, tab);
             return new ResponseEntity<>(task, HttpStatus.OK);
         } catch (TaskException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -93,7 +93,7 @@ public class TaskController {
             List<Task> tasks = taskService.filterTaskByPriority(workspaceId, taskPriority);
             return new ResponseEntity<>(tasks, HttpStatus.OK);
         } catch (TaskException | WorkspaceException exception) {
-            return new ResponseEntity<>(new ApiResponse<>(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 }

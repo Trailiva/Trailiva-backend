@@ -7,7 +7,9 @@ import com.trailiva.web.payload.request.ImageRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.response.UserProfile;
 
+import java.awt.print.Pageable;
 import java.io.IOException;
+import java.util.Map;
 
 public interface UserService {
     User getUserProfile(Long userId) throws UserException;
@@ -18,4 +20,6 @@ public interface UserService {
     void saveImageProperties(ImageRequest imageProperties, Long userId) throws UserException, IOException;
 
     void deleteAUser(String email) throws UserException;
+
+    Map<String, Object> fetchUserBy(Map<String, String> params);
 }
