@@ -109,7 +109,7 @@ public class TaskController {
                                            @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
                                            @RequestParam Map<String, String> params) {
         try {
-            Map<String, Object> response = userService.SearchUserByName(params, page, size);
+            Map<String, Object> response = taskService.searchTaskByNameAndDescription(params, page, size);
             return new ResponseEntity<>(new ApiResponse(true, "Data successfully filtered", response), HttpStatus.OK);
         } catch (BadRequestException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
