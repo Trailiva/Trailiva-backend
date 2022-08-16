@@ -49,8 +49,6 @@ class WorkspaceControllerTest {
     @Autowired
     protected WebApplicationContext wac;
 
-    @Autowired
-    private FilterChainProxy filterChain;
 
     @Autowired
     private JacksonTester<WorkspaceRequest> jsonWorkspaceRequest;
@@ -65,9 +63,6 @@ class WorkspaceControllerTest {
     @BeforeEach
     void setup(){
 
-        this.mockMvc = webAppContextSetup(wac)
-                .apply(springSecurity(filterChain))
-                .build();
 
         workspaceRequest = new WorkspaceRequest("Trailiva",
                 "task management software",
@@ -78,8 +73,8 @@ class WorkspaceControllerTest {
         workSpace.setReferenceName(workspaceRequest.getReferenceName());
         workSpace.setName(workspaceRequest.getName());
         workSpace.setDescription(workspaceRequest.getDescription());
-        workSpace.setWorkSpaceType(workspaceRequest.getWorkSpaceType());
-        workSpace.setTasks(List.of(new Task(), new Task()));
+//        workSpace.setWorkSpaceType(workspaceRequest.getWorkSpaceType());
+//        workSpace.setTasks(List.of(new Task(), new Task()));
     }
 
     @AfterEach

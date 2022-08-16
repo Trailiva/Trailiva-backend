@@ -24,7 +24,7 @@ class TrailivaTaskSchedulerTest {
     @Mock
     TaskRepository taskRepository;
     @InjectMocks
-    TaskService mockTaskService=new TaskServiceImpl(null, null, null);
+    TaskService mockTaskService=new TaskServiceImpl(null, null,  null);
 
     @Mock
     TrailivaTaskScheduler trailivaTaskScheduler;

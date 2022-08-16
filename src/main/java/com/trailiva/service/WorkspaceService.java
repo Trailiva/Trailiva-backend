@@ -7,13 +7,12 @@ import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.WorkspaceRequest;
 
-import java.util.List;
-import java.util.Set;
-
 public interface WorkspaceService {
-    Set<WorkSpace> getWorkspaces(Long userId) throws UserException;
-    WorkSpace getWorkspace(Long workspaceId) throws WorkspaceException;
-    OfficialWorkspace getOfficialWorkspace(Long workspaceId) throws WorkspaceException;
+    WorkSpace getUserPersonalWorkspace(Long userId) throws UserException;
+    WorkSpace getPersonalWorkspace(Long workspaceId) throws WorkspaceException;
+    WorkSpace getOfficialWorkspace(Long workspaceId) throws WorkspaceException;
+    WorkSpace getUserOfficialWorkspace(Long userId) throws UserException, WorkspaceException;
     WorkSpace createWorkspace(WorkspaceRequest request,  Long userId)throws WorkspaceException, UserException;
-    WorkSpace addMemberToOfficialWorkspace(Long workspaceId, String memberEmail) throws UserException, WorkspaceException, BadRequestException;
+    OfficialWorkspace addMemberToOfficialWorkspace(String memberEmail, Long userId) throws UserException, WorkspaceException, BadRequestException;
+    WorkSpace addModeratorToOfficialWorkspace(String memberEmail, Long userId) throws UserException, WorkspaceException;
 }

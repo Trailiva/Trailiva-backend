@@ -3,6 +3,8 @@ package com.trailiva.data.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.hateoas.RepresentationModel;
@@ -15,7 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @Entity
 @Table(name = "user_data")
 public class User extends RepresentationModel<User> {
@@ -44,12 +47,13 @@ public class User extends RepresentationModel<User> {
     @JsonIgnore
     private List<Role> roles = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_workspaces",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "workspace_id"))
-    @JsonIgnore
-    private Set<WorkSpace> workspaces = new HashSet<>();
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "personal_workspace_id")
+    private PersonalWorkspace personalWorkspace;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "official_workspace_id")
+    private  OfficialWorkspace officialWorkspace;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -59,10 +63,6 @@ public class User extends RepresentationModel<User> {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDated;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "members")
-    private Set<OfficialWorkspace> officialWorkspace = new HashSet<>();
 
-    public void addWorkSpace(WorkSpace workSpace) {
-        workspaces.add(workSpace);
-    }
+
 }
