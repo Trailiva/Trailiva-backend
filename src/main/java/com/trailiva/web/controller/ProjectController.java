@@ -30,7 +30,7 @@ public class ProjectController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> createProject(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
         try {
-            Project project = projectService.createProject(request, id);
+            Project project = projectService.createProjectForPersonalWorkspace(request, id);
             return  ResponseEntity.ok(project);
         } catch (WorkspaceException | UserException | ProjectException e) {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);

@@ -1,9 +1,12 @@
 package com.trailiva.service;
 
+import com.trailiva.data.model.OfficialWorkspace;
+import com.trailiva.data.model.PersonalWorkspace;
 import com.trailiva.data.model.Project;
 import com.trailiva.data.model.WorkSpace;
+import com.trailiva.data.repository.OfficialWorkspaceRepository;
 import com.trailiva.data.repository.ProjectRepository;
-import com.trailiva.data.repository.WorkspaceRepository;
+import com.trailiva.data.repository.PersonalWorkspaceRepository;
 import com.trailiva.web.exceptions.ProjectException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
@@ -18,27 +21,47 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
-    private final WorkspaceRepository workspaceRepository;
+    private final PersonalWorkspaceRepository personalWorkspaceRepository;
+    private final OfficialWorkspaceRepository officialWorkspaceRepository;
 
-    public ProjectServiceImpl(ProjectRepository workspaceRepository, ModelMapper modelMapper, ProjectRepository projectRepository, WorkspaceRepository workspaceRepository1) {
+    public ProjectServiceImpl(ModelMapper modelMapper, ProjectRepository projectRepository, PersonalWorkspaceRepository personalWorkspaceRepository, OfficialWorkspaceRepository officialWorkspaceRepository) {
         this.modelMapper = modelMapper;
         this.projectRepository = projectRepository;
-        this.workspaceRepository = workspaceRepository1;
+        this.personalWorkspaceRepository = personalWorkspaceRepository;
+        this.officialWorkspaceRepository = officialWorkspaceRepository;
     }
 
 
     @Override
-    public Project createProject(ProjectRequest request, Long workspaceId) throws WorkspaceException, UserException, ProjectException {
-        WorkSpace workSpace = workspaceRepository.findById(workspaceId).orElseThrow(
+    public Project createProjectForPersonalWorkspace(ProjectRequest request, Long workspaceId) throws WorkspaceException, UserException, ProjectException {
+        PersonalWorkspace workSpace = personalWorkspaceRepository.findById(workspaceId).orElseThrow(
                 ()-> new WorkspaceException("Workspace does not exist"));
         List<Project> projects = workSpace.getProjects();
 
 
-        if(!isValidProject(projects, request.getName())){
+        if(isValidProject(projects, request.getName())){
             Project project = modelMapper.map(request, Project.class);
+            project.setReferenceName(generateReferenceName(request.getName()));
             Project savedProject = projectRepository.save(project);
             workSpace.addProject(savedProject);
-            workspaceRepository.save(workSpace);
+            personalWorkspaceRepository.save(workSpace);
+            return savedProject;
+        }else throw new ProjectException("Project name already exist on your project list");
+    }
+
+    @Override
+    public Project createProjectForOfficialWorkspace(ProjectRequest request, Long workspaceId) throws WorkspaceException, ProjectException {
+        OfficialWorkspace workSpace = officialWorkspaceRepository.findById(workspaceId).orElseThrow(
+                ()-> new WorkspaceException("Workspace does not exist"));
+        List<Project> projects = workSpace.getProjects();
+
+
+        if(isValidProject(projects, request.getName())){
+            Project project = modelMapper.map(request, Project.class);
+            project.setReferenceName(generateReferenceName(request.getName()));
+            Project savedProject = projectRepository.save(project);
+            workSpace.addProject(savedProject);
+            officialWorkspaceRepository.save(workSpace);
             return savedProject;
         }else throw new ProjectException("Project name already exist on your project list");
     }
@@ -59,6 +82,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean isValidProject(List<Project> projects, String name) {
-       return projects.stream().anyMatch(project -> project.getName().equalsIgnoreCase(name));
+       return projects.stream().noneMatch(project -> project.getName().equalsIgnoreCase(name));
+    }
+
+    private String generateReferenceName(String projectName){
+        return projectName.substring(0, 2).toUpperCase();
     }
 }
