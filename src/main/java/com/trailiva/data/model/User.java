@@ -11,7 +11,9 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -47,7 +49,7 @@ public class User extends RepresentationModel<User> {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "workspace_id"))
     @JsonIgnore
-    private List<WorkSpace> workspaces = new ArrayList<>();
+    private Set<WorkSpace> workspaces = new HashSet<>();
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -56,6 +58,9 @@ public class User extends RepresentationModel<User> {
     @UpdateTimestamp
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDated;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "members")
+    private Set<OfficialWorkspace> officialWorkspace = new HashSet<>();
 
     public void addWorkSpace(WorkSpace workSpace) {
         workspaces.add(workSpace);

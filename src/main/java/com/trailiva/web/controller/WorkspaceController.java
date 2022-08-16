@@ -5,8 +5,8 @@ import com.trailiva.data.model.Task;
 import com.trailiva.data.model.WorkSpace;
 import com.trailiva.security.CurrentUser;
 import com.trailiva.security.UserPrincipal;
-import com.trailiva.service.TaskService;
 import com.trailiva.service.WorkspaceService;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.WorkspaceRequest;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Locale;
+import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -57,11 +57,10 @@ public class WorkspaceController {
 
     @GetMapping()
     @PreAuthorize("hasRole('ROLE_USER')")
-    @Transactional
     public ResponseEntity<?> getWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
         WorkspaceList workSpaceList = new WorkspaceList();
         try {
-            List<WorkSpace> workSpaces = workspaceService.getWorkspaces(userPrincipal.getId());
+            Set<WorkSpace> workSpaces = workspaceService.getWorkspaces(userPrincipal.getId());
 
             for (WorkSpace workSpace : workSpaces) {
 
@@ -91,9 +90,11 @@ public class WorkspaceController {
     }
 
     @GetMapping("my-workspace/{workspaceId}")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+
     public ResponseEntity<?> getWorkspace(@PathVariable Long workspaceId) {
         try {
-            WorkSpace workSpace = workspaceService.getWorkspace(workspaceId);
+            WorkSpace workSpace = workspaceService.getOfficialWorkspace(workspaceId);
 
             ResponseEntity<Task> getTasksLink = (ResponseEntity<Task>) methodOn(TaskController.class).getAllTaskInWorkspace(workSpace.getWorkspaceId());
 
@@ -107,5 +108,21 @@ public class WorkspaceController {
         }
     }
 
+    @PostMapping("my-workspace/add-member/{workspaceId}")
+    public ResponseEntity<?> addMember(@PathVariable Long workspaceId, @RequestParam String email) {
+        try {
+            WorkSpace workSpace = workspaceService.addMemberToOfficialWorkspace(workspaceId, email);
+
+            ResponseEntity<Task> getTasksLink = (ResponseEntity<Task>) methodOn(TaskController.class).getAllTaskInWorkspace(workSpace.getWorkspaceId());
+
+            Link projectLink = linkTo(getTasksLink).withRel("workspace-tasks");
+
+            workSpace.add(projectLink);
+
+            return new ResponseEntity<>(workSpace, HttpStatus.OK);
+        } catch (WorkspaceException | UserException | BadRequestException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
 
 }

@@ -33,6 +33,8 @@ public class SetupRoleAndPrivileges implements ApplicationListener<ContextRefres
             if (alreadySetup) return;
             createRoleIfNotFound("ROLE_ADMIN");
             createRoleIfNotFound("ROLE_USER");
+            createRoleIfNotFound("ROLE_SUPER_MODERATOR");
+            createRoleIfNotFound("ROLE_MODERATOR");
 
 
         Optional<Role> adminRole = roleRepository.findByName("ROLE_ADMIN");
