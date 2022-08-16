@@ -16,7 +16,7 @@ import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("api/v1/trailiva/project")
+@RequestMapping("api/v1/trailiva/projects")
 public class ProjectController {
 
     private final ProjectService projectService;
@@ -26,13 +26,23 @@ public class ProjectController {
     }
 
 
-    @PostMapping("/create/{id}")
+    @PostMapping("personal/create/{id}")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> createProject(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
         try {
             Project project = projectService.createProjectForPersonalWorkspace(request, id);
             return  ResponseEntity.ok(project);
         } catch (WorkspaceException | UserException | ProjectException e) {
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+  @PostMapping("official/create/{id}")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> createProjectForOfficialWorkspace(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
+        try {
+            Project project = projectService.createProjectForOfficialWorkspace(request, id);
+            return  ResponseEntity.ok(project);
+        } catch (WorkspaceException  | ProjectException e) {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }

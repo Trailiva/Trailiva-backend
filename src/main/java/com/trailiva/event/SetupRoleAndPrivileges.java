@@ -4,6 +4,7 @@ import com.trailiva.data.model.Role;
 import com.trailiva.data.model.User;
 import com.trailiva.data.repository.RoleRepository;
 import com.trailiva.data.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -19,7 +20,9 @@ public class SetupRoleAndPrivileges implements ApplicationListener<ContextRefres
     private final   RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    boolean alreadySetup = false;
+
+    @Value("${ALREADY_SETUP:false}")
+    boolean alreadySetup;
 
     public SetupRoleAndPrivileges(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;

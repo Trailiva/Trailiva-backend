@@ -47,12 +47,14 @@ public class User extends RepresentationModel<User> {
     @JsonIgnore
     private List<Role> roles = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "personal_workspace_id")
+    @JsonIgnore
     private PersonalWorkspace personalWorkspace;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "official_workspace_id")
+    @JsonIgnore
     private  OfficialWorkspace officialWorkspace;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")

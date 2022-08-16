@@ -23,6 +23,7 @@ import java.util.Set;
 @Entity
 public class OfficialWorkspace extends WorkSpace{
 
+    @JsonIgnore
     @ManyToMany()
     @JoinTable(
             name = "workspace_members",
@@ -32,6 +33,7 @@ public class OfficialWorkspace extends WorkSpace{
     private Set<User> members = new HashSet<>();
 
 
+    @JsonIgnore
     @ManyToMany()
     @JoinTable(
             name = "workspace_moderators",

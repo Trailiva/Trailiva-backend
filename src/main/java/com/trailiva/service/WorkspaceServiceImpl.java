@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Slf4j
 @AllArgsConstructor
@@ -34,7 +36,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             throw new WorkspaceException("Workspace with name already exist");
 
         if (WorkSpaceType.PERSONAL == request.getWorkSpaceType())
-           createdWorkspace =  createPersonalWorkspace(request, user);
+            createdWorkspace = createPersonalWorkspace(request, user);
 
         else if (WorkSpaceType.OFFICIAL == request.getWorkSpaceType())
             createdWorkspace = createOfficialWorkspace(request, user);
@@ -43,28 +45,39 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public OfficialWorkspace addMemberToOfficialWorkspace(String memberEmail, Long userId) throws UserException, WorkspaceException, BadRequestException {
-        User user = userRepository.findByEmail(memberEmail).orElseThrow(() -> new UserException("User not found"));
-        OfficialWorkspace  workspace = getUserOfficialWorkspace(userId);
-        workspace.getMembers().add(user);
-        userRepository.save(user);
-        return officialWorkspaceRepository.save(workspace);
+    public void addMemberToOfficialWorkspace(List<String> memberEmails, Long userId) throws UserException, WorkspaceException, BadRequestException {
+        if (!memberEmails.isEmpty()) {
+            for (String email : memberEmails) {
+                User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found"));
+                User workspaceOwner = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
+                OfficialWorkspace workspace = workspaceOwner.getOfficialWorkspace();
+                workspace.getMembers().add(user);
+                userRepository.save(workspaceOwner);
+                officialWorkspaceRepository.save(workspace);
+            }
+        }
+
     }
 
     @Override
-    public WorkSpace addModeratorToOfficialWorkspace(String memberEmail, Long userId) throws UserException, WorkspaceException {
-        User user = userRepository.findByEmail(memberEmail).orElseThrow(() -> new UserException("User not found"));
-        user.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
-        OfficialWorkspace  workspace = getUserOfficialWorkspace(userId);
-        workspace.getMembers().add(user);
-        userRepository.save(user);
-        return officialWorkspaceRepository.save(workspace);
+    public void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException, WorkspaceException {
+        if (!moderatorEmail.isEmpty()) {
+            for (String email : moderatorEmail) {
+                User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found"));
+                user.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
+                OfficialWorkspace workspace = getUserOfficialWorkspace(userId);
+                workspace.getMembers().add(user);
+                userRepository.save(user);
+                officialWorkspaceRepository.save(workspace);
+            }
+        }
+
     }
 
 
-    private WorkSpace createPersonalWorkspace(WorkspaceRequest request, User user){
-       PersonalWorkspace workSpace = modelMapper.map(request, com.trailiva.data.model.PersonalWorkspace.class);
-       PersonalWorkspace space = savePersonalWorkspace(workSpace);
+    private WorkSpace createPersonalWorkspace(WorkspaceRequest request, User user) {
+        PersonalWorkspace workSpace = modelMapper.map(request, com.trailiva.data.model.PersonalWorkspace.class);
+        PersonalWorkspace space = savePersonalWorkspace(workSpace);
         user.setPersonalWorkspace(space);
         userRepository.save(user);
         return space;
@@ -73,9 +86,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private WorkSpace createOfficialWorkspace(WorkspaceRequest request, User user) throws WorkspaceException, UserException {
         user.getRoles().add(roleRepository.findByName("ROLE_SUPER_MODERATOR").get());
         OfficialWorkspace workSpace = modelMapper.map(request, OfficialWorkspace.class);
-        user.setOfficialWorkspace(workSpace);
+        OfficialWorkspace officialWorkspace = saveOfficialWorkspace(workSpace);
+        user.setOfficialWorkspace(officialWorkspace);
         userRepository.save(user);
-        return saveOfficialWorkspace(workSpace);
+        return officialWorkspace;
     }
 
     @Override
@@ -103,10 +117,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
 
     private boolean existByName(String name) {
-        return personalWorkspaceRepository.existsByName(name);
+        return personalWorkspaceRepository.existsByName(name)
+                || officialWorkspaceRepository.existsByName(name);
     }
 
-    private com.trailiva.data.model.PersonalWorkspace savePersonalWorkspace(com.trailiva.data.model.PersonalWorkspace workSpace) {
+    private PersonalWorkspace savePersonalWorkspace(PersonalWorkspace workSpace) {
         return personalWorkspaceRepository.save(workSpace);
     }
 

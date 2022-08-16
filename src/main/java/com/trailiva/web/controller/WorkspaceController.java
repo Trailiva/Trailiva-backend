@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import java.util.List;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -91,37 +93,26 @@ public class WorkspaceController {
     }
 
     @PostMapping("my-workspace/add-member")
-    public ResponseEntity<?> addMember(@CurrentUser UserPrincipal userPrincipal, @RequestParam String email) {
+    public ResponseEntity<?> addMember(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {
         try {
-            WorkSpace workSpace = workspaceService.addMemberToOfficialWorkspace(email, userPrincipal.getId());
+            workspaceService.addMemberToOfficialWorkspace(emails, userPrincipal.getId());
 
-            ResponseEntity<Project> getTasksLink = methodOn(ProjectController.class).getProjectsByWorkspaceId(workSpace.getWorkspaceId());
-
-            Link projectLink = linkTo(getTasksLink).withRel("workspace-tasks");
-
-            workSpace.add(projectLink);
-
-            return new ResponseEntity<>(workSpace, HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "members are successfully added to workspace", HttpStatus.OK), HttpStatus.OK);
         } catch (WorkspaceException | UserException | BadRequestException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("my-workspace/add-moderator")
-    public ResponseEntity<?> addModerator(@CurrentUser UserPrincipal userPrincipal, @RequestParam String email) {
+    public ResponseEntity<?> addModerator(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {
         try {
-            WorkSpace workSpace = workspaceService.addModeratorToOfficialWorkspace(email, userPrincipal.getId());
-
-            ResponseEntity<Project> getTasksLink = methodOn(ProjectController.class).getProjectsByWorkspaceId(workSpace.getWorkspaceId());
-
-            Link projectLink = linkTo(getTasksLink).withRel("workspace-tasks");
-
-            workSpace.add(projectLink);
-
-            return new ResponseEntity<>(workSpace, HttpStatus.OK);
+           workspaceService.addModeratorToOfficialWorkspace(emails, userPrincipal.getId());
+            return new ResponseEntity<>(new ApiResponse(true, "moderators are successfully added to workspace", HttpStatus.OK), HttpStatus.OK);
         } catch (WorkspaceException | UserException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
+
+
 
 }

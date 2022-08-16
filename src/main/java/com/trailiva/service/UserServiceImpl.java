@@ -40,11 +40,11 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public com.trailiva.data.model.User getUserProfile(Long userId) throws UserException {
+    public User getUserProfile(Long userId) throws UserException {
         return getAUser(userId);
     }
 
-    private com.trailiva.data.model.User getAUser(Long userId) throws UserException {
+    private User getAUser(Long userId) throws UserException {
         return userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
     }
 
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void saveImageProperties(ImageRequest imageProperties, Long userId) throws UserException, IOException {
-        com.trailiva.data.model.User user = getAUser(userId);
+        User user = getAUser(userId);
         String url = user.getImageUrl();
         String publicId = user.getPublicId();
 
