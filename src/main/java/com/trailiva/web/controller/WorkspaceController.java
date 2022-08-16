@@ -1,9 +1,11 @@
 package com.trailiva.web.controller;
 
+import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.*;
 import com.trailiva.security.CurrentUser;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.WorkspaceService;
+import com.trailiva.util.Helper;
 import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
@@ -16,9 +18,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -113,6 +117,32 @@ public class WorkspaceController {
         }
     }
 
+    @PostMapping("my-workspace/csv/add-member")
+    public ResponseEntity<?> addMemberFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file")MultipartFile file){
+        try {
+            if (Helper.hasCSVFormat(file)){
+                workspaceService.addMemberToWorkspaceFromCSV(file, userPrincipal.getId());
+                return new ResponseEntity<>(new ApiResponse(true, "members are successfully added to workspace", HttpStatus.OK), HttpStatus.OK);
+            }
+            return new ResponseEntity<>(new ApiResponse(true, "Please upload a csv file!", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
 
+        } catch (CsvValidationException | IOException |UserException | WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("my-workspace/csv/add-moderator")
+    public ResponseEntity<?> addModeratorFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file")MultipartFile file){
+        try {
+            if (Helper.hasCSVFormat(file)){
+                workspaceService.addModeratorToWorkspaceFromCSV(file, userPrincipal.getId());
+                return new ResponseEntity<>(new ApiResponse(true, "moderators are successfully added to workspace", HttpStatus.OK), HttpStatus.OK);
+            }
+            return new ResponseEntity<>(new ApiResponse(true, "Please upload a csv file!", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+
+        } catch (CsvValidationException | IOException |UserException | WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
 
 }
