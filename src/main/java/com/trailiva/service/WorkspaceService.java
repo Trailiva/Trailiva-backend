@@ -14,12 +14,20 @@ import java.util.List;
 
 public interface WorkspaceService {
     WorkSpace getUserPersonalWorkspace(Long userId) throws UserException;
+
     WorkSpace getPersonalWorkspace(Long workspaceId) throws WorkspaceException;
+
     WorkSpace getOfficialWorkspace(Long workspaceId) throws WorkspaceException;
+
     WorkSpace getUserOfficialWorkspace(Long userId) throws UserException, WorkspaceException;
-    WorkSpace createWorkspace(WorkspaceRequest request,  Long userId)throws WorkspaceException, UserException;
+
+    WorkSpace createWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException;
+
     void addMemberToOfficialWorkspace(List<String> memberEmail, Long userId) throws UserException, WorkspaceException, BadRequestException;
+
     void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException, WorkspaceException;
+
     void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
-     void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
+
+    void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
 }

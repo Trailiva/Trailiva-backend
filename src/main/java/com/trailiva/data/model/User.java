@@ -21,7 +21,7 @@ import java.util.Set;
 @Getter
 @Entity
 @Table(name = "user_data")
-public class User extends RepresentationModel<User> {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore

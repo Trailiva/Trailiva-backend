@@ -59,26 +59,9 @@ public class WorkspaceController {
     @GetMapping()
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> getPersonalWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
-        WorkspaceList workSpaceList = new WorkspaceList();
         try {
              WorkSpace workSpace = workspaceService.getUserPersonalWorkspace(userPrincipal.getId());
-
-                ResponseEntity<WorkSpace> getWorkspaceLink = (ResponseEntity<WorkSpace>) methodOn(WorkspaceController.class).getWorkspace(workSpace.getWorkspaceId());
-                Link getSpaceLink = linkTo(getWorkspaceLink).withRel("my-workspace");
-//                workSpace.add(getSpaceLink);
-
-                ResponseEntity<Project> getProjectsLink = methodOn(ProjectController.class)
-                                .getProjectsByWorkspaceId(workSpace.getWorkspaceId());
-
-                Link projectLink = linkTo(getProjectsLink).withRel("workspace-projects");
-
-            Link selfLink =
-                    linkTo(methodOn(WorkspaceController.class).getPersonalWorkspacesByUserId(userPrincipal)).withSelfRel();
-
-            workSpaceList.add(projectLink);
-            workSpaceList.add(selfLink);
-
-            return new ResponseEntity<>(workSpaceList, HttpStatus.OK);
+            return new ResponseEntity<>(workSpace, HttpStatus.OK);
         } catch (UserException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }

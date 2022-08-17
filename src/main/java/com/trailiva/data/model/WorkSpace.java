@@ -8,11 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
-public class WorkSpace extends RepresentationModel<WorkSpace> {
+public class WorkSpace{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
