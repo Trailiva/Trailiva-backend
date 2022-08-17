@@ -48,18 +48,6 @@ public class UserController {
     public ResponseEntity<?> getUserProfile(@CurrentUser UserPrincipal currentUser) {
         try {
             User userProfile = userService.getUserProfile(currentUser.getId());
-            Link link = linkTo(UserController.class)
-                    .slash(userProfile.getUserId()).withSelfRel();
-            userProfile.add(link);
-
-
-            ResponseEntity<WorkSpace> methodLinkBuilder = (ResponseEntity<WorkSpace>) methodOn(WorkspaceController.class)
-                    .getPersonalWorkspacesByUserId(currentUser);
-
-            Link workspaceLink = linkTo(methodLinkBuilder).withRel("user-workspace");
-
-            userProfile.add(workspaceLink);
-
             return new ResponseEntity<>(userProfile, HttpStatus.OK);
         } catch (UserException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);

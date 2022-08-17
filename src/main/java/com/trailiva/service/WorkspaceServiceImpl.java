@@ -1,5 +1,7 @@
 package com.trailiva.service;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.*;
 import com.trailiva.data.repository.OfficialWorkspaceRepository;
 import com.trailiva.data.repository.RoleRepository;
@@ -13,8 +15,14 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -48,30 +56,56 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     public void addMemberToOfficialWorkspace(List<String> memberEmails, Long userId) throws UserException, WorkspaceException, BadRequestException {
         if (!memberEmails.isEmpty()) {
             for (String email : memberEmails) {
-                User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found"));
-                User workspaceOwner = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
-                OfficialWorkspace workspace = workspaceOwner.getOfficialWorkspace();
-                workspace.getMembers().add(user);
-                userRepository.save(workspaceOwner);
-                officialWorkspaceRepository.save(workspace);
+                onboardMember(userId, email);
             }
         }
 
+    }
+
+    private void onboardMember(Long userId, String email) throws UserException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found"));
+        User workspaceOwner = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
+        workspaceOwner.getOfficialWorkspace().getMembers().add(user);
+        userRepository.save(workspaceOwner);
     }
 
     @Override
     public void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException, WorkspaceException {
         if (!moderatorEmail.isEmpty()) {
             for (String email : moderatorEmail) {
-                User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found"));
-                user.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
-                OfficialWorkspace workspace = getUserOfficialWorkspace(userId);
-                workspace.getMembers().add(user);
-                userRepository.save(user);
-                officialWorkspaceRepository.save(workspace);
+                onboardModerator(userId, email);
             }
         }
 
+    }
+
+    private void onboardModerator(Long userId, String email) throws UserException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found"));
+        user.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
+        User workspaceOwner = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
+        workspaceOwner.getOfficialWorkspace().getModerators().add(user);
+        userRepository.save(workspaceOwner);
+    }
+
+
+    public void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException {
+        CSVReader reader = new CSVReader(new FileReader(convertMultiPartToFile(file)));
+        String[] nextLine;
+        while ((nextLine = reader.readNext()) != null) {
+            for (String email : nextLine){
+                onboardMember(userId, email);
+            }
+        }
+    }
+
+     public void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException {
+        CSVReader reader = new CSVReader(new FileReader(convertMultiPartToFile(file)));
+        String[] nextLine;
+        while ((nextLine = reader.readNext()) != null) {
+            for (String email : nextLine){
+                onboardMember(userId, email);
+            }
+        }
     }
 
 
@@ -83,7 +117,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return space;
     }
 
-    private WorkSpace createOfficialWorkspace(WorkspaceRequest request, User user) throws WorkspaceException, UserException {
+    private WorkSpace createOfficialWorkspace(WorkspaceRequest request, User user){
         user.getRoles().add(roleRepository.findByName("ROLE_SUPER_MODERATOR").get());
         OfficialWorkspace workSpace = modelMapper.map(request, OfficialWorkspace.class);
         OfficialWorkspace officialWorkspace = saveOfficialWorkspace(workSpace);
@@ -127,5 +161,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     private OfficialWorkspace saveOfficialWorkspace(OfficialWorkspace workSpace) {
         return officialWorkspaceRepository.save(workSpace);
+    }
+
+    private File convertMultiPartToFile(MultipartFile file ) throws IOException {
+        File convFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
+        FileOutputStream fos = new FileOutputStream( convFile );
+        fos.write( file.getBytes() );
+        fos.close();
+        return convFile;
     }
 }
