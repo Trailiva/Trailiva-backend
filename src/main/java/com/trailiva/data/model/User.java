@@ -66,5 +66,4 @@ public class User {
     private LocalDateTime updatedDated;
 
 
-
 }
