@@ -33,8 +33,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Slf4j
 @RequestMapping("api/v1/trailiva/workspace")
 public class WorkspaceController {
-
-
     private final WorkspaceService workspaceService;
 
     public WorkspaceController(WorkspaceService workspaceService) {
@@ -75,6 +73,16 @@ public class WorkspaceController {
             WorkSpace workSpace = workspaceService.getOfficialWorkspace(workspaceId);
             return new ResponseEntity<>(workSpace, HttpStatus.OK);
         } catch (WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("send-request-token/{workspaceId}")
+    public ResponseEntity<?> sendRequestToken(@RequestParam("email") String email, @PathVariable Long workspaceId){
+        try {
+            workspaceService.sendWorkspaceRequestToken(workspaceId, email);
+            return new ResponseEntity<>(new ApiResponse(true, "Request token send to member", HttpStatus.OK), HttpStatus.OK);
+        } catch (WorkspaceException | UserException  e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }

@@ -15,24 +15,16 @@ import com.trailiva.web.payload.response.TokenResponse;
 import com.trailiva.web.payload.response.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.Request;
 import org.modelmapper.ModelMapper;
-import org.springframework.boot.autoconfigure.cassandra.CassandraProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.RequestContextUtils;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController

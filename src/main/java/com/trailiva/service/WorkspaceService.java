@@ -30,4 +30,6 @@ public interface WorkspaceService {
     void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
 
     void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
+
+    void sendWorkspaceRequestToken(Long workspaceId, String email) throws UserException, WorkspaceException;
 }

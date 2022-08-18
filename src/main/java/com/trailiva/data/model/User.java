@@ -66,4 +66,11 @@ public class User {
     private LocalDateTime updatedDated;
 
 
+    public void addMember(User user){
+        officialWorkspace.getMembers().add(user);
+    }
+
+    public void addModerator(User user){
+        officialWorkspace.getModerators().add(user);
+    }
 }
