@@ -61,7 +61,7 @@ public class WorkspaceRequestToken {
     }
 
     private LocalDateTime calculateExpiryDate(long expiryTimeInHours){
-        return LocalDateTime.now().plusHours(expiryTimeInHours);
+        return LocalDateTime.now().plusMinutes(expiryTimeInHours);
     }
 
     public void updateWorkspaceRequestToken(String code){

@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -113,6 +115,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     @Override
     public void addMemberToWorkspace(String requestToken) throws TokenException {
         WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
+        if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
+
         User workspaceOwner = token.getWorkspaceOwner();
         workspaceOwner.getOfficialWorkspace().getMembers().add(token.getUser());
         userRepository.save(workspaceOwner);
@@ -238,5 +242,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     private User getAUserByUserId(Long id) throws UserException {
         return userRepository.findById(id).orElseThrow(() -> new UserException("User not found"));
+    }
+
+    private boolean isValidToken(LocalDateTime expiryDate) {
+        long minutes = ChronoUnit.MINUTES.between(LocalDateTime.now(), expiryDate);
+        return minutes <= 0;
     }
 }
