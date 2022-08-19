@@ -103,8 +103,8 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.save(user);
     }
 
-    private boolean isValidToken(Token vCode) {
-        long minutes = ChronoUnit.MINUTES.between(LocalDateTime.now(), vCode.getExpiryDate());
+    private boolean isValidToken(LocalDateTime expiryDate) {
+        long minutes = ChronoUnit.MINUTES.between(LocalDateTime.now(), expiryDate);
         return minutes <= 0;
     }
 
@@ -112,7 +112,7 @@ public class AuthServiceImpl implements AuthService {
     public void confirmVerificationToken(String verificationToken) throws TokenException {
         Token vToken = getToken(verificationToken, VERIFICATION.toString());
 
-        if (isValidToken(vToken))
+        if (isValidToken(vToken.getExpiryDate()))
             throw new TokenException("Token has expired");
 
         User user = vToken.getUser();
@@ -158,7 +158,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public boolean validatePasswordResetToken(String token) throws TokenException {
         final Token passToken = getToken(token, PASSWORD_RESET.toString());
-        if (isValidToken(passToken)) throw new TokenException("Token has expired");
+        if (isValidToken(passToken.getExpiryDate())) throw new TokenException("Token has expired");
         return true;
     }
 
