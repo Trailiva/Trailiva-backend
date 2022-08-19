@@ -31,13 +31,13 @@ import static com.trailiva.util.Helper.isNullOrEmpty;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final  ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
     private final CloudinaryService cloudinaryService;
     private final PasswordEncoder passwordEncoder;
-
+    private final EmailService emailService;
 
     @Override
     public User getUserProfile(Long userId) throws UserException {
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService{
         String url = user.getImageUrl();
         String publicId = user.getPublicId();
 
-        if(!Objects.isNull(url) && !Objects.isNull(publicId))
+        if (!Objects.isNull(url) && !Objects.isNull(publicId))
             cloudinaryService.deleteImage(publicId, userId);
 
         user.setImageUrl(imageProperties.getUrl());
@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void deleteAUser(String email) throws UserException {
-        User user =  userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found with email " + email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found with email " + email));
         userRepository.delete(user);
     }
 

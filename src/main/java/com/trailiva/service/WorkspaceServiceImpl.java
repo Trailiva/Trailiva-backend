@@ -36,6 +36,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final RoleRepository roleRepository;
     private final OfficialWorkspaceRepository officialWorkspaceRepository;
     private final WorkspaceRequestTokenRepository tokenRepository;
+    private final EmailService emailService;
 
     public WorkspaceServiceImpl(
             ModelMapper modelMapper,
@@ -43,13 +44,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             UserRepository userRepository,
             RoleRepository roleRepository,
             OfficialWorkspaceRepository officialWorkspaceRepository,
-            WorkspaceRequestTokenRepository tokenRepository) {
+            WorkspaceRequestTokenRepository tokenRepository, EmailService emailService) {
         this.modelMapper = modelMapper;
         this.personalWorkspaceRepository = personalWorkspaceRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.officialWorkspaceRepository = officialWorkspaceRepository;
         this.tokenRepository = tokenRepository;
+        this.emailService = emailService;
     }
 
 
@@ -101,14 +103,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         }
     }
 
-    private void sendWorkspaceRequestToken(Long userId, String email) throws UserException {
-        User user = getAUserByEmail(email);
-        String token = UUID.randomUUID().toString();
-        User workspaceOwner = getAUserByUserId(userId);
-        WorkspaceRequestToken requestToken = new WorkspaceRequestToken(token, user, WORKSPACE_REQUEST.toString(),
-                workspaceOwner);
-        tokenRepository.save(requestToken);
-    }
+
 
     @Override
     public void addMemberToWorkspace(String requestToken) throws TokenException, UserException {
@@ -247,5 +242,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private boolean isValidToken(LocalDateTime expiryDate) {
         long minutes = ChronoUnit.MINUTES.between(LocalDateTime.now(), expiryDate);
         return minutes <= 0;
+    }
+
+    private void sendWorkspaceRequestToken(Long userId, String email) throws UserException {
+        User user = getAUserByEmail(email);
+        String token = UUID.randomUUID().toString();
+        User workspaceOwner = getAUserByUserId(userId);
+        WorkspaceRequestToken requestToken = new WorkspaceRequestToken(token, user, WORKSPACE_REQUEST.toString(),
+                workspaceOwner);
+        tokenRepository.save(requestToken);
+        emailService.sendWorkspaceRequestTokenEmail(email, requestToken.getToken());
     }
 }
