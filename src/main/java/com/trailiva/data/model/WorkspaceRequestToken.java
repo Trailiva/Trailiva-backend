@@ -1,6 +1,7 @@
 package com.trailiva.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,11 +13,12 @@ import java.time.LocalDateTime;
 
 import static com.trailiva.data.model.TokenType.REFRESH;
 
-@Setter
 @Getter
+@Setter
+@AllArgsConstructor
 @Entity
 @NoArgsConstructor
-public class Token {
+public class WorkspaceRequestToken {
     private final static long EXPIRATION = 1L;
 
     @Id
@@ -25,8 +27,14 @@ public class Token {
     private String token;
 
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
-    @JoinColumn(nullable = false, name = "user_id", foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
+    @JoinColumn(nullable = false, name = "user_id",
+            foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
     private User user;
+
+    @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
+    @JoinColumn(nullable = false, name = "workspace_owner_id",
+            foreignKey = @ForeignKey(name = "FK_VERIFY_WORKSPACE_OWNER"))
+    private User workspaceOwner;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -40,24 +48,29 @@ public class Token {
 
     private String tokenType;
 
-    public Token(String token, User user, String tokenType) {
+    public WorkspaceRequestToken(String token, User user, String tokenType) {
         this.token = token;
         this.user = user;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
+    public WorkspaceRequestToken(String token, User user, String tokenType, User workspaceOwner) {
+        this(token, user, tokenType);
+        this.workspaceOwner = workspaceOwner;
+    }
+
     private LocalDateTime calculateExpiryDate(long expiryTimeInHours){
         return LocalDateTime.now().plusHours(expiryTimeInHours);
     }
 
-    public void updateToken(String code){
+    public void updateWorkspaceRequestToken(String code){
         this.token = code;
         this.tokenType = REFRESH.toString();
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public void updateToken(String code, String tokenType){
+    public void updateWorkspaceRequestToken(String code, String tokenType){
         this.token = code;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);

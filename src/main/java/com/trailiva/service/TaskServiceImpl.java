@@ -1,70 +1,77 @@
 package com.trailiva.service;
 
-import com.trailiva.data.model.Priority;
-import com.trailiva.data.model.Tab;
-import com.trailiva.data.model.Task;
-import com.trailiva.data.model.WorkSpace;
+import com.trailiva.data.model.*;
+import com.trailiva.data.repository.ProjectRepository;
 import com.trailiva.data.repository.TaskRepository;
-import com.trailiva.data.repository.WorkspaceRepository;
+import com.trailiva.data.repository.PersonalWorkspaceRepository;
+import com.trailiva.specification.TaskSpecifications;
+import com.trailiva.util.Helper;
+import com.trailiva.web.exceptions.BadRequestException;
+import com.trailiva.web.exceptions.ProjectException;
 import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.TaskRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.trailiva.data.model.Tab.PENDING;
 
 @Service
 @Slf4j
-
 public class TaskServiceImpl implements TaskService{
 
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private WorkspaceRepository workspaceRepository;
-
-    @Autowired
-    private ModelMapper modelMapper;
+    private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
+    private final ModelMapper modelMapper;
 
     private static int taskReferenceId = 1;
 
+    public TaskServiceImpl(TaskRepository taskRepository,
+                           ProjectRepository projectRepository,
+                           ModelMapper modelMapper) {
+        this.taskRepository = taskRepository;
+        this.projectRepository = projectRepository;
+        this.modelMapper = modelMapper;
+    }
+
     @Override
     @Transactional
-    public Task createTask(TaskRequest request, Long workSpaceId) throws TaskException, WorkspaceException {
-        WorkSpace workSpace = workspaceRepository.findById(workSpaceId).orElseThrow(()-> new WorkspaceException("workspace not found"));
+    public Task createTask(TaskRequest request, Long projectId) throws TaskException, ProjectException {
+        Project project = projectRepository.findById(projectId).orElseThrow(()-> new ProjectException("project not found"));
         boolean existByName = false;
 
 
-        if (workSpace.getTasks().size() > 0)
-            existByName = workSpace.getTasks().stream().anyMatch(task -> task.getName().equals(request.getName()));
+        if (project.getTasks().size() > 0)
+            existByName = project.getTasks().stream().anyMatch(task -> task.getName().equals(request.getName()));
 
         if (existByName)  throw new TaskException("This task already exist");
 
         Task newTask = modelMapper.map(request, Task.class);
-        newTask.setPriority(Priority.fetchPriority(request.getPriority()));
-        newTask.setTab(PENDING);
+        newTask.setPriority(Priority.fetchPriority(request.getPriority()).toString());
+        newTask.setTab(PENDING.toString());
         String formattedId = String.format("%02d", taskReferenceId);
         taskReferenceId++;
-        newTask.setTaskReference(workSpace.getReferenceName().concat("-").concat(formattedId));
+        newTask.setTaskReference(project.getReferenceName().concat("-").concat(formattedId));
 
         Task task = taskRepository.save(newTask);
-        workSpace.getTasks().add(newTask);
-        workspaceRepository.save(workSpace);
+        project.getTasks().add(newTask);
+        projectRepository.save(project);
         return task;
     }
 
     @Override
+    @Transactional
     public Task updateTask(TaskRequest taskRequest, Long id) throws TaskException {
         Task taskToUpdate = taskRepository.findById(id).orElseThrow(()-> new TaskException("Task does not exist"));
         modelMapper.map(taskRequest, taskToUpdate);
@@ -72,6 +79,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
+    @Transactional
     public void deleteTask(Long id) throws TaskException {
         Task taskToDelete = taskRepository.findById(id).orElseThrow(
                 ()-> new TaskException("Task not found"));
@@ -80,61 +88,73 @@ public class TaskServiceImpl implements TaskService{
 
     @Override
     @Transactional
-    public List<Task> getTasksByWorkspaceId(Long workspaceId) throws WorkspaceException {
-        WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
-                ()-> new WorkspaceException("No workspace found"));
-        return workspace.getTasks();
+    public List<Task> getTasksByWorkspaceId(Long projectId) throws ProjectException {
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                ()-> new ProjectException("Project not found"));
+        return project.getTasks();
     }
 
     @Override
-    public Task getTaskDetail(Long workspaceId, Long taskId)throws WorkspaceException {
-        WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
-                ()-> new WorkspaceException("No workspace found"));
-        Optional<Task> task = workspace.getTasks().stream().filter(data -> Objects.equals(data.getId(), taskId)).findFirst();
+    @Transactional
+    public Task getTaskDetail(Long projectId, Long taskId) throws ProjectException {
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                ()-> new ProjectException("Project not found"));
+        Optional<Task> task = project.getTasks().stream().filter(data -> Objects.equals(data.getId(), taskId)).findFirst();
         return task.orElse(null);
     }
 
     @Override
+    @Transactional
     public Task updateTaskTag(Long taskId, String taskTab) throws TaskException {
         Task taskToUpdate = taskRepository.findById(taskId).orElseThrow(
                 ()-> new TaskException("Task not found"));
-        taskToUpdate.setTab(Tab.tabMapper(taskTab));
+        taskToUpdate.setTab(Tab.tabMapper(taskTab).toString());
         return taskRepository.save(taskToUpdate);
     }
 
     @Override
     @Transactional
-    public List<Task> filterTaskByPriority(Long workspaceId, Priority taskPriority) throws WorkspaceException {
-        WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
-                ()-> new WorkspaceException("No workspace found"));
-        return workspace.getTasks().stream()
-                .filter(task -> task.getPriority() == taskPriority)
+    public List<Task> filterTaskByPriority(Long projectId, Priority taskPriority) throws ProjectException {
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                ()-> new ProjectException("Project not found"));
+        return project.getTasks().stream()
+                .filter(task -> task.getPriority().equals( taskPriority.toString()))
                 .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
-    public List<Task> filterTaskByTab(Long workspaceId, Tab taskTab) throws WorkspaceException {
-        WorkSpace workspace = workspaceRepository.findById(workspaceId).orElseThrow(
-                ()-> new WorkspaceException("No workspace found"));
-        return workspace.getTasks().stream()
-                .filter(task -> task.getTab() == taskTab)
+    @Transactional
+    public List<Task> filterTaskByTab(Long projectId, Tab taskTab) throws  ProjectException {
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                ()-> new ProjectException("Project not found"));
+        return project.getTasks().stream()
+                .filter(task -> task.getTab().equals(taskTab.toString()))
                 .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
+    @Transactional
     public List<Task> getDueTasks(LocalDate time) {
         return  taskRepository.findByDueDate(time);
     }
 
     @Override
-    public Task searchTaskByName(String taskName) throws TaskException {
-        return taskRepository.findByName(taskName).orElseThrow(()-> new TaskException("No task with the task name found"));
-    }
+    public Map<String, Object> searchTaskByNameAndDescription(Map<String, String> params, int page, int size) throws BadRequestException {
+        Helper.validatePageNumberAndSize(page, size);
+        Specification<Task> searchByName = TaskSpecifications.withTaskName(params.get("name"));
+        Specification<Task> searchByDesc = TaskSpecifications.withTaskDescription(params.get("description"));
 
-    @Override
-    public Task searchTaskByDescription(String description) {
-        return null;
-    }
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        Page<Task> result = taskRepository.findAll(
+                Specification.where(searchByName)
+                        .and(searchByDesc),
+                pageable
+        );
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", result.getContent());
+        response.put("recordsTotal", result.getTotalElements());
+        response.put("recordsFiltered", result.getTotalElements());
+        return response;    }
 
 
 }

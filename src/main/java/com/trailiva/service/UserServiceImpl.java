@@ -2,20 +2,31 @@ package com.trailiva.service;
 
 import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
+import com.trailiva.specification.UserSpecifications;
+import com.trailiva.util.Helper;
 import com.trailiva.web.exceptions.AuthException;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
-import com.trailiva.web.payload.request.UpdatePasswordRequest;
+import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.response.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import static com.trailiva.util.Helper.isNullOrEmpty;
 
 @Service
 @AllArgsConstructor
@@ -29,11 +40,11 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public com.trailiva.data.model.User getUserProfile(Long userId) throws UserException {
+    public User getUserProfile(Long userId) throws UserException {
         return getAUser(userId);
     }
 
-    private com.trailiva.data.model.User getAUser(Long userId) throws UserException {
+    private User getAUser(Long userId) throws UserException {
         return userRepository.findById(userId).orElseThrow(() -> new UserException("User not found"));
     }
 
@@ -45,7 +56,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void saveImageProperties(ImageRequest imageProperties, Long userId) throws UserException, IOException {
-        com.trailiva.data.model.User user = getAUser(userId);
+        User user = getAUser(userId);
         String url = user.getImageUrl();
         String publicId = user.getPublicId();
 
@@ -69,8 +80,10 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public void updatePassword(UpdatePasswordRequest request, String email) throws AuthException {
-       User userToChangePassword = userRepository.findByEmail(email)
+    public void updatePassword(PasswordRequest request, String email) throws AuthException {
+        if (isNullOrEmpty(request.getOldPassword())) throw new AuthException("Password must cannot be blank");
+
+        User userToChangePassword = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("No user found with email" + email));
 
         boolean passwordMatch = passwordEncoder.matches(request.getOldPassword(), userToChangePassword.getPassword());
@@ -79,6 +92,23 @@ public class UserServiceImpl implements UserService{
         }
         userToChangePassword.setPassword(passwordEncoder.encode(request.getPassword()));
         saveAUser(userToChangePassword);
+    }
+
+    @Override
+    public Map<String, Object> SearchUserByName(Map<String, String> params, int page, int size) throws BadRequestException {
+        Helper.validatePageNumberAndSize(page, size);
+        Specification<User> withFirstName = UserSpecifications.withFirstName(params.get("firstName"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "firstName"));
+        Page<User> result = userRepository.findAll(
+                Specification.where(withFirstName),
+                pageable
+        );
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", result.getContent());
+        response.put("recordsTotal", result.getTotalElements());
+        response.put("recordsFiltered", result.getTotalElements());
+        return response;
     }
 
 }

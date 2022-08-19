@@ -3,6 +3,8 @@ package com.trailiva.data.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.hateoas.RepresentationModel;
@@ -11,12 +13,15 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @Entity
 @Table(name = "user_data")
-public class User extends RepresentationModel<User> {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -42,12 +47,15 @@ public class User extends RepresentationModel<User> {
     @JsonIgnore
     private List<Role> roles = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_workspaces",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "workspace_id"))
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "personal_workspace_id")
     @JsonIgnore
-    private List<WorkSpace> workspaces = new ArrayList<>();
+    private PersonalWorkspace personalWorkspace;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "official_workspace_id")
+    @JsonIgnore
+    private  OfficialWorkspace officialWorkspace;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -57,7 +65,12 @@ public class User extends RepresentationModel<User> {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDated;
 
-    public void addWorkSpace(WorkSpace workSpace) {
-        workspaces.add(workSpace);
+
+    public void addMember(User user){
+        officialWorkspace.getMembers().add(user);
+    }
+
+    public void addModerator(User user){
+        officialWorkspace.getModerators().add(user);
     }
 }

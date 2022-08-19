@@ -6,11 +6,12 @@ import com.trailiva.security.CurrentUser;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.CloudinaryService;
 import com.trailiva.service.UserService;
+import com.trailiva.util.AppConstants;
 import com.trailiva.web.exceptions.AuthException;
-import com.trailiva.web.exceptions.TokenException;
+import com.trailiva.web.exceptions.BadRequestException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.payload.request.ImageRequest;
-import com.trailiva.web.payload.request.UpdatePasswordRequest;
+import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Link;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -46,21 +48,9 @@ public class UserController {
     public ResponseEntity<?> getUserProfile(@CurrentUser UserPrincipal currentUser) {
         try {
             User userProfile = userService.getUserProfile(currentUser.getId());
-            Link link = linkTo(UserController.class)
-                    .slash(userProfile.getUserId()).withSelfRel();
-            userProfile.add(link);
-
-
-            ResponseEntity<WorkSpace> methodLinkBuilder = (ResponseEntity<WorkSpace>) methodOn(WorkspaceController.class)
-                    .getWorkspacesByUserId(currentUser);
-
-            Link workspaceLink = linkTo(methodLinkBuilder).withRel("user-workspace");
-
-            userProfile.add(workspaceLink);
-
             return new ResponseEntity<>(userProfile, HttpStatus.OK);
         } catch (UserException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -69,9 +59,9 @@ public class UserController {
     public ResponseEntity<?> uploadProfileData(@CurrentUser UserPrincipal currentUser, @RequestBody ImageRequest imageProperties) {
         try {
             userService.saveImageProperties(imageProperties, currentUser.getId());
-            return ResponseEntity.ok(new ApiResponse<>(true, "profile image is successfully uploaded", HttpStatus.OK));
+            return ResponseEntity.ok(new ApiResponse(true, "profile image is successfully uploaded", HttpStatus.OK));
         } catch (UserException | IOException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -82,43 +72,56 @@ public class UserController {
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("file") MultipartFile file, @CurrentUser UserPrincipal currentUser) {
         try {
             String url = cloudinaryService.uploadImage(file, currentUser.getId());
-            return ResponseEntity.ok(new ApiResponse<>(true, "file is successfully uploaded", url, HttpStatus.OK));
+            return ResponseEntity.ok(new ApiResponse(true, "file is successfully uploaded", url));
         } catch (IOException | UserException exception) {
-            return new ResponseEntity<>(new ApiResponse<>(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/profile/delete")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> deleteUploadedImage(@CurrentUser UserPrincipal currentUser,  @RequestParam("public_id") String publicId) {
+    public ResponseEntity<?> deleteUploadedImage(@CurrentUser UserPrincipal currentUser, @RequestParam("public_id") String publicId) {
         try {
             cloudinaryService.deleteImage(publicId, currentUser.getId());
-            return ResponseEntity.ok(new ApiResponse<>(true, "image deleted successfully", HttpStatus.OK));
+            return ResponseEntity.ok(new ApiResponse(true, "image deleted successfully", HttpStatus.OK));
         } catch (IOException | UserException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
-   @PostMapping("/delete")
+    @PostMapping("/delete")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deleteAUser(@RequestParam("email") String email){
+    public ResponseEntity<?> deleteAUser(@RequestParam("email") String email) {
         try {
             userService.deleteAUser(email);
-            return ResponseEntity.ok(new ApiResponse<>(true, "user deleted successfully", HttpStatus.OK));
+            return ResponseEntity.ok(new ApiResponse(true, "user deleted successfully", HttpStatus.OK));
         } catch (UserException e) {
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/password/update")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> updatePassword(@CurrentUser UserPrincipal currentUser, @Valid @RequestBody UpdatePasswordRequest request) {
+    public ResponseEntity<?> updatePassword(@CurrentUser UserPrincipal currentUser, @Valid @RequestBody PasswordRequest request) {
         try {
             userService.updatePassword(request, currentUser.getEmail());
-            return new ResponseEntity<>(new ApiResponse<>(true, "Password updated successful", HttpStatus.OK), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "Password updated successful", HttpStatus.OK), HttpStatus.OK);
         } catch (AuthException e) {
 
-            return new ResponseEntity<>(new ApiResponse<>(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/filter")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> updatePassword(@RequestParam Map<String, String> params,
+                                            @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                            @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+        try {
+            Map<String, Object> response = userService.SearchUserByName(params, page, size);
+            return new ResponseEntity<>(new ApiResponse(true, "Data successfully filtered", response), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 }

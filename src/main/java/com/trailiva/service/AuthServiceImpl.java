@@ -1,6 +1,7 @@
 package com.trailiva.service;
 
 import com.trailiva.data.model.Token;
+import com.trailiva.data.model.TokenType;
 import com.trailiva.data.model.User;
 import com.trailiva.data.repository.RoleRepository;
 import com.trailiva.data.repository.TokenRepository;
@@ -30,6 +31,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.trailiva.data.model.TokenType.PASSWORD_RESET;
+import static com.trailiva.data.model.TokenType.VERIFICATION;
+import static com.trailiva.util.Helper.isNullOrEmpty;
 
 
 @Service
@@ -107,7 +110,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void confirmVerificationToken(String verificationToken) throws TokenException {
-        Token vToken = getToken(verificationToken);
+        Token vToken = getToken(verificationToken, VERIFICATION.toString());
 
         if (isValidToken(vToken))
             throw new TokenException("Token has expired");
@@ -120,8 +123,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resendVerificationToken(String verificationToken) throws TokenException {
-        Token token = generateNewVerificationToken(verificationToken);
+        Token token = generateNewToken(verificationToken, VERIFICATION.toString());
         sendVerificationToken(token.getUser());
+    }
+
+    @Override
+    public void resendResetPasswordToken(String verificationToken) throws TokenException {
+        generateNewToken(verificationToken, PASSWORD_RESET.toString());
     }
 
 
@@ -131,10 +139,10 @@ public class AuthServiceImpl implements AuthService {
         return tokenRepository.save(verificationToken);
     }
 
-    @Override
-    public Token generateNewVerificationToken(String verificationToken) throws TokenException {
-        Token vCode = getToken(verificationToken);
-        vCode.updateToken(UUID.randomUUID().toString());
+
+    private Token generateNewToken(String token, String tokenType) throws TokenException {
+        Token vCode = getToken(token, tokenType);
+        vCode.updateToken(UUID.randomUUID().toString(), tokenType);
         return tokenRepository.save(vCode);
     }
 
@@ -143,39 +151,29 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("No user found with email " + email));
         String token = UUID.randomUUID().toString();
-        Token createdToken =  createVerificationToken(user, token, PASSWORD_RESET.toString());
+        Token createdToken = createVerificationToken(user, token, PASSWORD_RESET.toString());
         return modelMapper.map(createdToken, TokenResponse.class);
     }
 
     @Override
     public boolean validatePasswordResetToken(String token) throws TokenException {
-        final Token passToken = tokenRepository.findByToken(token).orElseThrow(()-> new TokenException("Token is invalid"));
+        final Token passToken = getToken(token, PASSWORD_RESET.toString());
         if (isValidToken(passToken)) throw new TokenException("Token has expired");
         return true;
     }
 
 
-    private Token getToken(String token) throws TokenException {
-        return tokenRepository.findByToken(token)
+    private Token getToken(String token, String tokenType) throws TokenException {
+        return tokenRepository.findByTokenAndTokenType(token, tokenType)
                 .orElseThrow(() -> new TokenException("Invalid token"));
     }
 
     @Override
-    public void saveResetPassword(PasswordRequest request) throws AuthException, TokenException {
-        boolean isValidToken = validatePasswordResetToken(request.getToken());
-        Token pToken = getToken(request.getToken());
-            if (isValidToken)
-                throw new TokenException("Token has expired");
-
-        String oldPassword = request.getOldPassword();
-        String newPassword = request.getPassword();
+    public void saveResetPassword(PasswordRequest request) throws TokenException, AuthException {
+        if (isNullOrEmpty(request.getToken())) throw new AuthException("Password must cannot be blank");
+        Token pToken = getToken(request.getToken(), PASSWORD_RESET.toString());
         User userToChangePassword = pToken.getUser();
-
-        boolean passwordMatch = passwordEncoder.matches(oldPassword, userToChangePassword.getPassword());
-        if (!passwordMatch) {
-            throw new AuthException("Passwords do not match");
-        }
-        userToChangePassword.setPassword(passwordEncoder.encode(newPassword));
+        userToChangePassword.setPassword(passwordEncoder.encode(request.getPassword()));
         saveAUser(userToChangePassword);
     }
 
