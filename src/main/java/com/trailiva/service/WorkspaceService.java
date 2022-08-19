@@ -24,15 +24,14 @@ public interface WorkspaceService {
 
     WorkSpace createWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException;
 
-    void addMemberToOfficialWorkspace(List<String> memberEmail, Long userId) throws UserException, WorkspaceException, BadRequestException;
+    void addMemberToOfficialWorkspace(List<String> memberEmail, Long userId) throws UserException;
 
-    void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException, WorkspaceException;
+    void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException;
 
-    void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
+    void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException;
 
-    void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
+    void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException;
 
-    void sendWorkspaceRequestToken(Long userId, String email) throws UserException;
-
-    void addMemberToWorkspace(String requestToken) throws TokenException;
+    void addMemberToWorkspace(String requestToken) throws TokenException, UserException;
+    void addModeratorToWorkspace(String requestToken) throws TokenException, UserException;
 }

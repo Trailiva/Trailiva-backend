@@ -70,10 +70,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public void addMemberToOfficialWorkspace(List<String> memberEmails, Long userId) throws UserException, WorkspaceException {
+    public void addMemberToOfficialWorkspace(List<String> memberEmails, Long userId) throws UserException {
         if (!memberEmails.isEmpty()) {
             for (String email : memberEmails) {
-                onboardMember(userId, email);
+                sendWorkspaceRequestToken(userId, email);
             }
         }
 
@@ -83,10 +83,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     public void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException {
         if (!moderatorEmail.isEmpty()) {
             for (String email : moderatorEmail) {
-                onboardModerator(userId, email);
+                sendWorkspaceRequestToken(userId, email);
             }
         }
-
     }
 
 
@@ -97,13 +96,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         String[] nextLine;
         while ((nextLine = reader.readNext()) != null) {
             for (String email : nextLine) {
-                onboardMember(userId, email);
+                sendWorkspaceRequestToken(userId, email);
             }
         }
     }
 
-    @Override
-    public void sendWorkspaceRequestToken(Long userId, String email) throws UserException {
+    private void sendWorkspaceRequestToken(Long userId, String email) throws UserException {
         User user = getAUserByEmail(email);
         String token = UUID.randomUUID().toString();
         User workspaceOwner = getAUserByUserId(userId);
@@ -113,13 +111,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public void addMemberToWorkspace(String requestToken) throws TokenException {
+    public void addMemberToWorkspace(String requestToken) throws TokenException, UserException {
         WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
         if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
+        onboardMember(token.getWorkspaceOwner(), token.getUser());
+        tokenRepository.delete(token);
+    }
 
-        User workspaceOwner = token.getWorkspaceOwner();
-        workspaceOwner.getOfficialWorkspace().getMembers().add(token.getUser());
-        userRepository.save(workspaceOwner);
+    @Override
+    public void addModeratorToWorkspace(String requestToken) throws TokenException, UserException {
+        WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
+        if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
+        onboardModerator(token.getWorkspaceOwner(), token.getUser());
+        tokenRepository.delete(token);
     }
 
     private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
@@ -153,7 +157,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         String[] nextLine;
         while ((nextLine = reader.readNext()) != null) {
             for (String email : nextLine) {
-                onboardModerator(userId, email);
+                sendWorkspaceRequestToken(userId, email);
             }
         }
     }
@@ -166,26 +170,22 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
 
-    private void onboardMember(Long userId, String email) throws UserException {
-        User user = getAUserByEmail(email);
-        User workspaceOwner = getAUserByUserId(userId);
-        if (userAlreadyExist(workspaceOwner.getOfficialWorkspace().getMembers(),
-                workspaceOwner.getOfficialWorkspace().getModerators(), email, workspaceOwner.getEmail())) {
-            throw new UserException("Member with email " + email + " already added to this workspace");
+    private void onboardMember(User workspaceOwner, User member) throws UserException {
+        if (userAlreadyExistInWorkspace(workspaceOwner.getOfficialWorkspace().getMembers(),
+                workspaceOwner.getOfficialWorkspace().getModerators(), member.getEmail(), workspaceOwner.getEmail())) {
+            throw new UserException("Member with email " + member.getEmail() + " already added to this workspace");
         }
-        user.addMember(user);
+        member.addMember(member);
         userRepository.save(workspaceOwner);
     }
 
-    private void onboardModerator(Long userId, String email) throws UserException {
-        User user = getAUserByEmail(email);
-        User workspaceOwner = getAUserByUserId(userId);
-        if (userAlreadyExist(workspaceOwner.getOfficialWorkspace().getMembers(),
-                workspaceOwner.getOfficialWorkspace().getModerators(), email, workspaceOwner.getEmail())) {
-            throw new UserException("Moderator with email " + email + " already added to this workspace");
+    private void onboardModerator(User workspaceOwner, User member) throws UserException {
+        if (userAlreadyExistInWorkspace(workspaceOwner.getOfficialWorkspace().getMembers(),
+                workspaceOwner.getOfficialWorkspace().getModerators(), member.getEmail(), workspaceOwner.getEmail())) {
+            throw new UserException("Moderator with email " + member.getEmail() + " already added to this workspace");
         }
-        user.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
-        workspaceOwner.addModerator(user);
+        member.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
+        workspaceOwner.addModerator(member);
         userRepository.save(workspaceOwner);
     }
 
@@ -229,7 +229,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return convFile;
     }
 
-    private boolean userAlreadyExist(Set<User> members, Set<User> moderators, String email, String ownerEmail) {
+    private boolean userAlreadyExistInWorkspace(Set<User> members, Set<User> moderators, String email, String ownerEmail) {
         boolean memberExist = members.stream().anyMatch(user -> user.getEmail().equals(email));
         boolean moderatorExist = moderators.stream().anyMatch(user -> user.getEmail().equals(email));
         return memberExist || moderatorExist || ownerEmail.equals(email);

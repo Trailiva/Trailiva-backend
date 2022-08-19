@@ -19,7 +19,7 @@ import static com.trailiva.data.model.TokenType.REFRESH;
 @Entity
 @NoArgsConstructor
 public class WorkspaceRequestToken {
-    private final static long EXPIRATION = 1L;
+    private final static long EXPIRATION = 48L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,7 +61,7 @@ public class WorkspaceRequestToken {
     }
 
     private LocalDateTime calculateExpiryDate(long expiryTimeInHours){
-        return LocalDateTime.now().plusMinutes(expiryTimeInHours);
+        return LocalDateTime.now().plusHours(expiryTimeInHours);
     }
 
     public void updateWorkspaceRequestToken(String code){
