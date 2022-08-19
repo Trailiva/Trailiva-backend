@@ -101,7 +101,7 @@ public class WorkspaceController {
 
 
     @PostMapping("my-workspace/add-member")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+//    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<?> addMember(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {
         try {
             workspaceService.addMemberToOfficialWorkspace(emails, userPrincipal.getId());
@@ -113,7 +113,7 @@ public class WorkspaceController {
     }
 
     @PostMapping("my-workspace/add-moderator")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+//    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<?> addModerator(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {
         try {
            workspaceService.addModeratorToOfficialWorkspace(emails, userPrincipal.getId());
@@ -124,7 +124,7 @@ public class WorkspaceController {
     }
 
     @PostMapping("my-workspace/csv/add-member")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+//    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<?> addMemberFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file")MultipartFile file){
         try {
             if (Helper.hasCSVFormat(file)){
@@ -139,7 +139,7 @@ public class WorkspaceController {
     }
 
     @PostMapping("my-workspace/csv/add-moderator")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+//    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<?> addModeratorFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file")MultipartFile file){
         try {
             if (Helper.hasCSVFormat(file)){

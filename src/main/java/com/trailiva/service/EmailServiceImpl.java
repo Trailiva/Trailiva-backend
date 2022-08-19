@@ -35,7 +35,7 @@ public class EmailServiceImpl implements EmailService{
     public void sendUserVerificationEmail(EmailRequest emailRequest) {
 
         // the sender email should be the same as we used to Create a Single Sender Verification
-        Email from = new Email("ohida2001@gmail.com");
+        Email from = new Email("mongodbms@gmail.com");
         Email to = new Email(emailRequest.getEmail());
         Mail mail = new Mail();
         // we create an object of our static class feel free to change the class on it's own file
@@ -51,6 +51,43 @@ public class EmailServiceImpl implements EmailService{
         personalization.addDynamicTemplateData("first_name", emailRequest.getFirstName());
         personalization.addDynamicTemplateData("last_name", emailRequest.getLastName());
         personalization.addDynamicTemplateData("token", emailRequest.getVerificationToken());
+
+        mail.addPersonalization(personalization);
+        mail.setTemplateId(API_ID);
+        // this is the api key
+        SendGrid sg = new SendGrid(API_KEY);
+        Request request = new Request();
+
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            log.info(response.getBody());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void sendWorkspaceRequestTokenEmail(String recipient, String token) {
+
+        // the sender email should be the same as we used to Create a Single Sender Verification
+        Email from = new Email("mongodbms@gmail.com");
+        Email to = new Email(recipient);
+        Mail mail = new Mail();
+        // we create an object of our static class feel free to change the class on it's own file
+        // I try to keep every think simple
+
+        // we create an object of our static class feel free to change the class on it's own file
+        // I try to keep every think simple
+        DynamicTemplatePersonalization personalization = new DynamicTemplatePersonalization();
+        personalization.addTo(to);
+        mail.setFrom(from);
+
+        // This is the first_name variable that we created on the template
+        personalization.addDynamicTemplateData("workspace_request_token", token);
+
 
         mail.addPersonalization(personalization);
         mail.setTemplateId(API_ID);
