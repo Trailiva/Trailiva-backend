@@ -27,12 +27,14 @@ public class WorkspaceRequestToken {
     private String token;
 
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
-    @JoinColumn(nullable = false, name = "user_id", foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
+    @JoinColumn(nullable = false, name = "user_id",
+            foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
     private User user;
 
-    @OneToOne(fetch = FetchType.EAGER, targetEntity = OfficialWorkspace.class)
-    @JoinColumn(nullable = false, name = "official_workspace_id", foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
-    private OfficialWorkspace officialWorkspace;
+    @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
+    @JoinColumn(nullable = false, name = "workspace_owner_id",
+            foreignKey = @ForeignKey(name = "FK_VERIFY_WORKSPACE_OWNER"))
+    private User workspaceOwner;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -53,9 +55,9 @@ public class WorkspaceRequestToken {
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public WorkspaceRequestToken(String token, User user, String tokenType, OfficialWorkspace workspace) {
+    public WorkspaceRequestToken(String token, User user, String tokenType, User workspaceOwner) {
         this(token, user, tokenType);
-        this.officialWorkspace = workspace;
+        this.workspaceOwner = workspaceOwner;
     }
 
     private LocalDateTime calculateExpiryDate(long expiryTimeInHours){

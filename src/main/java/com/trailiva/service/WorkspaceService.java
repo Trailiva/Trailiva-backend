@@ -4,6 +4,7 @@ import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.OfficialWorkspace;
 import com.trailiva.data.model.WorkSpace;
 import com.trailiva.web.exceptions.BadRequestException;
+import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.WorkspaceRequest;
@@ -31,5 +32,7 @@ public interface WorkspaceService {
 
     void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
 
-    void sendWorkspaceRequestToken(Long workspaceId, String email) throws UserException, WorkspaceException;
+    void sendWorkspaceRequestToken(Long userId, String email) throws UserException;
+
+    void addMemberToWorkspace(String requestToken) throws TokenException;
 }

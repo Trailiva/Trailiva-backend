@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.*;
 import com.trailiva.data.repository.*;
+import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.WorkspaceRequest;
@@ -100,12 +101,26 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public void sendWorkspaceRequestToken(Long workspaceId, String email) throws UserException, WorkspaceException {
+    public void sendWorkspaceRequestToken(Long userId, String email) throws UserException {
         User user = getAUserByEmail(email);
         String token = UUID.randomUUID().toString();
-        OfficialWorkspace officialWorkspace = getOfficialWorkspace(workspaceId);
-        WorkspaceRequestToken requestToken = new WorkspaceRequestToken(token, user, WORKSPACE_REQUEST.toString(), officialWorkspace);
+        User workspaceOwner = getAUserByUserId(userId);
+        WorkspaceRequestToken requestToken = new WorkspaceRequestToken(token, user, WORKSPACE_REQUEST.toString(),
+                workspaceOwner);
         tokenRepository.save(requestToken);
+    }
+
+    @Override
+    public void addMemberToWorkspace(String requestToken) throws TokenException {
+        WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
+        User workspaceOwner = token.getWorkspaceOwner();
+        workspaceOwner.getOfficialWorkspace().getMembers().add(token.getUser());
+        userRepository.save(workspaceOwner);
+    }
+
+    private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
+        return tokenRepository.findByTokenAndTokenType(token, tokenType)
+                .orElseThrow(() -> new TokenException("Invalid token"));
     }
 
     @Override
