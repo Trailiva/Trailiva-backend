@@ -129,7 +129,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resendResetPasswordToken(String verificationToken) throws TokenException {
-        Token token = generateNewToken(verificationToken, PASSWORD_RESET.toString());
+        generateNewToken(verificationToken, PASSWORD_RESET.toString());
     }
 
 

@@ -7,6 +7,7 @@ import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.WorkspaceService;
 import com.trailiva.util.Helper;
 import com.trailiva.web.exceptions.BadRequestException;
+import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.WorkspaceRequest;
@@ -33,8 +34,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Slf4j
 @RequestMapping("api/v1/trailiva/workspace")
 public class WorkspaceController {
-
-
     private final WorkspaceService workspaceService;
 
     public WorkspaceController(WorkspaceService workspaceService) {
@@ -78,6 +77,27 @@ public class WorkspaceController {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PostMapping("/send-request-token")
+    public ResponseEntity<?> sendRequestToken(@CurrentUser UserPrincipal userPrincipal, @RequestParam("email") String email){
+        try {
+            workspaceService.sendWorkspaceRequestToken(userPrincipal.getId(), email);
+            return new ResponseEntity<>(new ApiResponse(true, "Request token send to member", HttpStatus.OK), HttpStatus.OK);
+        } catch (UserException  e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("my-workspace/add-member/request-token")
+    public ResponseEntity<?> addMember(@RequestParam("requestToken") String requestToken) {
+        try {
+            workspaceService.addMemberToWorkspace(requestToken);
+            return new ResponseEntity<>(new ApiResponse(true, "member are successfully added to workspace", HttpStatus.OK), HttpStatus.OK);
+        } catch (TokenException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
     @PostMapping("my-workspace/add-member")
     public ResponseEntity<?> addMember(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {

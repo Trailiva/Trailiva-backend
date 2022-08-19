@@ -3,14 +3,11 @@ package com.trailiva.service;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.*;
-import com.trailiva.data.repository.OfficialWorkspaceRepository;
-import com.trailiva.data.repository.PersonalWorkspaceRepository;
-import com.trailiva.data.repository.RoleRepository;
-import com.trailiva.data.repository.UserRepository;
+import com.trailiva.data.repository.*;
+import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.WorkspaceRequest;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -23,10 +20,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
+
+import static com.trailiva.data.model.TokenType.WORKSPACE_REQUEST;
 
 @Service
 @Slf4j
-@AllArgsConstructor
 public class WorkspaceServiceImpl implements WorkspaceService {
 
     private final ModelMapper modelMapper;
@@ -34,6 +33,22 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final OfficialWorkspaceRepository officialWorkspaceRepository;
+    private final WorkspaceRequestTokenRepository tokenRepository;
+
+    public WorkspaceServiceImpl(
+            ModelMapper modelMapper,
+            PersonalWorkspaceRepository personalWorkspaceRepository,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            OfficialWorkspaceRepository officialWorkspaceRepository,
+            WorkspaceRequestTokenRepository tokenRepository) {
+        this.modelMapper = modelMapper;
+        this.personalWorkspaceRepository = personalWorkspaceRepository;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.officialWorkspaceRepository = officialWorkspaceRepository;
+        this.tokenRepository = tokenRepository;
+    }
 
 
     @Override
@@ -62,25 +77,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     }
 
-    private void onboardMember(Long userId, String email) throws UserException {
-        User user = getAUserByEmail(email);
-        User workspaceOwner = getAUserByUserId(userId);
-        if (userAlreadyExist(workspaceOwner.getOfficialWorkspace().getMembers(),
-                workspaceOwner.getOfficialWorkspace().getModerators(), email, workspaceOwner.getEmail())) {
-            throw new UserException("Member with email " + email + " already added to this workspace");
-        }
-        workspaceOwner.getOfficialWorkspace().getMembers().add(user);
-        userRepository.save(workspaceOwner);
-    }
-
-    private User getAUserByEmail(String email) throws UserException {
-        return userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found"));
-    }
-
-    private User getAUserByUserId(Long id) throws UserException {
-        return userRepository.findById(id).orElseThrow(() -> new UserException("User not found"));
-    }
-
     @Override
     public void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException {
         if (!moderatorEmail.isEmpty()) {
@@ -91,19 +87,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     }
 
-    private void onboardModerator(Long userId, String email) throws UserException {
-        User user = getAUserByEmail(email);
-        User workspaceOwner = getAUserByUserId(userId);
-        if (userAlreadyExist(workspaceOwner.getOfficialWorkspace().getMembers(),
-                workspaceOwner.getOfficialWorkspace().getModerators(), email, workspaceOwner.getEmail())) {
-            throw new UserException("Moderator with email " + email + " already added to this workspace");
-        }
-        user.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
-        workspaceOwner.getOfficialWorkspace().getModerators().add(user);
-        userRepository.save(workspaceOwner);
-    }
 
-
+    @Override
     public void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException,
             CsvValidationException, UserException {
         CSVReader reader = new CSVReader(new FileReader(convertMultiPartToFile(file)));
@@ -115,6 +100,49 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         }
     }
 
+    @Override
+    public void sendWorkspaceRequestToken(Long userId, String email) throws UserException {
+        User user = getAUserByEmail(email);
+        String token = UUID.randomUUID().toString();
+        User workspaceOwner = getAUserByUserId(userId);
+        WorkspaceRequestToken requestToken = new WorkspaceRequestToken(token, user, WORKSPACE_REQUEST.toString(),
+                workspaceOwner);
+        tokenRepository.save(requestToken);
+    }
+
+    @Override
+    public void addMemberToWorkspace(String requestToken) throws TokenException {
+        WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
+        User workspaceOwner = token.getWorkspaceOwner();
+        workspaceOwner.getOfficialWorkspace().getMembers().add(token.getUser());
+        userRepository.save(workspaceOwner);
+    }
+
+    private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
+        return tokenRepository.findByTokenAndTokenType(token, tokenType)
+                .orElseThrow(() -> new TokenException("Invalid token"));
+    }
+
+    @Override
+    public OfficialWorkspace getOfficialWorkspace(Long workspaceId) throws WorkspaceException {
+        return officialWorkspaceRepository.findById(workspaceId).orElseThrow(
+                () -> new WorkspaceException("Workspace not found"));
+    }
+
+    @Override
+    public OfficialWorkspace getUserOfficialWorkspace(Long userId) throws WorkspaceException {
+        return officialWorkspaceRepository.findById(userId).orElseThrow(
+                () -> new WorkspaceException("Workspace not found"));
+    }
+
+    @Override
+    public WorkSpace getUserPersonalWorkspace(Long userId) throws UserException {
+        User user = getAUserByUserId(userId);
+        return user.getPersonalWorkspace();
+    }
+
+
+    @Override
     public void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException,
             CsvValidationException, UserException {
         CSVReader reader = new CSVReader(new FileReader(convertMultiPartToFile(file)));
@@ -124,6 +152,37 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 onboardModerator(userId, email);
             }
         }
+    }
+
+
+    @Override
+    public WorkSpace getPersonalWorkspace(Long workspaceId) throws WorkspaceException {
+        return personalWorkspaceRepository.findById(workspaceId).orElseThrow(
+                () -> new WorkspaceException("Workspace not found"));
+    }
+
+
+    private void onboardMember(Long userId, String email) throws UserException {
+        User user = getAUserByEmail(email);
+        User workspaceOwner = getAUserByUserId(userId);
+        if (userAlreadyExist(workspaceOwner.getOfficialWorkspace().getMembers(),
+                workspaceOwner.getOfficialWorkspace().getModerators(), email, workspaceOwner.getEmail())) {
+            throw new UserException("Member with email " + email + " already added to this workspace");
+        }
+        user.addMember(user);
+        userRepository.save(workspaceOwner);
+    }
+
+    private void onboardModerator(Long userId, String email) throws UserException {
+        User user = getAUserByEmail(email);
+        User workspaceOwner = getAUserByUserId(userId);
+        if (userAlreadyExist(workspaceOwner.getOfficialWorkspace().getMembers(),
+                workspaceOwner.getOfficialWorkspace().getModerators(), email, workspaceOwner.getEmail())) {
+            throw new UserException("Moderator with email " + email + " already added to this workspace");
+        }
+        user.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
+        workspaceOwner.addModerator(user);
+        userRepository.save(workspaceOwner);
     }
 
 
@@ -142,29 +201,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         user.setOfficialWorkspace(officialWorkspace);
         userRepository.save(user);
         return officialWorkspace;
-    }
-
-    @Override
-    public WorkSpace getUserPersonalWorkspace(Long userId) throws UserException {
-        User user = getAUserByUserId(userId);
-        return user.getPersonalWorkspace();
-    }
-
-    public WorkSpace getPersonalWorkspace(Long workspaceId) throws WorkspaceException {
-        return personalWorkspaceRepository.findById(workspaceId).orElseThrow(
-                () -> new WorkspaceException("Workspace not found"));
-    }
-
-    @Override
-    public OfficialWorkspace getOfficialWorkspace(Long workspaceId) throws WorkspaceException {
-        return officialWorkspaceRepository.findById(workspaceId).orElseThrow(
-                () -> new WorkspaceException("Workspace not found"));
-    }
-
-    @Override
-    public OfficialWorkspace getUserOfficialWorkspace(Long userId) throws WorkspaceException {
-        return officialWorkspaceRepository.findById(userId).orElseThrow(
-                () -> new WorkspaceException("Workspace not found"));
     }
 
 
@@ -193,5 +229,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         boolean memberExist = members.stream().anyMatch(user -> user.getEmail().equals(email));
         boolean moderatorExist = moderators.stream().anyMatch(user -> user.getEmail().equals(email));
         return memberExist || moderatorExist || ownerEmail.equals(email);
+    }
+
+
+    private User getAUserByEmail(String email) throws UserException {
+        return userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found"));
+    }
+
+    private User getAUserByUserId(Long id) throws UserException {
+        return userRepository.findById(id).orElseThrow(() -> new UserException("User not found"));
     }
 }
