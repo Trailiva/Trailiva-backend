@@ -122,6 +122,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
+    public void removeMemberFromWorkspace(Long userId, Long memberId) throws UserException {
+        User workspaceOwner = getAUserByUserId(userId);
+        User member = getAUserByUserId(memberId);
+        workspaceOwner.getOfficialWorkspace().getMembers().remove(member);
+
     public void removeModeratorFromWorkspace(Long userId, Long moderatorId) throws UserException, WorkspaceException {
        OfficialWorkspace workspace = getOfficialWorkspace(userId);
         User moderator = getAUserByUserId(moderatorId);
