@@ -31,11 +31,14 @@ public class EmailServiceImpl implements EmailService{
     @Value("${SEND_GRID_API_ID}")
     private String API_ID;
 
+    @Value("${DOMAIN_EMAIL}")
+    private String FROM;
+
     @Override
     public void sendUserVerificationEmail(EmailRequest emailRequest) {
 
         // the sender email should be the same as we used to Create a Single Sender Verification
-        Email from = new Email("mongodbms@gmail.com");
+        Email from = new Email(FROM);
         Email to = new Email(emailRequest.getEmail());
         Mail mail = new Mail();
         // we create an object of our static class feel free to change the class on it's own file
@@ -73,7 +76,7 @@ public class EmailServiceImpl implements EmailService{
     public void sendWorkspaceRequestTokenEmail(String recipient, String token) {
 
         // the sender email should be the same as we used to Create a Single Sender Verification
-        Email from = new Email("mongodbms@gmail.com");
+        Email from = new Email(FROM);
         Email to = new Email(recipient);
         Mail mail = new Mail();
         // we create an object of our static class feel free to change the class on it's own file
