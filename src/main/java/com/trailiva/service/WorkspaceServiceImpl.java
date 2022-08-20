@@ -121,6 +121,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         tokenRepository.delete(token);
     }
 
+    @Override
+    public void removeMemberFromWorkspace(Long userId, Long memberId) throws UserException {
+        User workspaceOwner = getAUserByUserId(userId);
+        User member = getAUserByUserId(memberId);
+        workspaceOwner.getOfficialWorkspace().getMembers().remove(member);
+    }
+
     private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
         return tokenRepository.findByTokenAndTokenType(token, tokenType)
                 .orElseThrow(() -> new TokenException("Invalid token"));

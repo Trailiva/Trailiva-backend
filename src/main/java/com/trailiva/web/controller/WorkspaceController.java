@@ -154,4 +154,15 @@ public class WorkspaceController {
         }
     }
 
+    @DeleteMapping("my-workspace/remove-member/{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+    public ResponseEntity<?> removeMember(@PathVariable Long userId, @CurrentUser UserPrincipal userPrincipal){
+        try {
+            workspaceService.removeMemberFromWorkspace(userPrincipal.getId(), userId);
+            return new ResponseEntity<>(new ApiResponse(true, "Member is successfully removed from workspace", HttpStatus.OK), HttpStatus.OK);
+        } catch (UserException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

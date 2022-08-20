@@ -34,4 +34,6 @@ public interface WorkspaceService {
     void addMemberToWorkspace(String requestToken) throws TokenException, UserException;
 
     void addModeratorToWorkspace(String requestToken) throws TokenException, UserException;
+
+    void removeMemberFromWorkspace(Long userId, Long memberId) throws UserException;
 }
