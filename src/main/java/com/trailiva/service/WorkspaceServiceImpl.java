@@ -72,7 +72,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public void addMemberToOfficialWorkspace(List<String> memberEmails, Long userId) throws UserException {
+    public void addContributorToOfficialWorkspace(List<String> memberEmails, Long userId) throws UserException, WorkspaceException {
         if (!memberEmails.isEmpty()) {
             for (String email : memberEmails) {
                 sendWorkspaceRequestToken(userId, email);
@@ -82,7 +82,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException {
+    public void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException, WorkspaceException {
         if (!moderatorEmail.isEmpty()) {
             for (String email : moderatorEmail) {
                 sendWorkspaceRequestToken(userId, email);
@@ -92,8 +92,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
 
     @Override
-    public void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException,
-            CsvValidationException, UserException {
+    public void addContributorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException,
+            CsvValidationException, UserException, WorkspaceException {
         CSVReader reader = new CSVReader(new FileReader(convertMultiPartToFile(file)));
         String[] nextLine;
         while ((nextLine = reader.readNext()) != null) {
@@ -106,10 +106,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
 
     @Override
-    public void addMemberToWorkspace(String requestToken) throws TokenException, UserException {
+    public void addContributorToWorkspace(String requestToken) throws TokenException, UserException {
         WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
         if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
-        onboardMember(token.getWorkspaceOwner(), token.getUser());
+        onboardMember(token.getWorkspace(), token.getContributor());
         tokenRepository.delete(token);
     }
 
@@ -117,7 +117,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     public void addModeratorToWorkspace(String requestToken) throws TokenException, UserException {
         WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
         if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
-        onboardModerator(token.getWorkspaceOwner(), token.getUser());
+        onboardModerator(token.getWorkspace(), token.getContributor());
         tokenRepository.delete(token);
     }
 
@@ -126,6 +126,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         User workspaceOwner = getAUserByUserId(userId);
         User member = getAUserByUserId(memberId);
         workspaceOwner.getOfficialWorkspace().getMembers().remove(member);
+
+    public void removeModeratorFromWorkspace(Long userId, Long moderatorId) throws UserException, WorkspaceException {
+       OfficialWorkspace workspace = getOfficialWorkspace(userId);
+        User moderator = getAUserByUserId(moderatorId);
+        workspace.getModerators().remove(moderator);
     }
 
     private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
@@ -140,21 +145,23 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public OfficialWorkspace getUserOfficialWorkspace(Long userId) throws WorkspaceException {
-        return officialWorkspaceRepository.findById(userId).orElseThrow(
-                () -> new WorkspaceException("Workspace not found"));
+    public OfficialWorkspace getUserOfficialWorkspace(Long userId) throws WorkspaceException, UserException {
+        User creator = getAUserByUserId(userId);
+        return officialWorkspaceRepository.findByCreator(creator)
+                .orElseThrow(() -> new WorkspaceException("Workspace not found"));
     }
 
     @Override
-    public WorkSpace getUserPersonalWorkspace(Long userId) throws UserException {
-        User user = getAUserByUserId(userId);
-        return user.getPersonalWorkspace();
+    public PersonalWorkspace getUserPersonalWorkspace(Long userId) throws UserException, WorkspaceException {
+        User creator = getAUserByUserId(userId);
+        return personalWorkspaceRepository.findByCreator(creator)
+                .orElseThrow(() -> new WorkspaceException("Workspace not found"));
     }
 
 
     @Override
     public void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException,
-            CsvValidationException, UserException {
+            CsvValidationException, UserException, WorkspaceException {
         CSVReader reader = new CSVReader(new FileReader(convertMultiPartToFile(file)));
         String[] nextLine;
         while ((nextLine = reader.readNext()) != null) {
@@ -172,41 +179,37 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
 
-    private void onboardMember(User workspaceOwner, User member) throws UserException {
-        if (userAlreadyExistInWorkspace(workspaceOwner.getOfficialWorkspace().getMembers(),
-                workspaceOwner.getOfficialWorkspace().getModerators(), member.getEmail(), workspaceOwner.getEmail())) {
-            throw new UserException("Member with email " + member.getEmail() + " already added to this workspace");
+    private void onboardMember(OfficialWorkspace workspace, User contributor) throws UserException {
+        if (userAlreadyExistInWorkspace(workspace.getContributors(),
+                workspace.getModerators(), contributor.getEmail(), workspace.getCreator().getEmail())) {
+            throw new UserException("Contributor with email " + contributor.getEmail() + " already added to this workspace");
         }
-        member.addMember(member);
-        userRepository.save(workspaceOwner);
+        workspace.getContributors().add(contributor);
+        saveOfficialWorkspace(workspace);
     }
 
-    private void onboardModerator(User workspaceOwner, User member) throws UserException {
-        if (userAlreadyExistInWorkspace(workspaceOwner.getOfficialWorkspace().getMembers(),
-                workspaceOwner.getOfficialWorkspace().getModerators(), member.getEmail(), workspaceOwner.getEmail())) {
-            throw new UserException("Moderator with email " + member.getEmail() + " already added to this workspace");
+    private void onboardModerator(OfficialWorkspace workspace, User moderator) throws UserException {
+        if (userAlreadyExistInWorkspace(workspace.getContributors(),
+                workspace.getModerators(), moderator.getEmail(), workspace.getCreator().getEmail())) {
+            throw new UserException("Contributor with email " + moderator.getEmail() + " already added to this workspace");
         }
-        member.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
-        workspaceOwner.addModerator(member);
-        userRepository.save(workspaceOwner);
+        moderator.getRoles().add(roleRepository.findByName("ROLE_MODERATOR").get());
+        workspace.getModerators().add(moderator);
+        saveOfficialWorkspace(workspace);
     }
 
 
     private WorkSpace createPersonalWorkspace(WorkspaceRequest request, User user) {
         PersonalWorkspace workSpace = modelMapper.map(request, PersonalWorkspace.class);
-        PersonalWorkspace space = savePersonalWorkspace(workSpace);
-        user.setPersonalWorkspace(space);
-        userRepository.save(user);
-        return space;
+        workSpace.setCreator(user);
+        return savePersonalWorkspace(workSpace);
     }
 
     private WorkSpace createOfficialWorkspace(WorkspaceRequest request, User user) {
         user.getRoles().add(roleRepository.findByName("ROLE_SUPER_MODERATOR").get());
         OfficialWorkspace workSpace = modelMapper.map(request, OfficialWorkspace.class);
-        OfficialWorkspace officialWorkspace = saveOfficialWorkspace(workSpace);
-        user.setOfficialWorkspace(officialWorkspace);
-        userRepository.save(user);
-        return officialWorkspace;
+        workSpace.setCreator(user);
+        return saveOfficialWorkspace(workSpace);
     }
 
 
@@ -251,12 +254,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return minutes <= 0;
     }
 
-    private void sendWorkspaceRequestToken(Long userId, String email) throws UserException {
+    private void sendWorkspaceRequestToken(Long userId, String email) throws UserException, WorkspaceException {
         User user = getAUserByEmail(email);
         String token = UUID.randomUUID().toString();
-        User workspaceOwner = getAUserByUserId(userId);
+        OfficialWorkspace workspace = getUserOfficialWorkspace(userId);
         WorkspaceRequestToken requestToken = new WorkspaceRequestToken(token, user, WORKSPACE_REQUEST.toString(),
-                workspaceOwner);
+                workspace);
         tokenRepository.save(requestToken);
         emailService.sendWorkspaceRequestTokenEmail(email, requestToken.getToken());
     }

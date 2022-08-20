@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface WorkspaceService {
-    WorkSpace getUserPersonalWorkspace(Long userId) throws UserException;
+    WorkSpace getUserPersonalWorkspace(Long userId) throws UserException, WorkspaceException;
 
     WorkSpace getPersonalWorkspace(Long workspaceId) throws WorkspaceException;
 
@@ -23,17 +23,19 @@ public interface WorkspaceService {
 
     WorkSpace createWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException;
 
-    void addMemberToOfficialWorkspace(List<String> memberEmail, Long userId) throws UserException;
+    void addContributorToOfficialWorkspace(List<String> memberEmail, Long userId) throws UserException, WorkspaceException;
 
-    void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException;
+    void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException, WorkspaceException;
 
-    void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException;
+    void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
 
-    void addMemberToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException;
+    void addContributorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException, CsvValidationException, UserException, WorkspaceException;
 
-    void addMemberToWorkspace(String requestToken) throws TokenException, UserException;
+    void addContributorToWorkspace(String requestToken) throws TokenException, UserException;
 
     void addModeratorToWorkspace(String requestToken) throws TokenException, UserException;
 
     void removeMemberFromWorkspace(Long userId, Long memberId) throws UserException;
+    
+    void removeModeratorFromWorkspace(Long workspaceId, Long moderatorId) throws UserException, WorkspaceException;
 }
