@@ -40,12 +40,17 @@ public class Task {
     @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate dueDate;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "task_id")
-    private Project project;
-
     private boolean elapse = false;
 
     private String taskReference;
+
     private String tab;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "reporter_id")
+    private User reporter;
 }
