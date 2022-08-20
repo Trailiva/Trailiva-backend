@@ -47,6 +47,12 @@ public class WorkSpace{
     @JsonIgnore
     private List<Project> projects;
 
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinTable(name = "creator_id", foreignKey = @ForeignKey(name = "FK_VERIFY_WORKSPACE_CREATOR"))
+    private User creator;
+
     public void addProject(Project project){
         projects.add(project);
     }

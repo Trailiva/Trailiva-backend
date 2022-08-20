@@ -16,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 public class OfficialWorkspace extends WorkSpace{
-
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -24,7 +23,7 @@ public class OfficialWorkspace extends WorkSpace{
             joinColumns = @JoinColumn(name="workspace_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<User> members = new HashSet<>();
+    private Set<User> contributors = new HashSet<>();
 
 
     @JsonIgnore

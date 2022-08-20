@@ -29,12 +29,12 @@ public class WorkspaceRequestToken {
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
     @JoinColumn(nullable = false, name = "user_id",
             foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
-    private User user;
+    private User contributor;
 
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
-    @JoinColumn(nullable = false, name = "workspace_owner_id",
-            foreignKey = @ForeignKey(name = "FK_VERIFY_WORKSPACE_OWNER"))
-    private User workspaceOwner;
+    @JoinColumn(nullable = false, name = "official_workspace_id",
+            foreignKey = @ForeignKey(name = "FK_VERIFY_OFFICIAL_WORKSPACE"))
+    private OfficialWorkspace workspace;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -48,31 +48,20 @@ public class WorkspaceRequestToken {
 
     private String tokenType;
 
-    public WorkspaceRequestToken(String token, User user, String tokenType) {
+    public WorkspaceRequestToken(String token, User contributor, String tokenType) {
         this.token = token;
-        this.user = user;
+        this.contributor = contributor;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public WorkspaceRequestToken(String token, User user, String tokenType, User workspaceOwner) {
-        this(token, user, tokenType);
-        this.workspaceOwner = workspaceOwner;
+    public WorkspaceRequestToken(String token, User contributor, String tokenType, OfficialWorkspace workspace) {
+        this(token, contributor, tokenType);
+        this.workspace = workspace;
     }
 
     private LocalDateTime calculateExpiryDate(long expiryTimeInHours){
         return LocalDateTime.now().plusHours(expiryTimeInHours);
     }
 
-    public void updateWorkspaceRequestToken(String code){
-        this.token = code;
-        this.tokenType = REFRESH.toString();
-        this.expiryDate = calculateExpiryDate(EXPIRATION);
-    }
-
-    public void updateWorkspaceRequestToken(String code, String tokenType){
-        this.token = code;
-        this.tokenType = tokenType;
-        this.expiryDate = calculateExpiryDate(EXPIRATION);
-    }
 }
