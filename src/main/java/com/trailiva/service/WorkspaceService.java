@@ -2,6 +2,7 @@ package com.trailiva.service;
 
 import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.WorkSpace;
+import com.trailiva.security.UserPrincipal;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
@@ -33,5 +34,4 @@ public interface WorkspaceService {
     void addMemberToWorkspace(String requestToken) throws TokenException, UserException;
 
     void addModeratorToWorkspace(String requestToken) throws TokenException, UserException;
-
 }

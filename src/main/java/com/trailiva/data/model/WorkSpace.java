@@ -25,9 +25,14 @@ public class WorkSpace{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long WorkspaceId;
 
+    @Column(unique = true, nullable = false)
     private String name;
+
     private String description;
+
+    @Column(unique = true, nullable = false)
     private String referenceName;
+
     private String workSpaceType;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
