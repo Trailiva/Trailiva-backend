@@ -2,20 +2,15 @@ package com.trailiva.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Setter
 @Getter
@@ -47,16 +42,6 @@ public class User {
     @JsonIgnore
     private List<Role> roles = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "personal_workspace_id")
-    @JsonIgnore
-    private PersonalWorkspace personalWorkspace;
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "official_workspace_id")
-    @JsonIgnore
-    private  OfficialWorkspace officialWorkspace;
-
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
     private LocalDateTime datePublished;
@@ -64,13 +49,4 @@ public class User {
     @UpdateTimestamp
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDated;
-
-
-    public void addMember(User user){
-        officialWorkspace.getMembers().add(user);
-    }
-
-    public void addModerator(User user){
-        officialWorkspace.getModerators().add(user);
-    }
 }
