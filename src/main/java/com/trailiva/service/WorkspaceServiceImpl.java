@@ -129,6 +129,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         workspace.getModerators().remove(moderator);
     }
 
+    @Override
+    public int countOfficialWorkspaceProject(Long workspaceId) throws WorkspaceException {
+        OfficialWorkspace workspace = getOfficialWorkspace(workspaceId);
+        return workspace.getProjects().size();
+    }
+
+    @Override
+    public int countPersonalWorkspaceProject(Long workspaceId) throws WorkspaceException {
+        PersonalWorkspace workspace = getPersonalWorkspace(workspaceId);
+        return workspace.getProjects().size();
+    }
+
     private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
         return tokenRepository.findByTokenAndTokenType(token, tokenType)
                 .orElseThrow(() -> new TokenException("Invalid token"));

@@ -209,4 +209,23 @@ public class WorkspaceController {
         }
     }
 
+    @GetMapping("count-projects/official/{workspaceId}")
+    public ResponseEntity<?> getProjectCountForOfficialWorkspace(@PathVariable Long workspaceId) {
+        try {
+            int projectCount = workspaceService.countOfficialWorkspaceProject(workspaceId);
+            return  ResponseEntity.ok(new ApiResponse(true, "Project is successfully counted", projectCount));
+        } catch ( WorkspaceException e) {
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("count-projects/personal/{workspaceId}")
+    public ResponseEntity<?> getProjectCountForPersonalWorkspace(@PathVariable Long workspaceId) {
+        try {
+            int projectCount = workspaceService.countOfficialWorkspaceProject(workspaceId);
+            return  ResponseEntity.ok(new ApiResponse(true, "Project is successfully counted", projectCount));
+        } catch ( WorkspaceException e) {
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
