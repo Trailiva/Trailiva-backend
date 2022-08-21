@@ -45,4 +45,9 @@ public interface WorkspaceService {
     int countOfficialWorkspaceProject(Long workspaceId) throws WorkspaceException;
 
     int countPersonalWorkspaceProject(Long workspaceId) throws WorkspaceException;
+
+    int countContributorOnOfficialWorkspace(Long workspaceId) throws WorkspaceException;
+
+    int countModeratorOnOfficialWorkspace(Long workspaceId) throws WorkspaceException;
+
 }

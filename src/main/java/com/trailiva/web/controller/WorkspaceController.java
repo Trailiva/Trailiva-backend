@@ -22,6 +22,7 @@ import javax.validation.Valid;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -222,8 +223,20 @@ public class WorkspaceController {
     @GetMapping("count-projects/personal/{workspaceId}")
     public ResponseEntity<?> getProjectCountForPersonalWorkspace(@PathVariable Long workspaceId) {
         try {
-            int projectCount = workspaceService.countOfficialWorkspaceProject(workspaceId);
+            int projectCount = workspaceService.countPersonalWorkspaceProject(workspaceId);
             return  ResponseEntity.ok(new ApiResponse(true, "Project is successfully counted", projectCount));
+        } catch ( WorkspaceException e) {
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("count-users/official/{workspaceId}")
+    public ResponseEntity<?> countAllContributorAndModeratorOnOfficialWorkspace(@PathVariable Long workspaceId) {
+        try {
+            int contributorCount = workspaceService.countContributorOnOfficialWorkspace(workspaceId);
+            int moderatorCount = workspaceService.countModeratorOnOfficialWorkspace(workspaceId);
+            Map<String, Integer> userCount = Map.of("contributorCount", contributorCount, "moderatorCount", moderatorCount);
+            return  ResponseEntity.ok(new ApiResponse(true, "Users is successfully counted", userCount));
         } catch ( WorkspaceException e) {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
