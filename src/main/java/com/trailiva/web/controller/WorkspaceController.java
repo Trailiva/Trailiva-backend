@@ -110,7 +110,6 @@ public class WorkspaceController {
     }
 
 
-
     @PostMapping("/my-workspace/add-contributor/request-token")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addContributor(@RequestParam("requestToken") String requestToken) {
@@ -201,7 +200,7 @@ public class WorkspaceController {
 
     @DeleteMapping("/my-workspace/remove-contributor/{userId}")
     @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
-    public ResponseEntity<?> removeContributor(@PathVariable Long userId, @CurrentUser UserPrincipal userPrincipal){
+    public ResponseEntity<?> removeContributor(@PathVariable Long userId, @CurrentUser UserPrincipal userPrincipal) {
         try {
             workspaceService.removeContributorFromWorkspace(userPrincipal.getId(), userId);
             return new ResponseEntity<>(new ApiResponse(true, "Contributor is successfully removed from workspace", HttpStatus.OK), HttpStatus.OK);
@@ -214,9 +213,9 @@ public class WorkspaceController {
     public ResponseEntity<?> getProjectCountForOfficialWorkspace(@PathVariable Long workspaceId) {
         try {
             int projectCount = workspaceService.countOfficialWorkspaceProject(workspaceId);
-            return  ResponseEntity.ok(new ApiResponse(true, "Project is successfully counted", projectCount));
-        } catch ( WorkspaceException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.ok(new ApiResponse(true, "Successful", projectCount));
+        } catch (WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -224,9 +223,9 @@ public class WorkspaceController {
     public ResponseEntity<?> getProjectCountForPersonalWorkspace(@PathVariable Long workspaceId) {
         try {
             int projectCount = workspaceService.countPersonalWorkspaceProject(workspaceId);
-            return  ResponseEntity.ok(new ApiResponse(true, "Project is successfully counted", projectCount));
-        } catch ( WorkspaceException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.ok(new ApiResponse(true, "Successful", projectCount));
+        } catch (WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -236,9 +235,18 @@ public class WorkspaceController {
             int contributorCount = workspaceService.countContributorOnOfficialWorkspace(workspaceId);
             int moderatorCount = workspaceService.countModeratorOnOfficialWorkspace(workspaceId);
             Map<String, Integer> userCount = Map.of("contributorCount", contributorCount, "moderatorCount", moderatorCount);
-            return  ResponseEntity.ok(new ApiResponse(true, "Users is successfully counted", userCount));
-        } catch ( WorkspaceException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.ok(new ApiResponse(true, "Successful", userCount));
+        } catch (WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> getAllWorkspace() {
+        List<PersonalWorkspace> personalWorkspaces = workspaceService.getPersonalWorkspaces();
+        List<OfficialWorkspace> officialWorkspaces = workspaceService.getOfficialWorkspaces();
+        Map<String, List<?>> userCount = Map.of("personalWorkspaces", personalWorkspaces, "officialWorkspaces", officialWorkspaces);
+        return ResponseEntity.ok(new ApiResponse(true, "Successful", userCount));
     }
 }

@@ -50,4 +50,8 @@ public interface WorkspaceService {
 
     int countModeratorOnOfficialWorkspace(Long workspaceId) throws WorkspaceException;
 
+    List<PersonalWorkspace> getPersonalWorkspaces();
+
+    List<OfficialWorkspace> getOfficialWorkspaces();
+
 }
