@@ -17,5 +17,5 @@ public interface ProjectService {
     void deleteProject(Long projectId);
     Project getProjectById(Long projectId) throws ProjectException;
     List<Task> getUserTasks(Long projectId, Long memberId) throws UserException, ProjectException;
-
+    int countProjectTask(Long projectId) throws ProjectException;
 }
