@@ -54,7 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/v1/trailiva/auth/**")
                 .permitAll()
-                .antMatchers(HttpMethod.GET, "/api/v1/trailiva/**")
+                .antMatchers(HttpMethod.GET, "/api/v1/trailiva/users/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated();

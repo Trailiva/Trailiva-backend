@@ -47,11 +47,11 @@ public class WorkSpace{
     @JsonIgnore
     private List<Project> projects;
 
-
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinTable(name = "creator_id", foreignKey = @ForeignKey(name = "FK_VERIFY_WORKSPACE_CREATOR"))
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinTable(name = "creator_id")
     private User creator;
+
 
     public void addProject(Project project){
         projects.add(project);

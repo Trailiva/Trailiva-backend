@@ -16,6 +16,8 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 public class OfficialWorkspace extends WorkSpace{
+
+
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

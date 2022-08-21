@@ -52,6 +52,7 @@ public class WorkspaceController {
 
 
     @GetMapping("/my-workspace/personal")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> getPersonalWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
         try {
             WorkSpace workSpace = workspaceService.getUserPersonalWorkspace(userPrincipal.getId());
@@ -62,6 +63,7 @@ public class WorkspaceController {
     }
 
     @GetMapping("/my-workspace/official")
+    @PreAuthorize("hasRole('ROLE_SUPER_MODERATOR')")
     public ResponseEntity<?> getOfficialWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
         try {
             WorkSpace workSpace = workspaceService.getUserOfficialWorkspace(userPrincipal.getId());
@@ -72,6 +74,7 @@ public class WorkspaceController {
     }
 
     @GetMapping("/official/{workspaceId}")
+    @PreAuthorize("hasRole('ROLE_SUPER_MODERATOR')")
     public ResponseEntity<?> getOfficialWorkspace(@PathVariable Long workspaceId) {
         try {
             WorkSpace workSpace = workspaceService.getOfficialWorkspace(workspaceId);
@@ -82,6 +85,7 @@ public class WorkspaceController {
     }
 
     @GetMapping("/personal/{workspaceId}")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> getPersonalWorkspace(@PathVariable Long workspaceId) {
         try {
             WorkSpace workSpace = workspaceService.getPersonalWorkspace(workspaceId);
@@ -93,32 +97,32 @@ public class WorkspaceController {
 
 
 
-    @PostMapping("my-workspace/add-member/request-token")
+    @PostMapping("/my-workspace/add-contributor/request-token")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addContributor(@RequestParam("requestToken") String requestToken) {
         try {
             workspaceService.addContributorToWorkspace(requestToken);
-            return new ResponseEntity<>(new ApiResponse(true, "member are successfully added to workspace", HttpStatus.OK), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "contributor is successfully added to workspace", HttpStatus.OK), HttpStatus.OK);
         } catch (TokenException | UserException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
 
-    @PostMapping("my-workspace/add-moderator/request-token")
+    @PostMapping("/my-workspace/add-moderator/request-token")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addModerator(@RequestParam("requestToken") String requestToken) {
         try {
             workspaceService.addModeratorToWorkspace(requestToken);
-            return new ResponseEntity<>(new ApiResponse(true, "moderator are successfully added to workspace", HttpStatus.OK), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "moderator is successfully added to workspace", HttpStatus.OK), HttpStatus.OK);
         } catch (TokenException | UserException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 
 
-    @PostMapping("my-workspace/add-members")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+    @PostMapping("/my-workspace/add-contributors")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<?> addContributor(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {
         try {
             workspaceService.addContributorToOfficialWorkspace(emails, userPrincipal.getId());
@@ -129,8 +133,8 @@ public class WorkspaceController {
         }
     }
 
-    @PostMapping("my-workspace/add-moderators")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+    @PostMapping("/my-workspace/add-moderators")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<?> addModerator(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {
         try {
             workspaceService.addModeratorToOfficialWorkspace(emails, userPrincipal.getId());
@@ -140,13 +144,13 @@ public class WorkspaceController {
         }
     }
 
-    @PostMapping("my-workspace/csv/add-member")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
-    public ResponseEntity<?> addMemberFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file") MultipartFile file) {
+    @PostMapping("/my-workspace/csv/add-contributors")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
+    public ResponseEntity<?> addContributorFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file") MultipartFile file) {
         try {
             if (Helper.hasCSVFormat(file)) {
                 workspaceService.addContributorToWorkspaceFromCSV(file, userPrincipal.getId());
-                return new ResponseEntity<>(new ApiResponse(true, "Request token send to member", HttpStatus.OK), HttpStatus.OK);
+                return new ResponseEntity<>(new ApiResponse(true, "Request token send to contributor", HttpStatus.OK), HttpStatus.OK);
             }
             return new ResponseEntity<>(new ApiResponse(true, "Please upload a csv file!", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
 
@@ -155,8 +159,8 @@ public class WorkspaceController {
         }
     }
 
-    @PostMapping("my-workspace/csv/add-moderator")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+    @PostMapping("/my-workspace/csv/add-moderators")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<?> addModeratorFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file") MultipartFile file) {
         try {
             if (Helper.hasCSVFormat(file)) {
@@ -170,9 +174,9 @@ public class WorkspaceController {
         }
     }
 
-    @DeleteMapping("my-workspace/remove-moderator/{userId}")
+    @DeleteMapping("/my-workspace/remove-moderator/{userId}")
     @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
-    public ResponseEntity<?> removeContributor(@PathVariable Long userId, @CurrentUser UserPrincipal userPrincipal) {
+    public ResponseEntity<?> removeModerator(@PathVariable Long userId, @CurrentUser UserPrincipal userPrincipal) {
         try {
             workspaceService.removeModeratorFromWorkspace(userPrincipal.getId(), userId);
             return new ResponseEntity<>(new ApiResponse(true, "Moderator is successfully removed from workspace", HttpStatus.OK), HttpStatus.OK);
@@ -181,13 +185,13 @@ public class WorkspaceController {
         }
     }
 
-    @DeleteMapping("my-workspace/remove-member/{userId}")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
-    public ResponseEntity<?> removeMember(@PathVariable Long userId, @CurrentUser UserPrincipal userPrincipal){
+    @DeleteMapping("/my-workspace/remove-contributor/{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
+    public ResponseEntity<?> removeContributor(@PathVariable Long userId, @CurrentUser UserPrincipal userPrincipal){
         try {
-            workspaceService.removeMemberFromWorkspace(userPrincipal.getId(), userId);
-            return new ResponseEntity<>(new ApiResponse(true, "Member is successfully removed from workspace", HttpStatus.OK), HttpStatus.OK);
-        } catch (UserException e) {
+            workspaceService.removeContributorFromWorkspace(userPrincipal.getId(), userId);
+            return new ResponseEntity<>(new ApiResponse(true, "Contributor is successfully removed from workspace", HttpStatus.OK), HttpStatus.OK);
+        } catch (UserException | WorkspaceException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }

@@ -1,20 +1,14 @@
 package com.trailiva.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-import static com.trailiva.data.model.TokenType.REFRESH;
-
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @Entity
 @NoArgsConstructor
@@ -29,9 +23,9 @@ public class WorkspaceRequestToken {
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
     @JoinColumn(nullable = false, name = "user_id",
             foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
-    private User contributor;
+    private User user;
 
-    @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
+    @OneToOne(fetch = FetchType.EAGER, targetEntity = OfficialWorkspace.class)
     @JoinColumn(nullable = false, name = "official_workspace_id",
             foreignKey = @ForeignKey(name = "FK_VERIFY_OFFICIAL_WORKSPACE"))
     private OfficialWorkspace workspace;
@@ -48,15 +42,15 @@ public class WorkspaceRequestToken {
 
     private String tokenType;
 
-    public WorkspaceRequestToken(String token, User contributor, String tokenType) {
+    public WorkspaceRequestToken(String token, User user, String tokenType) {
         this.token = token;
-        this.contributor = contributor;
+        this.user = user;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public WorkspaceRequestToken(String token, User contributor, String tokenType, OfficialWorkspace workspace) {
-        this(token, contributor, tokenType);
+    public WorkspaceRequestToken(String token, User user, String tokenType, OfficialWorkspace workspace) {
+        this(token, user, tokenType);
         this.workspace = workspace;
     }
 

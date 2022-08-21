@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-
 import static com.trailiva.data.model.TokenType.WORKSPACE_REQUEST;
 
 @Service
@@ -72,9 +71,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public void addContributorToOfficialWorkspace(List<String> memberEmails, Long userId) throws UserException, WorkspaceException {
-        if (!memberEmails.isEmpty()) {
-            for (String email : memberEmails) {
+    public void addContributorToOfficialWorkspace(List<String> contributorEmails, Long userId) throws UserException, WorkspaceException {
+        if (!contributorEmails.isEmpty()) {
+            for (String email : contributorEmails) {
                 sendWorkspaceRequestToken(userId, email);
             }
         }
@@ -103,13 +102,23 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         }
     }
 
-
+    @Override
+    public void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException,
+            CsvValidationException, UserException, WorkspaceException {
+        CSVReader reader = new CSVReader(new FileReader(convertMultiPartToFile(file)));
+        String[] nextLine;
+        while ((nextLine = reader.readNext()) != null) {
+            for (String email : nextLine) {
+                sendWorkspaceRequestToken(userId, email);
+            }
+        }
+    }
 
     @Override
     public void addContributorToWorkspace(String requestToken) throws TokenException, UserException {
         WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
         if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
-        onboardMember(token.getWorkspace(), token.getContributor());
+        onboardContributor(token.getWorkspace(), token.getUser());
         tokenRepository.delete(token);
     }
 
@@ -117,18 +126,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     public void addModeratorToWorkspace(String requestToken) throws TokenException, UserException {
         WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
         if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
-        onboardModerator(token.getWorkspace(), token.getContributor());
+        onboardModerator(token.getWorkspace(), token.getUser());
         tokenRepository.delete(token);
     }
 
     @Override
-    public void removeMemberFromWorkspace(Long userId, Long memberId) throws UserException {
-        User workspaceOwner = getAUserByUserId(userId);
-        User member = getAUserByUserId(memberId);
-        workspaceOwner.getOfficialWorkspace().getMembers().remove(member);
+    public void removeContributorFromWorkspace(Long userId, Long contributorId) throws UserException, WorkspaceException {
+        OfficialWorkspace workspace = getUserOfficialWorkspace(userId);
+        User contributor = getAUserByUserId(contributorId);
+        workspace.getModerators().remove(contributor);
+    }
 
+    @Override
     public void removeModeratorFromWorkspace(Long userId, Long moderatorId) throws UserException, WorkspaceException {
-       OfficialWorkspace workspace = getOfficialWorkspace(userId);
+        OfficialWorkspace workspace = getUserOfficialWorkspace(userId);
         User moderator = getAUserByUserId(moderatorId);
         workspace.getModerators().remove(moderator);
     }
@@ -159,17 +170,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
 
-    @Override
-    public void addModeratorToWorkspaceFromCSV(MultipartFile file, Long userId) throws IOException,
-            CsvValidationException, UserException, WorkspaceException {
-        CSVReader reader = new CSVReader(new FileReader(convertMultiPartToFile(file)));
-        String[] nextLine;
-        while ((nextLine = reader.readNext()) != null) {
-            for (String email : nextLine) {
-                sendWorkspaceRequestToken(userId, email);
-            }
-        }
-    }
+
 
 
     @Override
@@ -179,7 +180,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
 
-    private void onboardMember(OfficialWorkspace workspace, User contributor) throws UserException {
+    private void onboardContributor(OfficialWorkspace workspace, User contributor) throws UserException {
         if (userAlreadyExistInWorkspace(workspace.getContributors(),
                 workspace.getModerators(), contributor.getEmail(), workspace.getCreator().getEmail())) {
             throw new UserException("Contributor with email " + contributor.getEmail() + " already added to this workspace");
@@ -234,10 +235,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return convFile;
     }
 
-    private boolean userAlreadyExistInWorkspace(Set<User> members, Set<User> moderators, String email, String ownerEmail) {
-        boolean memberExist = members.stream().anyMatch(user -> user.getEmail().equals(email));
+    private boolean userAlreadyExistInWorkspace(Set<User> contributors, Set<User> moderators, String email, String ownerEmail) {
+        boolean contributorExist = contributors.stream().anyMatch(user -> user.getEmail().equals(email));
         boolean moderatorExist = moderators.stream().anyMatch(user -> user.getEmail().equals(email));
-        return memberExist || moderatorExist || ownerEmail.equals(email);
+        return contributorExist || moderatorExist || ownerEmail.equals(email);
     }
 
 
@@ -258,6 +259,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         User user = getAUserByEmail(email);
         String token = UUID.randomUUID().toString();
         OfficialWorkspace workspace = getUserOfficialWorkspace(userId);
+
         WorkspaceRequestToken requestToken = new WorkspaceRequestToken(token, user, WORKSPACE_REQUEST.toString(),
                 workspace);
         tokenRepository.save(requestToken);
