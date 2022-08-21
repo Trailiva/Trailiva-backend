@@ -92,6 +92,12 @@ public class ProjectServiceImpl implements ProjectService {
         return tasks;
     }
 
+    @Override
+    public int countProjectTask(Long projectId) throws ProjectException {
+        Project project = getProjectById(projectId);
+        return project.getTasks().size();
+    }
+
     private boolean isValidProject(List<Project> projects, String name) {
         return projects.stream().noneMatch(project -> project.getName().equalsIgnoreCase(name));
     }
