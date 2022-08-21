@@ -61,4 +61,14 @@ public class ProjectController {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("count-tasks/{projectId}")
+    public ResponseEntity<?> getTaskCount(@PathVariable Long projectId) {
+        try {
+            int taskCount = projectService.countProjectTask(projectId);
+            return  ResponseEntity.ok(new ApiResponse(true, "Task is successfully counted", taskCount));
+        } catch ( ProjectException e) {
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
