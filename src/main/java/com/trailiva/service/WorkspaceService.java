@@ -3,7 +3,6 @@ package com.trailiva.service;
 import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.OfficialWorkspace;
 import com.trailiva.data.model.PersonalWorkspace;
-import com.trailiva.data.model.WorkSpace;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
@@ -17,13 +16,15 @@ public interface WorkspaceService {
 
     PersonalWorkspace getUserPersonalWorkspace(Long userId) throws UserException, WorkspaceException;
 
-    WorkSpace getPersonalWorkspace(Long workspaceId) throws WorkspaceException;
+    PersonalWorkspace getPersonalWorkspace(Long workspaceId) throws WorkspaceException;
 
-    WorkSpace getOfficialWorkspace(Long workspaceId) throws WorkspaceException;
+    OfficialWorkspace getOfficialWorkspace(Long workspaceId) throws WorkspaceException;
 
     OfficialWorkspace getUserOfficialWorkspace(Long userId) throws UserException, WorkspaceException;
 
-    WorkSpace createWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException;
+    OfficialWorkspace createOfficialWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException;
+
+    PersonalWorkspace createPersonalWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException;
 
     void addContributorToOfficialWorkspace(List<String> memberEmail, Long userId) throws UserException, WorkspaceException;
 

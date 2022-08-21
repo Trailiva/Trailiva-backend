@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+
 import static com.trailiva.data.model.TokenType.WORKSPACE_REQUEST;
 
 @Service
@@ -53,22 +54,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         this.emailService = emailService;
     }
 
-
-    @Override
-    public WorkSpace createWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException {
-        User user = getAUserByUserId(userId);
-        WorkSpace createdWorkspace = null;
-        if (existByName(request.getName()))
-            throw new WorkspaceException("Workspace with name already exist");
-
-        if (WorkSpaceType.PERSONAL == request.getWorkSpaceType())
-            createdWorkspace = createPersonalWorkspace(request, user);
-
-        else if (WorkSpaceType.OFFICIAL == request.getWorkSpaceType())
-            createdWorkspace = createOfficialWorkspace(request, user);
-
-        return createdWorkspace;
-    }
 
     @Override
     public void addContributorToOfficialWorkspace(List<String> contributorEmails, Long userId) throws UserException, WorkspaceException {
@@ -170,11 +155,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
 
-
-
-
     @Override
-    public WorkSpace getPersonalWorkspace(Long workspaceId) throws WorkspaceException {
+    public PersonalWorkspace getPersonalWorkspace(Long workspaceId) throws WorkspaceException {
         return personalWorkspaceRepository.findById(workspaceId).orElseThrow(
                 () -> new WorkspaceException("Workspace not found"));
     }
@@ -200,13 +182,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
 
-    private WorkSpace createPersonalWorkspace(WorkspaceRequest request, User user) {
+    @Override
+    public PersonalWorkspace createPersonalWorkspace(WorkspaceRequest request, Long userId) throws UserException, WorkspaceException {
+        User user = getAUserByUserId(userId);
+        if (existByName(request.getName()))
+            throw new WorkspaceException("Workspace with name already exist");
         PersonalWorkspace workSpace = modelMapper.map(request, PersonalWorkspace.class);
         workSpace.setCreator(user);
         return savePersonalWorkspace(workSpace);
     }
 
-    private WorkSpace createOfficialWorkspace(WorkspaceRequest request, User user) {
+    @Override
+    public OfficialWorkspace createOfficialWorkspace(WorkspaceRequest request, Long userId) throws UserException, WorkspaceException {
+        User user = getAUserByUserId(userId);
+        if (existByName(request.getName()))
+            throw new WorkspaceException("Workspace with name already exist");
         user.getRoles().add(roleRepository.findByName("ROLE_SUPER_MODERATOR").get());
         OfficialWorkspace workSpace = modelMapper.map(request, OfficialWorkspace.class);
         workSpace.setCreator(user);

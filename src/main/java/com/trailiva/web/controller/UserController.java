@@ -1,7 +1,6 @@
 package com.trailiva.web.controller;
 
 import com.trailiva.data.model.User;
-import com.trailiva.data.model.WorkSpace;
 import com.trailiva.security.CurrentUser;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.CloudinaryService;
@@ -14,7 +13,6 @@ import com.trailiva.web.payload.request.ImageRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
 import com.trailiva.web.payload.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +25,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController

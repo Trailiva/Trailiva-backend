@@ -37,13 +37,26 @@ public class WorkspaceController {
     }
 
 
-    @PostMapping("/create")
+    @PostMapping("/personal/create")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> createWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody @Valid WorkspaceRequest request) {
+    public ResponseEntity<?> createPersonalWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody @Valid WorkspaceRequest request) {
         try {
             String referenceName = request.getName().substring(0, 2).toUpperCase();
             request.setReferenceName(referenceName);
-            WorkSpace workSpace = workspaceService.createWorkspace(request, currentUser.getId());
+            PersonalWorkspace workSpace = workspaceService.createPersonalWorkspace(request, currentUser.getId());
+            return ResponseEntity.ok(workSpace);
+        } catch (WorkspaceException | UserException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/official/create")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> createOfficialWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody @Valid WorkspaceRequest request) {
+        try {
+            String referenceName = request.getName().substring(0, 2).toUpperCase();
+            request.setReferenceName(referenceName);
+            OfficialWorkspace workSpace = workspaceService.createOfficialWorkspace(request, currentUser.getId());
             return ResponseEntity.ok(workSpace);
         } catch (WorkspaceException | UserException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
@@ -55,7 +68,7 @@ public class WorkspaceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> getPersonalWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
         try {
-            WorkSpace workSpace = workspaceService.getUserPersonalWorkspace(userPrincipal.getId());
+            PersonalWorkspace workSpace = workspaceService.getUserPersonalWorkspace(userPrincipal.getId());
             return new ResponseEntity<>(workSpace, HttpStatus.OK);
         } catch (UserException | WorkspaceException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
@@ -66,7 +79,7 @@ public class WorkspaceController {
     @PreAuthorize("hasRole('ROLE_SUPER_MODERATOR')")
     public ResponseEntity<?> getOfficialWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
         try {
-            WorkSpace workSpace = workspaceService.getUserOfficialWorkspace(userPrincipal.getId());
+            OfficialWorkspace workSpace = workspaceService.getUserOfficialWorkspace(userPrincipal.getId());
             return new ResponseEntity<>(workSpace, HttpStatus.OK);
         } catch (UserException | WorkspaceException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
@@ -77,7 +90,7 @@ public class WorkspaceController {
     @PreAuthorize("hasRole('ROLE_SUPER_MODERATOR')")
     public ResponseEntity<?> getOfficialWorkspace(@PathVariable Long workspaceId) {
         try {
-            WorkSpace workSpace = workspaceService.getOfficialWorkspace(workspaceId);
+            OfficialWorkspace workSpace = workspaceService.getOfficialWorkspace(workspaceId);
             return new ResponseEntity<>(workSpace, HttpStatus.OK);
         } catch (WorkspaceException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
@@ -88,7 +101,7 @@ public class WorkspaceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> getPersonalWorkspace(@PathVariable Long workspaceId) {
         try {
-            WorkSpace workSpace = workspaceService.getPersonalWorkspace(workspaceId);
+            PersonalWorkspace workSpace = workspaceService.getPersonalWorkspace(workspaceId);
             return new ResponseEntity<>(workSpace, HttpStatus.OK);
         } catch (WorkspaceException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
