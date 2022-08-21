@@ -153,6 +153,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return workspace.getModerators().size();
     }
 
+    @Override
+    public List<PersonalWorkspace> getPersonalWorkspaces() {
+        return personalWorkspaceRepository.findAll();
+    }
+
+    @Override
+    public List<OfficialWorkspace> getOfficialWorkspaces() {
+        return officialWorkspaceRepository.findAll();
+    }
+
     private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
         return tokenRepository.findByTokenAndTokenType(token, tokenType)
                 .orElseThrow(() -> new TokenException("Invalid token"));

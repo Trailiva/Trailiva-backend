@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfile getUserDetails(Long userId) throws UserException {
-        com.trailiva.data.model.User user = getAUser(userId);
+        User user = getAUser(userId);
         return modelMapper.map(user, UserProfile.class);
     }
 
