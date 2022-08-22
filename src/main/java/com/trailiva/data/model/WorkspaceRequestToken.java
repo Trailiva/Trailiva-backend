@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 public class WorkspaceRequestToken {
-    private final static long EXPIRATION = 48L;
+    private final static long EXPIRATION = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,7 +55,7 @@ public class WorkspaceRequestToken {
     }
 
     private LocalDateTime calculateExpiryDate(long expiryTimeInHours){
-        return LocalDateTime.now().plusHours(expiryTimeInHours);
+        return LocalDateTime.now().plusMinutes(expiryTimeInHours);
     }
 
 }

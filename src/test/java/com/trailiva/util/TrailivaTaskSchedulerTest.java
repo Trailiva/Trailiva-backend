@@ -1,6 +1,7 @@
 package com.trailiva.util;
 
 import com.trailiva.data.repository.TaskRepository;
+import com.trailiva.scheduler.TaskScheduler;
 import com.trailiva.service.TaskService;
 import com.trailiva.service.TaskServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,7 @@ class TrailivaTaskSchedulerTest {
     TaskService mockTaskService=new TaskServiceImpl(null, null,  null);
 
     @Mock
-    TrailivaTaskScheduler trailivaTaskScheduler;
+    TaskScheduler taskScheduler;
 
     @BeforeEach
     void setUp() {
@@ -38,6 +39,6 @@ class TrailivaTaskSchedulerTest {
         when(mockTaskService.getDueTasks(any(LocalDate.class))).thenReturn(anyList());
         await()
                 .atMost(Duration.ofSeconds(10L))
-                .untilAsserted(()->verify(trailivaTaskScheduler, atLeast(1)).verifyDueTask());
+                .untilAsserted(()->verify(taskScheduler, atLeast(1)).verifyDueTask());
     }
 }
