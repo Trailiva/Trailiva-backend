@@ -1,8 +1,13 @@
 package com.trailiva.web.controller;
 
+import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.Project;
+import com.trailiva.security.CurrentUser;
+import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.ProjectService;
+import com.trailiva.util.Helper;
 import com.trailiva.web.exceptions.ProjectException;
+import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.ProjectRequest;
@@ -11,8 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -69,6 +77,45 @@ public class ProjectController {
             return  ResponseEntity.ok(new ApiResponse(true, "Task is successfully counted", taskCount));
         } catch ( ProjectException e) {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/add-contibutor/request-token")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> addModerator(@RequestParam("requestToken") String requestToken) {
+        try {
+            projectService.addContributor(requestToken);
+            return new ResponseEntity<>(new ApiResponse(true, "contributor is successfully added to project", HttpStatus.OK), HttpStatus.OK);
+        } catch (TokenException | UserException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/add-contributors")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
+    public ResponseEntity<?> addContributor(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {
+        try {
+            projectService.addContributor(emails, userPrincipal.getEmail());
+
+            return new ResponseEntity<>(new ApiResponse(true, "Request token send to contributor", HttpStatus.OK), HttpStatus.OK);
+        } catch (UserException | ProjectException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @PostMapping("/csv/add-contributors")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
+    public ResponseEntity<?> addContributorFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file") MultipartFile file) {
+        try {
+            if (Helper.hasCSVFormat(file)) {
+                projectService.addContributorFromCSV(file, userPrincipal.getEmail());
+                return new ResponseEntity<>(new ApiResponse(true, "Request token send to contributor", HttpStatus.OK), HttpStatus.OK);
+            }
+            return new ResponseEntity<>(new ApiResponse(true, "Please upload a csv file!", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+
+        } catch (CsvValidationException | IOException | UserException | ProjectException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 

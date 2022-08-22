@@ -26,7 +26,7 @@ public interface WorkspaceService {
 
     PersonalWorkspace createPersonalWorkspace(WorkspaceRequest request, Long userId) throws WorkspaceException, UserException;
 
-    void addContributorToOfficialWorkspace(List<String> memberEmail, Long userId) throws UserException, WorkspaceException;
+    void addContributorToOfficialWorkspace(List<String>contributorEmail, Long userId) throws UserException, WorkspaceException;
 
     void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException, WorkspaceException;
 
@@ -38,7 +38,7 @@ public interface WorkspaceService {
 
     void addModeratorToWorkspace(String requestToken) throws TokenException, UserException;
 
-    void removeContributorFromWorkspace(Long userId, Long memberId) throws UserException, WorkspaceException;
+    void removeContributorFromWorkspace(Long userId, Long contributorId) throws UserException, WorkspaceException;
 
     void removeModeratorFromWorkspace(Long userId, Long moderatorId) throws UserException, WorkspaceException;
 

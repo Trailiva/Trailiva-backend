@@ -2,7 +2,10 @@ package com.trailiva.service;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import com.trailiva.data.model.*;
+import com.trailiva.data.model.OfficialWorkspace;
+import com.trailiva.data.model.PersonalWorkspace;
+import com.trailiva.data.model.User;
+import com.trailiva.data.model.WorkspaceRequestToken;
 import com.trailiva.data.repository.*;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
@@ -13,18 +16,17 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 import static com.trailiva.data.model.TokenType.WORKSPACE_REQUEST;
+import static com.trailiva.util.Helper.convertMultiPartToFile;
+import static com.trailiva.util.Helper.isValidToken;
 
 @Service
 @Slf4j
@@ -59,7 +61,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     public void addContributorToOfficialWorkspace(List<String> contributorEmails, Long userId) throws UserException, WorkspaceException {
         if (!contributorEmails.isEmpty()) {
             for (String email : contributorEmails) {
-                sendWorkspaceRequestToken(userId, email);
+                sendRequestToken(userId, email);
             }
         }
 
@@ -69,7 +71,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     public void addModeratorToOfficialWorkspace(List<String> moderatorEmail, Long userId) throws UserException, WorkspaceException {
         if (!moderatorEmail.isEmpty()) {
             for (String email : moderatorEmail) {
-                sendWorkspaceRequestToken(userId, email);
+                sendRequestToken(userId, email);
             }
         }
     }
@@ -82,7 +84,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         String[] nextLine;
         while ((nextLine = reader.readNext()) != null) {
             for (String email : nextLine) {
-                sendWorkspaceRequestToken(userId, email);
+                sendRequestToken(userId, email);
             }
         }
     }
@@ -94,7 +96,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         String[] nextLine;
         while ((nextLine = reader.readNext()) != null) {
             for (String email : nextLine) {
-                sendWorkspaceRequestToken(userId, email);
+                sendRequestToken(userId, email);
             }
         }
     }
@@ -251,14 +253,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return officialWorkspaceRepository.save(workSpace);
     }
 
-    private File convertMultiPartToFile(MultipartFile file) throws IOException {
-        File convFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
-        FileOutputStream fos = new FileOutputStream(convFile);
-        fos.write(file.getBytes());
-        fos.close();
-        return convFile;
-    }
-
     private boolean userAlreadyExistInWorkspace(Set<User> contributors, Set<User> moderators, String email, String ownerEmail) {
         boolean contributorExist = contributors.stream().anyMatch(user -> user.getEmail().equals(email));
         boolean moderatorExist = moderators.stream().anyMatch(user -> user.getEmail().equals(email));
@@ -274,12 +268,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return userRepository.findById(id).orElseThrow(() -> new UserException("User not found"));
     }
 
-    private boolean isValidToken(LocalDateTime expiryDate) {
-        long minutes = ChronoUnit.MINUTES.between(LocalDateTime.now(), expiryDate);
-        return minutes <= 0;
-    }
 
-    private void sendWorkspaceRequestToken(Long userId, String email) throws UserException, WorkspaceException {
+
+    private void sendRequestToken(Long userId, String email) throws UserException, WorkspaceException {
         User user = getAUserByEmail(email);
         String token = UUID.randomUUID().toString();
         OfficialWorkspace workspace = getUserOfficialWorkspace(userId);
