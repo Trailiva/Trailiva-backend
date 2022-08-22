@@ -1,19 +1,23 @@
 package com.trailiva.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+
 @Getter
 @Setter
 @AllArgsConstructor
 @Entity
 @NoArgsConstructor
-public class WorkspaceRequestToken {
+public class ProjectRequestToken {
     private final static long EXPIRATION = 48L;
 
     @Id
@@ -26,10 +30,10 @@ public class WorkspaceRequestToken {
             foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
     private User user;
 
-    @OneToOne(fetch = FetchType.EAGER, targetEntity = OfficialWorkspace.class)
-    @JoinColumn(nullable = false, name = "official_workspace_id",
-            foreignKey = @ForeignKey(name = "FK_VERIFY_OFFICIAL_WORKSPACE"))
-    private OfficialWorkspace workspace;
+    @OneToOne(fetch = FetchType.EAGER, targetEntity = Project.class)
+    @JoinColumn(nullable = false, name = "project_id",
+            foreignKey = @ForeignKey(name = "FK_PROJECT"))
+    private Project project;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -43,20 +47,19 @@ public class WorkspaceRequestToken {
 
     private String tokenType;
 
-    public WorkspaceRequestToken(String token, User user, String tokenType) {
+    public ProjectRequestToken(String token, User user, String tokenType) {
         this.token = token;
         this.user = user;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public WorkspaceRequestToken(String token, User user, String tokenType, OfficialWorkspace workspace) {
+    public ProjectRequestToken(String token, User user, String tokenType, Project project) {
         this(token, user, tokenType);
-        this.workspace = workspace;
+        this.project = project;
     }
 
     private LocalDateTime calculateExpiryDate(long expiryTimeInHours){
         return LocalDateTime.now().plusHours(expiryTimeInHours);
     }
-
 }
