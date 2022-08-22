@@ -55,11 +55,6 @@ public class ProjectController {
         }
     }
 
-    @GetMapping("/{workspaceId}")
-    public ResponseEntity<Project> getProjectsByWorkspaceId(@PathVariable Long workspaceId) {
-        return new ResponseEntity<>(new Project(), HttpStatus.OK);
-    }
-
     @GetMapping("/{projectId}")
     public ResponseEntity<?> getProjectsByProjectId(@PathVariable Long projectId) {
         try {
@@ -80,7 +75,7 @@ public class ProjectController {
         }
     }
 
-    @PostMapping("/add-contibutor/request-token")
+    @PostMapping("/add-contributor/request-token")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addModerator(@RequestParam("requestToken") String requestToken) {
         try {
@@ -92,7 +87,7 @@ public class ProjectController {
     }
 
     @PostMapping("/add-contributors")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<?> addContributor(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {
         try {
             projectService.addContributor(emails, userPrincipal.getEmail());
@@ -105,7 +100,7 @@ public class ProjectController {
 
 
     @PostMapping("/csv/add-contributors")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<?> addContributorFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file") MultipartFile file) {
         try {
             if (Helper.hasCSVFormat(file)) {

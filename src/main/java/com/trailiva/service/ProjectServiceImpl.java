@@ -176,7 +176,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = getUserProject(userEmail);
 
         ProjectRequestToken requestToken = new ProjectRequestToken(token, user,
-                WORKSPACE_REQUEST.toString(), project);
+                PROJECT_REQUEST.toString(), project);
         projectRequestTokenRepository.save(requestToken);
 //        emailService.sendWorkspaceRequestTokenEmail(email, requestToken.getToken());
     }

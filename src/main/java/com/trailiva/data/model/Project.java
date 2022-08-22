@@ -47,7 +47,7 @@ public class Project {
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "project_members",
+            name = "project_contributors",
             joinColumns = @JoinColumn(name="project_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )

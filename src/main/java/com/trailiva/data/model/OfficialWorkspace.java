@@ -60,7 +60,7 @@ public class OfficialWorkspace {
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "workspace_members",
+            name = "workspace_contributors",
             joinColumns = @JoinColumn(name="workspace_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
