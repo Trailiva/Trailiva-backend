@@ -4,7 +4,6 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
-import com.trailiva.security.UserPrincipal;
 import com.trailiva.web.exceptions.UserException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

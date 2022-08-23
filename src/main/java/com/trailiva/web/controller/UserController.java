@@ -1,6 +1,5 @@
 package com.trailiva.web.controller;
 
-import com.trailiva.data.model.User;
 import com.trailiva.security.CurrentUser;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.CloudinaryService;
@@ -44,7 +43,7 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> getUserProfile(@CurrentUser UserPrincipal currentUser) {
         try {
-            User userProfile = userService.getUserProfile(currentUser.getId());
+            com.trailiva.data.model.User userProfile = userService.getUserProfile(currentUser.getId());
             return new ResponseEntity<>(userProfile, HttpStatus.OK);
         } catch (UserException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);

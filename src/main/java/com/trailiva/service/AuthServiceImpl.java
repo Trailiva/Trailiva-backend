@@ -1,7 +1,6 @@
 package com.trailiva.service;
 
 import com.trailiva.data.model.Token;
-import com.trailiva.data.model.TokenType;
 import com.trailiva.data.model.User;
 import com.trailiva.data.repository.RoleRepository;
 import com.trailiva.data.repository.TokenRepository;
@@ -60,17 +59,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public User registerNewUserAccount(UserRequest userRequest) throws AuthException {
+    public com.trailiva.data.model.User registerNewUserAccount(UserRequest userRequest) throws AuthException {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
-        User user = modelMapper.map(userRequest, User.class);
+        com.trailiva.data.model.User user = modelMapper.map(userRequest, com.trailiva.data.model.User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
         return saveAUser(user);
     }
 
-    public void sendVerificationToken(User savedUser) {
+    public void sendVerificationToken(com.trailiva.data.model.User savedUser) {
         EmailRequest emailRequest = modelMapper.map(savedUser, EmailRequest.class);
         emailService.sendUserVerificationEmail(emailRequest);
     }
@@ -86,12 +85,13 @@ public class AuthServiceImpl implements AuthService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         final UserPrincipal userDetails = (UserPrincipal) customUserDetailService.loadUserByUsername(loginRequest.getEmail());
-        final String token = jwtTokenProvider.generateToken(userDetails);
-        com.trailiva.data.model.User user = internalFindUserByEmail(loginRequest.getEmail());
-        return new JwtTokenResponse(token, user.getEmail());
+        final String jwtToken = jwtTokenProvider.generateToken(userDetails);
+        User user = internalFindUserByEmail(loginRequest.getEmail());
+        Token refreshToken = new Token(user);
+        return new JwtTokenResponse(jwtToken, refreshToken.getToken(), user.getEmail());
     }
 
-    private User internalFindUserByEmail(String email) {
+    private com.trailiva.data.model.User internalFindUserByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
     }
 
@@ -99,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.existsByEmail(email);
     }
 
-    private User saveAUser(com.trailiva.data.model.User user) {
+    private com.trailiva.data.model.User saveAUser(com.trailiva.data.model.User user) {
         return userRepository.save(user);
     }
 
@@ -115,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
         if (isValidToken(vToken.getExpiryDate()))
             throw new TokenException("Token has expired");
 
-        User user = vToken.getUser();
+        com.trailiva.data.model.User user = vToken.getUser();
         user.setEnabled(true);
         saveAUser(user);
         tokenRepository.delete(vToken);
@@ -134,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public Token createVerificationToken(User user, String token, String tokenType) {
+    public Token createVerificationToken(com.trailiva.data.model.User user, String token, String tokenType) {
         Token verificationToken = new Token(token, user, tokenType);
         return tokenRepository.save(verificationToken);
     }
@@ -148,7 +148,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public TokenResponse createPasswordResetTokenForUser(String email) throws AuthException {
-        User user = userRepository.findByEmail(email)
+        com.trailiva.data.model.User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("No user found with email " + email));
         String token = UUID.randomUUID().toString();
         Token createdToken = createVerificationToken(user, token, PASSWORD_RESET.toString());
@@ -172,7 +172,7 @@ public class AuthServiceImpl implements AuthService {
     public void saveResetPassword(PasswordRequest request) throws TokenException, AuthException {
         if (isNullOrEmpty(request.getToken())) throw new AuthException("Password must cannot be blank");
         Token pToken = getToken(request.getToken(), PASSWORD_RESET.toString());
-        User userToChangePassword = pToken.getUser();
+        com.trailiva.data.model.User userToChangePassword = pToken.getUser();
         userToChangePassword.setPassword(passwordEncoder.encode(request.getPassword()));
         saveAUser(userToChangePassword);
     }

@@ -1,6 +1,5 @@
 package com.trailiva.security;
 
-import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,7 +20,7 @@ public class CustomUserDetailService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email).orElseThrow(
+        com.trailiva.data.model.User user = userRepository.findByEmail(email).orElseThrow(
                 () ->  new UsernameNotFoundException(format("User not found with email %s", email)));
         return UserPrincipal.create(user);
     }

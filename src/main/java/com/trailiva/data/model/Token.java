@@ -6,11 +6,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static com.trailiva.data.model.TokenType.REFRESH;
+import static com.trailiva.data.model.TokenType.REFRESH_TOKEN;
 
 @Setter
 @Getter
@@ -40,6 +44,9 @@ public class Token {
 
     private String tokenType;
 
+    @Value("${trailiva.app.jwtRefreshExpirationMs}")
+    long refreshTokenExpiryTimeInSec;
+
     public Token(String token, User user, String tokenType) {
         this.token = token;
         this.user = user;
@@ -55,6 +62,12 @@ public class Token {
         this.token = code;
         this.tokenType = REFRESH.toString();
         this.expiryDate = calculateExpiryDate(EXPIRATION);
+    }
+
+    public Token(User user){
+        this.token = UUID.randomUUID().toString();
+        this.tokenType = REFRESH_TOKEN.toString();
+        this.expiryDate = calculateExpiryDate(refreshTokenExpiryTimeInSec);
     }
 
     public void updateToken(String code, String tokenType){

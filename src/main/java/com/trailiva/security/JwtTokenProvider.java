@@ -16,7 +16,7 @@ import java.util.function.Function;
 @Slf4j
 public class JwtTokenProvider {
     // Key not for production but testing
-    private final String SECRET_KEY = "OrmSemicolonAfrica";
+    private final String SECRET_KEY = "TrailivaSolution";
 
     public String generateToken(UserPrincipal fetchedUser) {
         Map<String, Object> claims = new HashMap<>();
