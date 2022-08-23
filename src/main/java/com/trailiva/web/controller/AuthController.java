@@ -147,20 +147,12 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
-        String requestRefreshToken = request.getRefreshToken();
-
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
         try {
-            return tokenRepository.findByTokenAndTokenType(requestRefreshToken, REFRESH_TOKEN.toString())
-                    .map(token -> isValidToken(token.getExpiryDate()) ? null : token)
-                    .map(Token::getUser)
-                    .map(user -> {
-                        String jwtToken = jwtTokenProvider.generateToken((UserPrincipal) customUserDetailService.loadUserByUsername(user.getEmail()));
-                        return ResponseEntity.ok(new JwtTokenResponse(jwtToken, requestRefreshToken, user.getEmail()));
-                    })
-                    .orElseThrow(() -> new TokenException(requestRefreshToken + " Refresh token is not in database!"));
+            JwtTokenResponse jwtTokenResponse = authService.refreshToken(request);
+            return new ResponseEntity<>(jwtTokenResponse, HttpStatus.OK);
         } catch (TokenException e) {
-            e.printStackTrace();
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
 }

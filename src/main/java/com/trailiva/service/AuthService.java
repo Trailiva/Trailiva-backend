@@ -7,6 +7,7 @@ import com.trailiva.web.exceptions.RoleNotFoundException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.payload.request.LoginRequest;
 import com.trailiva.web.payload.request.PasswordRequest;
+import com.trailiva.web.payload.request.TokenRefreshRequest;
 import com.trailiva.web.payload.request.UserRequest;
 import com.trailiva.web.payload.response.JwtTokenResponse;
 import com.trailiva.web.payload.response.TokenResponse;
@@ -25,4 +26,5 @@ public interface AuthService {
     void sendVerificationToken(User user);
     TokenResponse createPasswordResetTokenForUser(String email) throws AuthException;
     boolean validatePasswordResetToken(String token) throws TokenException;
+    JwtTokenResponse refreshToken(TokenRefreshRequest request) throws TokenException;
 }
