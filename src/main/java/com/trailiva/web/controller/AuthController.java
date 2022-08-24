@@ -1,12 +1,7 @@
 package com.trailiva.web.controller;
 
-import com.trailiva.data.model.Token;
 import com.trailiva.data.model.User;
-import com.trailiva.data.repository.TokenRepository;
 import com.trailiva.event.OnRegistrationCompleteEvent;
-import com.trailiva.security.CustomUserDetailService;
-import com.trailiva.security.JwtTokenProvider;
-import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.AuthService;
 import com.trailiva.web.exceptions.AuthException;
 import com.trailiva.web.exceptions.RoleNotFoundException;
@@ -31,9 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
 
-import static com.trailiva.data.model.TokenType.REFRESH_TOKEN;
-import static com.trailiva.util.Helper.isValidToken;
-
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @Slf4j
@@ -43,21 +35,14 @@ public class AuthController {
     private final AuthService authService;
     private final ApplicationEventPublisher eventPublisher;
     private final ModelMapper modelMapper;
-    private final TokenRepository tokenRepository;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final CustomUserDetailService customUserDetailService;
 
 
     public AuthController(AuthService authService,
                           ApplicationEventPublisher eventPublisher,
-                          ModelMapper modelMapper, TokenRepository tokenRepository,
-                          JwtTokenProvider jwtTokenProvider, CustomUserDetailService customUserDetailService) {
+                          ModelMapper modelMapper) {
         this.authService = authService;
         this.eventPublisher = eventPublisher;
         this.modelMapper = modelMapper;
-        this.tokenRepository = tokenRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.customUserDetailService = customUserDetailService;
     }
 
 

@@ -1,6 +1,7 @@
 package com.trailiva.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.trailiva.util.AppConstants;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +22,7 @@ import static com.trailiva.data.model.TokenType.REFRESH_TOKEN;
 @Entity
 @NoArgsConstructor
 public class Token {
-    private final static long EXPIRATION = 1L;
+    private final static long EXPIRATION = 48L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,9 +45,6 @@ public class Token {
 
     private String tokenType;
 
-    @Value("${trailiva.app.jwtRefreshExpirationMs}")
-    long refreshTokenExpiryTimeInSec;
-
     public Token(String token, User user, String tokenType) {
         this.token = token;
         this.user = user;
@@ -55,7 +53,7 @@ public class Token {
     }
 
     private LocalDateTime calculateExpiryDate(long expiryTimeInHours){
-        return LocalDateTime.now().plusHours(expiryTimeInHours);
+        return LocalDateTime.now().plusMinutes(expiryTimeInHours);
     }
 
     public void updateToken(String code){
@@ -67,7 +65,8 @@ public class Token {
     public Token(User user){
         this.token = UUID.randomUUID().toString();
         this.tokenType = REFRESH_TOKEN.toString();
-        this.expiryDate = calculateExpiryDate(refreshTokenExpiryTimeInSec);
+        this.expiryDate = calculateExpiryDate(AppConstants.JWT_REFRESH_TOKEN_EXPIRATION_IN_HR);
+        this.user = user;
     }
 
     public void updateToken(String code, String tokenType){

@@ -1,5 +1,6 @@
 package com.trailiva.security;
 
+import com.trailiva.util.AppConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,8 +16,6 @@ import java.util.function.Function;
 @Service
 @Slf4j
 public class JwtTokenProvider {
-    // Key not for production but testing
-    private final String SECRET_KEY = "TrailivaSolution";
 
     public String generateToken(UserPrincipal fetchedUser) {
         Map<String, Object> claims = new HashMap<>();
@@ -28,8 +27,8 @@ public class JwtTokenProvider {
                 .setClaims(claims).setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
 //                // Jwt expiration time is 10hr after jwt is issued
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
+                .setExpiration(new Date(System.currentTimeMillis() + AppConstants.JWT_REFRESH_TOKEN_EXPIRATION_IN_MS))
+                .signWith(SignatureAlgorithm.HS256, AppConstants.JWT_SECRET).compact();
     }
 
     public String extractEmail(String jwtToken) {
@@ -42,7 +41,7 @@ public class JwtTokenProvider {
     }
 
     private Claims extractAllClaim(String jwtToken) {
-        return Jwts.parser().setSigningKey(SECRET_KEY)
+        return Jwts.parser().setSigningKey(AppConstants.JWT_SECRET)
                 .parseClaimsJws(jwtToken).getBody();
     }
 

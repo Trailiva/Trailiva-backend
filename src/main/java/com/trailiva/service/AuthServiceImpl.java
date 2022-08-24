@@ -88,6 +88,7 @@ public class AuthServiceImpl implements AuthService {
         final String jwtToken = jwtTokenProvider.generateToken(userDetails);
         User user = internalFindUserByEmail(loginRequest.getEmail());
         Token refreshToken = new Token(user);
+        tokenRepository.save(refreshToken);
         return new JwtTokenResponse(jwtToken, refreshToken.getToken(), user.getEmail());
     }
 
@@ -170,7 +171,7 @@ public class AuthServiceImpl implements AuthService {
             Token token = getRefreshToken(refreshToken.get());
             String jwtToken = jwtTokenProvider.generateToken((UserPrincipal) customUserDetailService.loadUserByUsername(token.getUser().getEmail()));
             return new JwtTokenResponse(jwtToken, requestRefreshToken, token.getUser().getEmail());
-        } else throw new TokenException(requestRefreshToken + "Invalid refresh token");
+        } else throw new TokenException(requestRefreshToken + " Invalid refresh token");
     }
 
     private Token getRefreshToken(Token token) throws TokenException {
