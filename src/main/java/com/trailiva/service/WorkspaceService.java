@@ -3,6 +3,7 @@ package com.trailiva.service;
 import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.OfficialWorkspace;
 import com.trailiva.data.model.PersonalWorkspace;
+import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
@@ -53,5 +54,7 @@ public interface WorkspaceService {
     List<PersonalWorkspace> getPersonalWorkspaces();
 
     List<OfficialWorkspace> getOfficialWorkspaces();
+
+    void assignContributorToTaskOnOfficialWorkspace(Long moderatorId, Long contributorId, Long taskId, Long workspaceId) throws WorkspaceException, TaskException, UserException;
 
 }

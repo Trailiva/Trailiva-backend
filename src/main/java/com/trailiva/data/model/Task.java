@@ -29,6 +29,10 @@ public class Task {
 
     private String description;
 
+    private boolean isAssigned;
+
+    private boolean isRequested;
+
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
     private LocalDateTime createdAt;

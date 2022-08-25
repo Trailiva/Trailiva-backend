@@ -2,11 +2,9 @@ package com.trailiva.service;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import com.trailiva.data.model.OfficialWorkspace;
-import com.trailiva.data.model.PersonalWorkspace;
-import com.trailiva.data.model.User;
-import com.trailiva.data.model.WorkspaceRequestToken;
+import com.trailiva.data.model.*;
 import com.trailiva.data.repository.*;
+import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
@@ -18,8 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -39,6 +35,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final OfficialWorkspaceRepository officialWorkspaceRepository;
     private final WorkspaceRequestTokenRepository tokenRepository;
     private final EmailService emailService;
+    private final TaskRepository taskRepository;
 
     public WorkspaceServiceImpl(
             ModelMapper modelMapper,
@@ -46,7 +43,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             UserRepository userRepository,
             RoleRepository roleRepository,
             OfficialWorkspaceRepository officialWorkspaceRepository,
-            WorkspaceRequestTokenRepository tokenRepository, EmailService emailService) {
+            WorkspaceRequestTokenRepository tokenRepository, EmailService emailService, TaskRepository taskRepository) {
         this.modelMapper = modelMapper;
         this.personalWorkspaceRepository = personalWorkspaceRepository;
         this.userRepository = userRepository;
@@ -54,6 +51,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         this.officialWorkspaceRepository = officialWorkspaceRepository;
         this.tokenRepository = tokenRepository;
         this.emailService = emailService;
+        this.taskRepository = taskRepository;
     }
 
 
@@ -163,6 +161,23 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     @Override
     public List<OfficialWorkspace> getOfficialWorkspaces() {
         return officialWorkspaceRepository.findAll();
+    }
+
+    @Override
+    public void assignContributorToTaskOnOfficialWorkspace(Long moderatorId, Long contributorId, Long taskId, Long workspaceId) throws WorkspaceException, TaskException, UserException {
+        OfficialWorkspace workspace = getOfficialWorkspace(workspaceId);
+        boolean isValidModerator = workspace.getModerators().stream().anyMatch(moderator -> moderator.getUserId().equals(moderatorId));
+        boolean isValidContributor = workspace.getContributors().stream().anyMatch(contributor -> contributor.getUserId().equals(contributorId));
+
+        if (isValidContributor){
+            if (isValidModerator){
+                Task task = taskRepository.findById(taskId).orElseThrow(
+                        ()-> new TaskException("Task not found"));
+                task.setAssignee(getAUserByUserId(contributorId));
+                task.setAssigned(true);
+                taskRepository.save(task);
+            }else throw new WorkspaceException("Not a valid moderator");
+        }else throw new WorkspaceException("Not a valid contributor");
     }
 
     private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
