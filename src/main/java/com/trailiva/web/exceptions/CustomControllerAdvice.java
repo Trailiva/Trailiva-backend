@@ -6,8 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import javax.naming.AuthenticationException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,10 +23,22 @@ public class CustomControllerAdvice {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handle(Exception ex, HttpServletRequest request, HttpServletResponse response) {
-        if (ex instanceof NullPointerException) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<?> handle(Exception e) {
+        if (e instanceof NullPointerException) {
+            return new ResponseEntity<>(new ApiResponse
+                    (false, "Error occurred from request data", e.getMessage()), HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        return new ResponseEntity<>(new ApiResponse
+                (false, " Unknown error occurred", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleAccessDeniedRequest(Exception e) {
+        return new ResponseEntity<>(new ApiResponse
+                (false, "You do not have permission to this resource", e.getMessage()), HttpStatus.FORBIDDEN);
+    }
+
 }

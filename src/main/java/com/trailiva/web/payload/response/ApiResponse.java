@@ -18,6 +18,7 @@ public class ApiResponse{
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime localDateTime;
     private Object data;
+    private int status;
 
     public ApiResponse(boolean isSuccessful, String message) {
         this.isSuccessful = isSuccessful;
@@ -29,6 +30,11 @@ public class ApiResponse{
     public ApiResponse(boolean isSuccessful, String message, Object data) {
         this(isSuccessful, message);
         this.data = data;
+    }
+
+    public ApiResponse(boolean isSuccessful, String message, int status){
+        this(isSuccessful, message);
+        this.status = status;
     }
 
 }
