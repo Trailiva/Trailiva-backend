@@ -13,14 +13,12 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class ApiResponse{
     private boolean isSuccessful;
     private String message;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime localDateTime;
     private Object data;
-    private int status;
 
     public ApiResponse(boolean isSuccessful, String message) {
         this.isSuccessful = isSuccessful;
@@ -33,10 +31,4 @@ public class ApiResponse{
         this(isSuccessful, message);
         this.data = data;
     }
-
-    public ApiResponse(boolean isSuccessful, String message, int status){
-        this(isSuccessful, message);
-        this.status = status;
-    }
-
 }
