@@ -166,19 +166,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     @Override
     public void assignContributorToTaskOnOfficialWorkspace(Long moderatorId, Long contributorId, Long taskId, Long workspaceId) throws WorkspaceException, TaskException, UserException {
         OfficialWorkspace workspace = getOfficialWorkspace(workspaceId);
-        boolean isValidModerator = workspace.getModerators().stream().anyMatch(moderator -> moderator.getUserId().equals(moderatorId));
-        boolean isValidContributor = workspace.getContributors().stream().anyMatch(contributor -> contributor.getUserId().equals(contributorId));
+        boolean isValidModerator = isValidMember(workspace.getModerators(), moderatorId);
+        boolean isValidContributor = isValidMember(workspace.getContributors(), contributorId);
 
-        if (isValidContributor){
-            if (isValidModerator){
+        if (isValidContributor && isValidModerator){
                 Task task = taskRepository.findById(taskId).orElseThrow(
                         ()-> new TaskException("Task not found"));
                 task.setAssignee(getAUserByUserId(contributorId));
                 task.setAssigned(true);
                 task.setReporter(getAUserByUserId(moderatorId));
                 taskRepository.save(task);
-            }else throw new WorkspaceException("Not a valid moderator");
-        }else throw new WorkspaceException("Not a valid contributor");
+            }else throw new WorkspaceException("Not a valid member");
+    }
+
+    private boolean isValidMember(Set<User> workspace, Long moderatorId) {
+        return workspace.stream().anyMatch(moderator -> moderator.getUserId().equals(moderatorId));
     }
 
     private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
