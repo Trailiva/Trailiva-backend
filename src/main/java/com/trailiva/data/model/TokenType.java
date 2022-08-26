@@ -7,5 +7,7 @@ public enum TokenType {
     FORGET_PASSWORD,
     WORKSPACE_REQUEST,
     PROJECT_REQUEST,
-    REFRESH_TOKEN
+    TASK_REQUEST,
+    REFRESH_TOKEN,
+
 }

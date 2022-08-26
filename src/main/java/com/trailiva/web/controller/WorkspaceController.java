@@ -260,4 +260,15 @@ public class WorkspaceController {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PostMapping("/official/request-task/{workspaceId}/{taskId}")
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    public ResponseEntity<?> requestTaskOnOfficialWorkspace(@CurrentUser UserPrincipal userPrincipal, @PathVariable Long workspaceId, @PathVariable Long taskId) {
+        try {
+            workspaceService.requestTask(workspaceId, taskId, userPrincipal.getId());
+            return ResponseEntity.ok(new ApiResponse(true, "Task is successfully requested"));
+        } catch (TaskException | UserException | WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.trailiva.data.model.TokenType.TASK_REQUEST;
 import static com.trailiva.data.model.TokenType.WORKSPACE_REQUEST;
 import static com.trailiva.util.Helper.convertMultiPartToFile;
 import static com.trailiva.util.Helper.isValidToken;
@@ -33,7 +34,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final OfficialWorkspaceRepository officialWorkspaceRepository;
-    private final WorkspaceRequestTokenRepository tokenRepository;
+    private final WorkspaceRequestTokenRepository workspaceRequestTokenRepository;
+    private final TaskRequestTokenRepository taskRequestTokenRepository;
     private final EmailService emailService;
     private final TaskRepository taskRepository;
 
@@ -43,13 +45,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             UserRepository userRepository,
             RoleRepository roleRepository,
             OfficialWorkspaceRepository officialWorkspaceRepository,
-            WorkspaceRequestTokenRepository tokenRepository, EmailService emailService, TaskRepository taskRepository) {
+            WorkspaceRequestTokenRepository workspaceRequestTokenRepository, TaskRequestTokenRepository taskRequestTokenRepository, EmailService emailService, TaskRepository taskRepository) {
         this.modelMapper = modelMapper;
         this.personalWorkspaceRepository = personalWorkspaceRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.officialWorkspaceRepository = officialWorkspaceRepository;
-        this.tokenRepository = tokenRepository;
+        this.workspaceRequestTokenRepository = workspaceRequestTokenRepository;
+        this.taskRequestTokenRepository = taskRequestTokenRepository;
         this.emailService = emailService;
         this.taskRepository = taskRepository;
     }
@@ -104,7 +107,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
         if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
         onboardContributor(token.getWorkspace(), token.getUser());
-        tokenRepository.delete(token);
+        workspaceRequestTokenRepository.delete(token);
     }
 
     @Override
@@ -112,7 +115,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         WorkspaceRequestToken token = getToken(requestToken, WORKSPACE_REQUEST.toString());
         if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
         onboardModerator(token.getWorkspace(), token.getUser());
-        tokenRepository.delete(token);
+        workspaceRequestTokenRepository.delete(token);
     }
 
     @Override
@@ -169,22 +172,63 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         boolean isValidModerator = isValidMember(workspace.getModerators(), moderatorId);
         boolean isValidContributor = isValidMember(workspace.getContributors(), contributorId);
 
-        if (isValidContributor && isValidModerator){
-                Task task = taskRepository.findById(taskId).orElseThrow(
-                        ()-> new TaskException("Task not found"));
-                task.setAssignee(getAUserByUserId(contributorId));
-                task.setAssigned(true);
-                task.setReporter(getAUserByUserId(moderatorId));
-                taskRepository.save(task);
-            }else throw new WorkspaceException("Not a valid member");
+        if (isValidContributor && isValidModerator) {
+            assignTask(moderatorId, contributorId, taskId);
+        } else throw new WorkspaceException("Not a valid member");
     }
 
-    private boolean isValidMember(Set<User> workspace, Long moderatorId) {
-        return workspace.stream().anyMatch(moderator -> moderator.getUserId().equals(moderatorId));
+    private void assignTask(Long moderatorId, Long contributorId, Long taskId) throws TaskException, UserException {
+        Task task = getATaskById(taskId);
+        task.setAssignee(getAUserByUserId(contributorId));
+        task.setAssigned(true);
+        task.setReporter(getAUserByUserId(moderatorId));
+        taskRepository.save(task);
+    }
+
+
+    private Task getATaskById(Long taskId) throws TaskException {
+        return taskRepository.findById(taskId).orElseThrow(
+                () -> new TaskException("Task not found"));
+    }
+
+    @Override
+    public void requestTask(Long workspaceId, Long taskId, Long contributionId) throws UserException, WorkspaceException, TaskException {
+        User user = getAUserByUserId(contributionId);
+        String token = UUID.randomUUID().toString();
+        OfficialWorkspace workspace = getOfficialWorkspace(workspaceId);
+        Task task = getATaskById(taskId);
+        task.setRequested(true);
+
+        taskRepository.save(task);
+        TaskRequestToken requestToken = new TaskRequestToken(token, user, TASK_REQUEST.toString(), task);
+        taskRequestTokenRepository.save(requestToken);
+
+        /*
+         * Send mail to all contributor on workspace
+         *         workspace.getModerators().forEach(moderator -> {
+         *
+         *   });
+         */
+
+    }
+
+    @Override
+    public void assignTaskToContributorWithRequestToken(Long moderatorId, String requestToken) throws
+            TokenException, TaskException, UserException {
+        TaskRequestToken token = taskRequestTokenRepository.findByTokenAndTokenType(requestToken,
+                TASK_REQUEST.toString()).orElseThrow(()-> new TokenException("Token is invalid"));
+        if (isValidToken(token.getExpiryDate())) throw new TokenException("Token has expired");
+        assignTask(moderatorId, token.getUser().getUserId(), token.getTask().getId());
+        taskRequestTokenRepository.delete(token);
+    }
+
+
+    private boolean isValidMember(Set<User> workspace, Long memberId) {
+        return workspace.stream().anyMatch(moderator -> moderator.getUserId().equals(memberId));
     }
 
     private WorkspaceRequestToken getToken(String token, String tokenType) throws TokenException {
-        return tokenRepository.findByTokenAndTokenType(token, tokenType)
+        return workspaceRequestTokenRepository.findByTokenAndTokenType(token, tokenType)
                 .orElseThrow(() -> new TokenException("Invalid token"));
     }
 
@@ -287,7 +331,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
 
-
     private void sendRequestToken(Long userId, String email) throws UserException, WorkspaceException {
         User user = getAUserByEmail(email);
         String token = UUID.randomUUID().toString();
@@ -295,7 +338,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
         WorkspaceRequestToken requestToken = new WorkspaceRequestToken(token, user, WORKSPACE_REQUEST.toString(),
                 workspace);
-        tokenRepository.save(requestToken);
+        workspaceRequestTokenRepository.save(requestToken);
         emailService.sendWorkspaceRequestTokenEmail(email, requestToken.getToken());
     }
 }

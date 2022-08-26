@@ -57,4 +57,7 @@ public interface WorkspaceService {
 
     void assignContributorToTaskOnOfficialWorkspace(Long moderatorId, Long contributorId, Long taskId, Long workspaceId) throws WorkspaceException, TaskException, UserException;
 
+    void requestTask(Long workspaceId, Long taskId, Long contributorId) throws UserException, WorkspaceException, TaskException;
+
+    void assignTaskToContributorWithRequestToken(Long moderatorId, String requestToken) throws TokenException, TaskException, UserException;
 }

@@ -19,8 +19,7 @@ import static com.trailiva.util.AppConstants.EXPIRATION;
 @AllArgsConstructor
 @Entity
 @NoArgsConstructor
-public class ProjectRequestToken {
-
+public class TaskRequestToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,7 +33,7 @@ public class ProjectRequestToken {
     @OneToOne(fetch = FetchType.EAGER, targetEntity = Project.class)
     @JoinColumn(nullable = false, name = "project_id",
             foreignKey = @ForeignKey(name = "FK_PROJECT"))
-    private Project project;
+    private Task task;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -48,16 +47,16 @@ public class ProjectRequestToken {
 
     private String tokenType;
 
-    public ProjectRequestToken(String token, User user, String tokenType) {
+    public TaskRequestToken(String token, User user, String tokenType) {
         this.token = token;
         this.user = user;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public ProjectRequestToken(String token, User user, String tokenType, Project project) {
+    public TaskRequestToken(String token, User user, String tokenType, Task task) {
         this(token, user, tokenType);
-        this.project = project;
+        this.task = task;
     }
 
     private LocalDateTime calculateExpiryDate(long expiryTimeInHours){

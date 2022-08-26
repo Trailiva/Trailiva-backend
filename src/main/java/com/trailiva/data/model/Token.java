@@ -64,7 +64,7 @@ public class Token {
 
     public Token(User user){
         this.token = UUID.randomUUID().toString();
-        this.tokenType = REFRESH_TOKEN.toString();
+        this.tokenType = REFRESH.toString();
         this.expiryDate = calculateExpiryDate(AppConstants.JWT_REFRESH_TOKEN_EXPIRATION_IN_HR);
         this.user = user;
     }
