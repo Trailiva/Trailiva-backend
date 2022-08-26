@@ -7,4 +7,6 @@ public interface AppConstants {
     int JWT_REFRESH_TOKEN_EXPIRATION_IN_HR = 240;
     int JWT_REFRESH_TOKEN_EXPIRATION_IN_MS = 36000000;
     String JWT_SECRET = "TrailOpenSourceProject";
+    long EXPIRATION = 48L;
+
 }
