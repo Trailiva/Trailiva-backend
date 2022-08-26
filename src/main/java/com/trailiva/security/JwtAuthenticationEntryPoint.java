@@ -1,8 +1,6 @@
 package com.trailiva.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trailiva.web.exceptions.UnauthorizedException;
-import com.trailiva.web.payload.response.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

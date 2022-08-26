@@ -1,11 +1,13 @@
 package com.trailiva.web.controller;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.trailiva.data.model.*;
+import com.trailiva.data.model.OfficialWorkspace;
+import com.trailiva.data.model.PersonalWorkspace;
 import com.trailiva.security.CurrentUser;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.WorkspaceService;
 import com.trailiva.util.Helper;
+import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
@@ -19,12 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -248,5 +247,17 @@ public class WorkspaceController {
         List<OfficialWorkspace> officialWorkspaces = workspaceService.getOfficialWorkspaces();
         Map<String, List<?>> userCount = Map.of("personalWorkspaces", personalWorkspaces, "officialWorkspaces", officialWorkspaces);
         return ResponseEntity.ok(new ApiResponse(true, "Successful", userCount));
+    }
+
+    @PostMapping("/official/assign-task/{workspaceId}/{taskId}/{contributorId}")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+    public ResponseEntity<?> assignTaskToContributorOnOfficialWorkspace(@CurrentUser UserPrincipal userPrincipal, @PathVariable Long workspaceId,
+                                                                        @PathVariable Long contributorId, @PathVariable Long taskId) {
+        try {
+            workspaceService.assignContributorToTaskOnOfficialWorkspace(userPrincipal.getId(), contributorId, taskId, workspaceId);
+            return ResponseEntity.ok(new ApiResponse(true, "Task is successfully assigned to contributor"));
+        } catch (TaskException | UserException | WorkspaceException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
     }
 }
