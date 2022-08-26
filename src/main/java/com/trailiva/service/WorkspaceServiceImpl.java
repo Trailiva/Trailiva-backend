@@ -175,6 +175,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                         ()-> new TaskException("Task not found"));
                 task.setAssignee(getAUserByUserId(contributorId));
                 task.setAssigned(true);
+                task.setReporter(getAUserByUserId(moderatorId));
                 taskRepository.save(task);
             }else throw new WorkspaceException("Not a valid moderator");
         }else throw new WorkspaceException("Not a valid contributor");
