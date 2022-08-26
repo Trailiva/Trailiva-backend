@@ -271,4 +271,15 @@ public class WorkspaceController {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PostMapping("/official/assign-task")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+    public ResponseEntity<?> assignTaskToContributorOnOfficialWorkspace(@CurrentUser UserPrincipal userPrincipal, @RequestParam("token") String token) {
+        try {
+            workspaceService.assignTaskToContributorWithRequestToken(userPrincipal.getId(), token);
+            return ResponseEntity.ok(new ApiResponse(true, "Task is successfully assigned to contributor"));
+        } catch (TaskException | UserException | TokenException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

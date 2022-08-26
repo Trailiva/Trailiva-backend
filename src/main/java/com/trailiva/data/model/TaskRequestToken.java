@@ -27,12 +27,12 @@ public class TaskRequestToken {
 
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
     @JoinColumn(nullable = false, name = "user_id",
-            foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
+            foreignKey = @ForeignKey(name = "FK_USER"))
     private User user;
 
-    @OneToOne(fetch = FetchType.EAGER, targetEntity = Project.class)
-    @JoinColumn(nullable = false, name = "project_id",
-            foreignKey = @ForeignKey(name = "FK_PROJECT"))
+    @OneToOne(fetch = FetchType.EAGER, targetEntity = Task.class)
+    @JoinColumn(nullable = false, name = "task_id",
+            foreignKey = @ForeignKey(name = "FK_TASK"))
     private Task task;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
