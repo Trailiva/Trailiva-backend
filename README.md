@@ -7,6 +7,7 @@ Trailiva is a project management tool that you may use to keep track of your per
 - Sendgrid (SMTP server for mail sending)
 - Cloudinary (File server for user pictures and videos)
 - Jwt (Library for authentication)
+- Heroku (Hosting service)
 
  ## How To Run The Project
 1. Clone project
