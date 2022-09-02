@@ -54,5 +54,3 @@ The api Documentation is hosted [here](https://documenter.postman.com/preview/18
 
 
 
-
-
