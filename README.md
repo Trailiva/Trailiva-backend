@@ -48,7 +48,27 @@ Trailiva is a project management tool that you may use to keep track of your per
 - The application should be available
 
 ## API Design
-The api Documentation is hosted [here](https://documenter.postman.com/preview/18385063-ff9175c4-8d85-48b4-9e61-ad09e1f4a4d8?environment=18385063-ffc454ad-94dc-4063-9942-93254a215c9f&versionTag=latest&apiName=CURRENT&version=latest&documentationLayout=classic-single-column&right-sidebar=303030&top-bar=FFFFFF&highlight=EF5B25)
+[![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](https://documenter.postman.com/preview/18385063-ff9175c4-8d85-48b4-9e61-ad09e1f4a4d8?environment=18385063-ffc454ad-94dc-4063-9942-93254a215c9f&versionTag=latest&apiName=CURRENT&version=latest&documentationLayout=classic-single-column&right-sidebar=303030&top-bar=FFFFFF&highlight=EF5B25)
+
+## Badges
+_Social buttons_
+
+[![Whalewalker - trailiva](https://img.shields.io/static/v1?label=Whalewalker&message=trailiva&color=blue&logo=github)](https://github.com/Whalewalker/trailiva "Go to GitHub repo")
+[![stars - trailiva](https://img.shields.io/github/stars/Whalewalker/trailiva?style=social)](https://github.com/Whalewalker/trailiva)
+[![forks - trailiva](https://img.shields.io/github/forks/Whalewalker/trailiva?style=social)](https://github.com/Whalewalker/trailiva)
+
+
+_Repo metadata_
+
+
+[![GitHub tag](https://img.shields.io/github/tag/Whalewalker/trailiva?include_prereleases=&sort=semver&color=blue)](https://github.com/Whalewalker/trailiva/releases/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+[![issues - trailiva](https://img.shields.io/github/issues/Whalewalker/trailiva)](https://github.com/Whalewalker/trailiva/issues)
+
+## License
+
+Released under [MIT](/LICENSE) by [@Whalewalker](https://github.com/Whalewalker).
+
 
 
 
