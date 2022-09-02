@@ -8,7 +8,7 @@ Trailiva is a project management tool that you may use to keep track of your per
 - Cloudinary (File server for user pictures and videos)
 - Jwt (Library for authentication)
 
- How To Run The Project
+ ## How To Run The Project
 1. Clone project
 2. create a database named `trailiva` on PGAdmin or any PostgreSql platform
 3. check out to dev with command `git checkout dev`
@@ -31,6 +31,24 @@ Trailiva is a project management tool that you may use to keep track of your per
 ```
 5. Run project with command `mvn spring-boot:run`
 
+# Requirements
+
+## Functional
+- Users can sign up, sign in, verify account, refresh authentication token, forget password, reset password and update profile picture.
+- Users can add contributors to workspace
+- Users can add moderators to workspace
+- Users can create project
+- Users can create task
+- Contributor can work on task, request for task
+- Moderator can assign task to contributor, create task, review task
+
+
+## Non-Functional
+- Application should be secure
+- The application should be available
+
+## API Design
+The api Documentation is hosted [here](https://documenter.postman.com/preview/18385063-ff9175c4-8d85-48b4-9e61-ad09e1f4a4d8?environment=18385063-ffc454ad-94dc-4063-9942-93254a215c9f&versionTag=latest&apiName=CURRENT&version=latest&documentationLayout=classic-single-column&right-sidebar=303030&top-bar=FFFFFF&highlight=EF5B25)
 
 
 
