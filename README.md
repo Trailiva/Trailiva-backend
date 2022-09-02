@@ -1,5 +1,6 @@
 # Trailiva-backend
 Trailiva is a project management tool that you may use to keep track of your personal, professional, and open source projects.
+> Trailiva backend offers the APIs needed to complete every project requirement.
 
 ## Technologies
 - Springboot (Framework used to develop the APIs)
