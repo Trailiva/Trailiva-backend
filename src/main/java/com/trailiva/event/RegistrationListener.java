@@ -26,6 +26,6 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         User user = event.getUser();
         String token = UUID.randomUUID().toString();
         authService.createVerificationToken(user, token, VERIFICATION.toString());
-        authService.sendVerificationToken(user);
+        authService.sendVerificationToken(user, token);
     }
 }

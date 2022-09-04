@@ -69,8 +69,9 @@ public class AuthServiceImpl implements AuthService {
         return saveAUser(user);
     }
 
-    public void sendVerificationToken(User savedUser) {
+    public void sendVerificationToken(User savedUser, String token) {
         EmailRequest emailRequest = modelMapper.map(savedUser, EmailRequest.class);
+        emailRequest.setVerificationToken(token);
         emailService.sendUserVerificationEmail(emailRequest);
     }
 
@@ -125,7 +126,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void resendVerificationToken(String verificationToken) throws TokenException {
         Token token = generateNewToken(verificationToken, VERIFICATION.toString());
-        sendVerificationToken(token.getUser());
+        sendVerificationToken(token.getUser(), token.getToken());
     }
 
     @Override
@@ -135,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public Token createVerificationToken(com.trailiva.data.model.User user, String token, String tokenType) {
+    public Token createVerificationToken(User user, String token, String tokenType) {
         Token verificationToken = new Token(token, user, tokenType);
         return tokenRepository.save(verificationToken);
     }
