@@ -33,12 +33,4 @@ public class CustomControllerAdvice {
                 (false, " Unknown error occurred", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleAccessDeniedRequest(Exception e) {
-        return new ResponseEntity<>(new ApiResponse
-                (false, "You do not have permission to this resource", e.getMessage()), HttpStatus.FORBIDDEN);
-    }
-
 }

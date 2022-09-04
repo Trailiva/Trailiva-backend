@@ -64,8 +64,6 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthException("Email is already in use");
         }
         User user = modelMapper.map(userRequest, User.class);
-        user.setFirstName(userRequest.getFullName().split(" ")[0]);
-        user.setLastName(userRequest.getFullName().split(" ")[1]);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
         return saveAUser(user);

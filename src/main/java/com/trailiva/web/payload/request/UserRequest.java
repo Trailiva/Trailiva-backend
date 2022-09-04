@@ -10,8 +10,11 @@ import javax.validation.constraints.Size;
 
 @Data
 public class UserRequest {
-    @NotBlank(message = "Full name can not be blank")
-    private String fullName;
+    @NotBlank(message = "first name can not be blank")
+    private String firstName;
+
+    @NotBlank(message = "last name can not be blank")
+    private String lastName;
 
     @Email(message = "Email must be valid")
     @NotBlank(message = "Email can not be blank")
