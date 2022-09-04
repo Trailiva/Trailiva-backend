@@ -43,8 +43,7 @@ class AuthControllerTest {
     @BeforeEach
     void setUp() throws JsonProcessingException {
         UserRequest userDto = new UserRequest();
-        userDto.setFirstName("Ismail");
-        userDto.setLastName("Abdul");
+        userDto.setFullName("Abdul Ismail");
         userDto.setEmail("ismail1@gmail.com");
         userDto.setPassword("password123");
         registerJsonObject = objectMapper.writeValueAsString(userDto);
