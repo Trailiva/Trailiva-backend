@@ -27,4 +27,5 @@ public interface AuthService {
     TokenResponse createPasswordResetTokenForUser(String email) throws AuthException;
     boolean validatePasswordResetToken(String token) throws TokenException;
     JwtTokenResponse refreshToken(TokenRefreshRequest request) throws TokenException;
+    void updatePassword(PasswordRequest passwordRequest) throws TokenException;
 }

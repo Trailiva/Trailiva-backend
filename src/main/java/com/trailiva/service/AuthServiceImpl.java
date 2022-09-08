@@ -175,6 +175,12 @@ public class AuthServiceImpl implements AuthService {
         } else throw new TokenException(requestRefreshToken + " Invalid refresh token");
     }
 
+    @Override
+    public void updatePassword(PasswordRequest passwordRequest) throws TokenException {
+//        boolean isValid = validatePasswordResetToken(token);
+
+    }
+
     private Token getRefreshToken(Token token) throws TokenException {
         if (!isValidToken(token.getExpiryDate()))
             return token;
