@@ -27,7 +27,7 @@ class TrailivaTaskSchedulerTest {
     TaskService mockTaskService=new TaskServiceImpl(null, null,  null);
 
     @Mock
-    TrailivaTaskScheduler trailivaTaskScheduler;
+    TaskScheduler taskScheduler;
 
     @BeforeEach
     void setUp() {
@@ -38,6 +38,6 @@ class TrailivaTaskSchedulerTest {
         when(mockTaskService.getDueTasks(any(LocalDate.class))).thenReturn(anyList());
         await()
                 .atMost(Duration.ofSeconds(10L))
-                .untilAsserted(()->verify(trailivaTaskScheduler, atLeast(1)).verifyDueTask());
+                .untilAsserted(()->verify(taskScheduler, atLeast(1)).verifyDueTask());
     }
 }
