@@ -50,7 +50,7 @@ Trailiva is a project management tool that you may use to keep track of your per
 - The application should be available
 
 ## API Design
-[![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](https://documenter.postman.com/preview/18385063-ff9175c4-8d85-48b4-9e61-ad09e1f4a4d8?environment=18385063-ffc454ad-94dc-4063-9942-93254a215c9f&versionTag=latest&apiName=CURRENT&version=latest&documentationLayout=classic-single-column&right-sidebar=303030&top-bar=FFFFFF&highlight=EF5B25)
+[![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](https://documenter.getpostman.com/view/18385063/VUqoSKcw)
 
 ## Badges
 _Social buttons_
