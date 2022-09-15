@@ -38,7 +38,7 @@ public class WorkspaceController {
 
 
     @PostMapping("/personal/create")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> createPersonalWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody @Valid WorkspaceRequest request) {
         try {
             String referenceName = request.getName().substring(0, 2).toUpperCase();
@@ -51,7 +51,7 @@ public class WorkspaceController {
     }
 
     @PostMapping("/official/create")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> createOfficialWorkspace(@CurrentUser UserPrincipal currentUser, @RequestBody @Valid WorkspaceRequest request) {
         try {
             String referenceName = request.getName().substring(0, 2).toUpperCase();
@@ -65,7 +65,7 @@ public class WorkspaceController {
 
 
     @GetMapping("/my-workspace/personal")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> getPersonalWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
         try {
             PersonalWorkspace workSpace = workspaceService.getUserPersonalWorkspace(userPrincipal.getId());
@@ -76,7 +76,7 @@ public class WorkspaceController {
     }
 
     @GetMapping("/my-workspace/official")
-    @PreAuthorize("hasRole('ROLE_SUPER_MODERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<?> getOfficialWorkspacesByUserId(@CurrentUser UserPrincipal userPrincipal) {
         try {
             OfficialWorkspace workSpace = workspaceService.getUserOfficialWorkspace(userPrincipal.getId());
@@ -87,7 +87,7 @@ public class WorkspaceController {
     }
 
     @GetMapping("/official/{workspaceId}")
-    @PreAuthorize("hasRole('ROLE_SUPER_MODERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<?> getOfficialWorkspace(@PathVariable Long workspaceId) {
         try {
             OfficialWorkspace workSpace = workspaceService.getOfficialWorkspace(workspaceId);
@@ -98,7 +98,7 @@ public class WorkspaceController {
     }
 
     @GetMapping("/personal/{workspaceId}")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> getPersonalWorkspace(@PathVariable Long workspaceId) {
         try {
             PersonalWorkspace workSpace = workspaceService.getPersonalWorkspace(workspaceId);
@@ -110,7 +110,7 @@ public class WorkspaceController {
 
 
     @PostMapping("/my-workspace/add-contributor/request-token")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> addContributor(@RequestParam("requestToken") String requestToken) {
         try {
             workspaceService.addContributorToWorkspace(requestToken);
@@ -122,7 +122,7 @@ public class WorkspaceController {
 
 
     @PostMapping("/my-workspace/add-moderator/request-token")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> addModerator(@RequestParam("requestToken") String requestToken) {
         try {
             workspaceService.addModeratorToWorkspace(requestToken);
@@ -262,7 +262,7 @@ public class WorkspaceController {
     }
 
     @PostMapping("/official/request-task/{workspaceId}/{taskId}")
-    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> requestTaskOnOfficialWorkspace(@CurrentUser UserPrincipal userPrincipal, @PathVariable Long workspaceId, @PathVariable Long taskId) {
         try {
             workspaceService.requestTask(workspaceId, taskId, userPrincipal.getId());
