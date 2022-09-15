@@ -20,14 +20,14 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class TrailivaTaskSchedulerTest {
+class TrailivaSchedulerTest {
     @Mock
     TaskRepository taskRepository;
     @InjectMocks
     TaskService mockTaskService=new TaskServiceImpl(null, null,  null);
 
     @Mock
-    TaskScheduler taskScheduler;
+    Scheduler scheduler;
 
     @BeforeEach
     void setUp() {
@@ -38,6 +38,6 @@ class TrailivaTaskSchedulerTest {
         when(mockTaskService.getDueTasks(any(LocalDate.class))).thenReturn(anyList());
         await()
                 .atMost(Duration.ofSeconds(10L))
-                .untilAsserted(()->verify(taskScheduler, atLeast(1)).verifyDueTask());
+                .untilAsserted(()->verify(scheduler, atLeast(1)).verifyDueTask());
     }
 }

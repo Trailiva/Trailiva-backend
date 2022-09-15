@@ -45,7 +45,7 @@ public class SetupRoleAndPrivileges implements ApplicationListener<ContextRefres
             User user = new User();
             user.setFirstName("admin");
             user.setLastName("user");
-            user.setPassword(passwordEncoder.encode("admin"));
+            user.setPassword(passwordEncoder.encode("admin123"));
             user.setEmail("admin@gmail.com");
             user.setRoles(List.of(adminRole.get()));
             user.setEnabled(true);

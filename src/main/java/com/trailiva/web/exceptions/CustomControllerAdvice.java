@@ -29,6 +29,7 @@ public class CustomControllerAdvice {
             return new ResponseEntity<>(new ApiResponse
                     (false, "Error occurred from request data", e.getMessage()), HttpStatus.BAD_REQUEST);
         }
+        log.info("Error message ==> {}", e.getMessage());
         return new ResponseEntity<>(new ApiResponse
                 (false, " Unknown error occurred", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }

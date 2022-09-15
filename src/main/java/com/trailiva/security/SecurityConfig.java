@@ -56,6 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/trailiva/users/**")
                 .permitAll()
+                .antMatchers("/api/v1/trailiva/**")
+                .hasRole("ADMIN")
                 .anyRequest()
                 .authenticated();
 
