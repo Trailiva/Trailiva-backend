@@ -181,6 +181,14 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    public void deleteExpiredToken() {
+        List<Token> allTokens = tokenRepository.findAll();
+        allTokens.forEach(token -> {
+            if (token.getExpiryDate().isBefore(LocalDateTime.now())) tokenRepository.delete(token);
+        });
+    }
+
     private Token getRefreshToken(Token token) throws TokenException {
         if (!isValidToken(token.getExpiryDate()))
             return token;
