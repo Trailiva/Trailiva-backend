@@ -2,6 +2,7 @@ package com.trailiva.web.controller;
 
 import com.opencsv.exceptions.CsvValidationException;
 import com.trailiva.data.model.Project;
+import com.trailiva.data.model.Task;
 import com.trailiva.security.CurrentUser;
 import com.trailiva.security.UserPrincipal;
 import com.trailiva.service.ProjectService;
@@ -35,7 +36,7 @@ public class ProjectController {
 
 
     @PostMapping("personal/create/{id}")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> createProject(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
         try {
             Project project = projectService.createProjectForPersonalWorkspace(request, id);
@@ -45,8 +46,8 @@ public class ProjectController {
         }
     }
   @PostMapping("official/create/{id}")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> createProjectForOfficialWorkspace(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+  public ResponseEntity<?> createProjectForOfficialWorkspace(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
         try {
             Project project = projectService.createProjectForOfficialWorkspace(request, id);
             return  ResponseEntity.ok(project);
@@ -65,6 +66,17 @@ public class ProjectController {
         }
     }
 
+    @GetMapping("project/{projectId}")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<?> getAllTaskInProject(@PathVariable Long projectId) {
+        try {
+            List<Task> tasks = projectService.getTasksByProjectId(projectId);
+            return ResponseEntity.ok(tasks);
+        } catch (ProjectException e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("count-tasks/{projectId}")
     public ResponseEntity<?> getTaskCount(@PathVariable Long projectId) {
         try {
@@ -76,7 +88,7 @@ public class ProjectController {
     }
 
     @PostMapping("/add-contributor/request-token")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> addModerator(@RequestParam("requestToken") String requestToken) {
         try {
             projectService.addContributor(requestToken);

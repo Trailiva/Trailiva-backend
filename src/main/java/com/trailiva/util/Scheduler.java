@@ -28,14 +28,14 @@ public class Scheduler {
         this.tokenRepository = tokenRepository;
     }
 
-    @Scheduled(cron = "0 12 * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     public void verifyDueTask() {
         log.info("============ TASK UPDATE SCHEDULER STARTED ===========");
         taskRepository.updateDueTask();
         log.info("============ TASK UPDATE SCHEDULER ENDED ===========");
     }
 
-    @Scheduled(cron = "0 12 * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     @Transactional
     public void getExpiredToken(){
         log.info("============ TOKEN SCHEDULER STARTED ===========");

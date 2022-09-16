@@ -86,13 +86,6 @@ public class TaskServiceImpl implements TaskService{
         taskRepository.delete(taskToDelete);
     }
 
-    @Override
-    @Transactional
-    public List<Task> getTasksByWorkspaceId(Long projectId) throws ProjectException {
-        Project project = projectRepository.findById(projectId).orElseThrow(
-                ()-> new ProjectException("Project not found"));
-        return project.getTasks();
-    }
 
     @Override
     @Transactional

@@ -2,7 +2,6 @@ package com.trailiva.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -20,7 +19,7 @@ import java.util.Set;
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long taskId;
+    private Long projectId;
 
     private String name;
     private String description;

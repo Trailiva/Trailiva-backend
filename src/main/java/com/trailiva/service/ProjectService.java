@@ -33,4 +33,6 @@ public interface ProjectService {
     void addContributorFromCSV(MultipartFile file, String userEmail) throws IOException, CsvValidationException, UserException, ProjectException;
 
     void addContributor(String requestToken) throws TokenException, UserException;
+
+    List<Task> getTasksByProjectId(Long workspaceId) throws ProjectException;
 }

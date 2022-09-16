@@ -11,6 +11,7 @@ import com.trailiva.web.exceptions.WorkspaceException;
 import com.trailiva.web.payload.request.ProjectRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileReader;
@@ -34,25 +35,23 @@ public class ProjectServiceImpl implements ProjectService {
     private final OfficialWorkspaceRepository officialWorkspaceRepository;
     private final ProjectRequestTokenRepository projectRequestTokenRepository;
     private final UserRepository userRepository;
-    private final EmailService emailService;
 
     public ProjectServiceImpl(ModelMapper modelMapper, ProjectRepository projectRepository,
                               PersonalWorkspaceRepository personalWorkspaceRepository,
                               OfficialWorkspaceRepository officialWorkspaceRepository,
                               ProjectRequestTokenRepository projectRequestTokenRepository,
-                              UserRepository userRepository, EmailService emailService) {
+                              UserRepository userRepository) {
         this.modelMapper = modelMapper;
         this.projectRepository = projectRepository;
         this.personalWorkspaceRepository = personalWorkspaceRepository;
         this.officialWorkspaceRepository = officialWorkspaceRepository;
         this.projectRequestTokenRepository = projectRequestTokenRepository;
         this.userRepository = userRepository;
-        this.emailService = emailService;
     }
 
 
     @Override
-    public Project createProjectForPersonalWorkspace(ProjectRequest request, Long workspaceId) throws WorkspaceException, UserException, ProjectException {
+    public Project createProjectForPersonalWorkspace(ProjectRequest request, Long workspaceId) throws WorkspaceException, ProjectException {
         PersonalWorkspace workSpace = personalWorkspaceRepository.findById(workspaceId).orElseThrow(
                 () -> new WorkspaceException("Workspace does not exist"));
         List<Project> projects = workSpace.getProjects();
@@ -146,6 +145,15 @@ public class ProjectServiceImpl implements ProjectService {
         onboardContributor(token.getProject(), token.getUser());
         projectRequestTokenRepository.delete(token);
     }
+
+    @Override
+    @Transactional
+    public List<Task> getTasksByProjectId(Long projectId) throws ProjectException {
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                ()-> new ProjectException("Project not found"));
+        return project.getTasks();
+    }
+
 
     private ProjectRequestToken getToken(String requestToken, String tokenType) throws TokenException {
         return projectRequestTokenRepository.findByTokenAndTokenType(requestToken, tokenType)
