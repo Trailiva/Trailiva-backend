@@ -22,7 +22,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.trailiva.data.model.TokenType.PROJECT_REQUEST;
-import static com.trailiva.data.model.TokenType.WORKSPACE_REQUEST;
 import static com.trailiva.util.Helper.convertMultiPartToFile;
 import static com.trailiva.util.Helper.isValidToken;
 
@@ -60,7 +59,6 @@ public class ProjectServiceImpl implements ProjectService {
         if (isValidProject(projects, request.getName())) {
             Project project = modelMapper.map(request, Project.class);
             project.setReferenceName(generateReferenceName(request.getName()));
-            project.setCreator(workSpace.getCreator());
             Project savedProject = projectRepository.save(project);
             workSpace.addProject(savedProject);
             personalWorkspaceRepository.save(workSpace);
@@ -78,7 +76,6 @@ public class ProjectServiceImpl implements ProjectService {
         if (isValidProject(projects, request.getName())) {
             Project project = modelMapper.map(request, Project.class);
             project.setReferenceName(generateReferenceName(request.getName()));
-            project.setCreator(workSpace.getCreator());
             Project savedProject = projectRepository.save(project);
             workSpace.addProject(savedProject);
             officialWorkspaceRepository.save(workSpace);
@@ -119,21 +116,21 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public void addContributor(List<String> contributorEmails, String userEmail) throws UserException, ProjectException {
+    public void addContributor(List<String> contributorEmails, Long projectId) throws UserException, ProjectException {
         if (!contributorEmails.isEmpty()) {
-            for (String email : contributorEmails) {
-                sendRequestToken(userEmail, email);
+            for (String contributorEmail : contributorEmails) {
+                sendRequestToken(contributorEmail, projectId);
             }
         }
     }
 
     @Override
-    public void addContributorFromCSV(MultipartFile file, String userEmail) throws IOException, CsvValidationException, UserException, ProjectException {
+    public void addContributorFromCSV(MultipartFile file, Long projectId) throws IOException, CsvValidationException, UserException, ProjectException {
         CSVReader reader = new CSVReader(new FileReader(convertMultiPartToFile(file)));
         String[] nextLine;
         while ((nextLine = reader.readNext()) != null) {
-            for (String email : nextLine) {
-                sendRequestToken(userEmail, email);
+            for (String contributorEmail : nextLine) {
+                sendRequestToken(contributorEmail, projectId);
             }
         }
     }
@@ -161,16 +158,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void onboardContributor(Project project, User contributor) throws UserException {
-        if (userAlreadyExistInWorkspace(project.getContributors(), contributor.getEmail(), project.getCreator().getEmail())) {
+        boolean isAContributor = isValidContributor(project.getContributors(), contributor.getEmail());
+        if (isAContributor) {
             throw new UserException("Contributor with email " + contributor.getEmail() + " already added to this project");
         }
         project.getContributors().add(contributor);
         saveProject(project);
     }
 
-    private boolean userAlreadyExistInWorkspace(Set<User> contributors, String contributorEmail, String creatorEmail) {
-        boolean contributorExist = contributors.stream().anyMatch(user -> user.getEmail().equals(contributorEmail));
-        return contributorExist || creatorEmail.equals(contributorEmail);
+    private boolean isValidContributor(Set<User> projectUsers, String email) {
+        return projectUsers.stream().anyMatch(user -> user.getEmail().equals(email));
     }
 
     private Project saveProject(Project project) {
@@ -178,21 +175,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
 
-    private void sendRequestToken(String userEmail, String email) throws UserException, ProjectException {
-        User user = getAUserByEmail(email);
+    private void sendRequestToken(String contributorEmail,Long projectId) throws UserException, ProjectException {
+        User User = getAUserByEmail(contributorEmail);
         String token = UUID.randomUUID().toString();
-        Project project = getUserProject(userEmail);
+        Project project = getProjectById(projectId);
 
-        ProjectRequestToken requestToken = new ProjectRequestToken(token, user,
+        ProjectRequestToken requestToken = new ProjectRequestToken(token, User,
                 PROJECT_REQUEST.toString(), project);
         projectRequestTokenRepository.save(requestToken);
 //        emailService.sendWorkspaceRequestTokenEmail(email, requestToken.getToken());
-    }
-
-    private Project getUserProject(String email) throws UserException, ProjectException {
-        User creator = getAUserByEmail(email);
-        return projectRepository.findByCreator(creator)
-                .orElseThrow(() -> new ProjectException("Project not found"));
     }
 
     private User getAUserByEmail(String email) throws UserException {

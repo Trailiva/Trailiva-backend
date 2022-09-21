@@ -24,23 +24,23 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
     @Override
     public String uploadImage(MultipartFile file, Long userId) throws IOException, UserException {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserException("user not found"));
+        User User = userRepository.findById(userId).orElseThrow(() -> new UserException("user not found"));
         Map<?, ?> imageProperties = ObjectUtils.asMap("public_id", "user_images" + extractFileName(file.getName()));
         Map<?, ?> uploadResult =  cloudinary.uploader().upload(file.getBytes(), imageProperties);
         String imageUrl =  String.valueOf(uploadResult.get("url"));
-        user.setImageUrl(imageUrl);
-        userRepository.save(user);
+        User.setImageUrl(imageUrl);
+        userRepository.save(User);
         return  imageUrl;
     }
 
     @Override
     public void deleteImage(String publicId, Long userId) throws IOException, UserException {
-        User user = getAUser(userId);
+        User User = getAUser(userId);
         Map deleteParams = ObjectUtils.asMap("invalidate", true );
         cloudinary.uploader().destroy(publicId ,deleteParams);
-        user.setPublicId(null);
-        user.setImageUrl(null);
-        userRepository.save(user);
+        User.setPublicId(null);
+        User.setImageUrl(null);
+        userRepository.save(User);
     }
 
     private String extractFileName(String name) {

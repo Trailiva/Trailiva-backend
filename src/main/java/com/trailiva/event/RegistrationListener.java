@@ -1,6 +1,5 @@
 package com.trailiva.event;
 
-import com.trailiva.data.model.TokenType;
 import com.trailiva.data.model.User;
 import com.trailiva.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -23,9 +22,9 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     }
 
     private void confirmRegistration(OnRegistrationCompleteEvent event){
-        User user = event.getUser();
+        User User = event.getUser();
         String token = UUID.randomUUID().toString();
-        authService.createVerificationToken(user, token, VERIFICATION.toString());
-        authService.sendVerificationToken(user, token);
+        authService.createVerificationToken(User, token, VERIFICATION.toString());
+        authService.sendVerificationToken(User, token);
     }
 }

@@ -29,7 +29,7 @@ public class ProjectRequestToken {
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
     @JoinColumn(nullable = false, name = "user_id",
             foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
-    private User user;
+    private User User;
 
     @OneToOne(fetch = FetchType.EAGER, targetEntity = Project.class)
     @JoinColumn(nullable = false, name = "project_id",
@@ -48,15 +48,15 @@ public class ProjectRequestToken {
 
     private String tokenType;
 
-    public ProjectRequestToken(String token, User user, String tokenType) {
+    public ProjectRequestToken(String token, User User, String tokenType) {
         this.token = token;
-        this.user = user;
+        this.User = User;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public ProjectRequestToken(String token, User user, String tokenType, Project project) {
-        this(token, user, tokenType);
+    public ProjectRequestToken(String token, User User, String tokenType, Project project) {
+        this(token, User, tokenType);
         this.project = project;
     }
 

@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,7 @@ public class Project {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<Task> tasks;
+    private List<Task> tasks = new ArrayList<>();
 
     @CreationTimestamp
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -38,11 +39,6 @@ public class Project {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDated;
 
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = User.class)
-    @JoinColumn(nullable = false, name = "creator_id")
-    @JsonIgnore
-    private User creator;
-
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -51,4 +47,9 @@ public class Project {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> contributors = new HashSet<>();
+
+    public void addTask(Task task){
+        this.tasks.add(task);
+        task.setProject(this);
+    }
 }

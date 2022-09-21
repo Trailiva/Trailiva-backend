@@ -26,13 +26,13 @@ public class TaskRequestToken {
     private String token;
 
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
-    @JoinColumn(nullable = false, name = "user_id",
-            foreignKey = @ForeignKey(name = "FK_USER"))
-    private User user;
+    @JoinColumn(nullable = false, name = "contributor_id",
+            foreignKey = @ForeignKey(name = "FK_CONTRIBUTOR_TOKEN"))
+    private User User;
 
     @OneToOne(fetch = FetchType.EAGER, targetEntity = Task.class)
     @JoinColumn(nullable = false, name = "task_id",
-            foreignKey = @ForeignKey(name = "FK_TASK"))
+            foreignKey = @ForeignKey(name = "FK_TASK_TOKEN"))
     private Task task;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -47,15 +47,15 @@ public class TaskRequestToken {
 
     private String tokenType;
 
-    public TaskRequestToken(String token, User user, String tokenType) {
+    public TaskRequestToken(String token, User User, String tokenType) {
         this.token = token;
-        this.user = user;
+        this.User = User;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public TaskRequestToken(String token, User user, String tokenType, Task task) {
-        this(token, user, tokenType);
+    public TaskRequestToken(String token, User User, String tokenType, Task task) {
+        this(token, User, tokenType);
         this.task = task;
     }
 

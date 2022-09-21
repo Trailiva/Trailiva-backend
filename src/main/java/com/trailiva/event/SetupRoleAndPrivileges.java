@@ -42,14 +42,14 @@ public class SetupRoleAndPrivileges implements ApplicationListener<ContextRefres
 
         Optional<Role> adminRole = roleRepository.findByName("ROLE_ADMIN");
         if (adminRole.isPresent()){
-            User user = new User();
-            user.setFirstName("admin");
-            user.setLastName("user");
-            user.setPassword(passwordEncoder.encode("admin123"));
-            user.setEmail("admin@gmail.com");
-            user.setRoles(List.of(adminRole.get()));
-            user.setEnabled(true);
-            userRepository.save(user);
+            User User = new User();
+            User.setFirstName("admin");
+            User.setLastName("user");
+            User.setPassword(passwordEncoder.encode("admin123"));
+            User.setEmail("admin@gmail.com");
+            User.setRoles(List.of(adminRole.get()));
+            User.setEnabled(true);
+            userRepository.save(User);
         }
 
     }

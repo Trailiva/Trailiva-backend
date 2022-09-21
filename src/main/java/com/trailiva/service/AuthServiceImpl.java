@@ -63,10 +63,10 @@ public class AuthServiceImpl implements AuthService {
         if (validateEmail(userRequest.getEmail())) {
             throw new AuthException("Email is already in use");
         }
-        User user = modelMapper.map(userRequest, User.class);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
-        return saveAUser(user);
+        User User = modelMapper.map(userRequest, User.class);
+        User.setPassword(passwordEncoder.encode(User.getPassword()));
+        User.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
+        return saveAUser(User);
     }
 
     public void sendVerificationToken(User savedUser, String token) {
@@ -87,10 +87,10 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         final UserPrincipal userDetails = (UserPrincipal) customUserDetailService.loadUserByUsername(loginRequest.getEmail());
         final String jwtToken = jwtTokenProvider.generateToken(userDetails);
-        User user = internalFindUserByEmail(loginRequest.getEmail());
-        Token refreshToken = new Token(user);
+        User User = internalFindUserByEmail(loginRequest.getEmail());
+        Token refreshToken = new Token(User);
         tokenRepository.save(refreshToken);
-        return new JwtTokenResponse(jwtToken, refreshToken.getToken(), user.getEmail());
+        return new JwtTokenResponse(jwtToken, refreshToken.getToken(), User.getEmail());
     }
 
     private User internalFindUserByEmail(String email) {
@@ -101,8 +101,8 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.existsByEmail(email);
     }
 
-    private User saveAUser(User user) {
-        return userRepository.save(user);
+    private User saveAUser(User User) {
+        return userRepository.save(User);
     }
 
     private boolean isValidToken(LocalDateTime expiryDate) {
@@ -117,9 +117,9 @@ public class AuthServiceImpl implements AuthService {
         if (isValidToken(vToken.getExpiryDate()))
             throw new TokenException("Token has expired");
 
-        User user = vToken.getUser();
-        user.setEnabled(true);
-        saveAUser(user);
+        User User = vToken.getUser();
+        User.setEnabled(true);
+        saveAUser(User);
         tokenRepository.delete(vToken);
     }
 
@@ -136,8 +136,8 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public Token createVerificationToken(User user, String token, String tokenType) {
-        Token verificationToken = new Token(token, user, tokenType);
+    public Token createVerificationToken(User User, String token, String tokenType) {
+        Token verificationToken = new Token(token, User, tokenType);
         return tokenRepository.save(verificationToken);
     }
 
@@ -150,10 +150,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public TokenResponse createPasswordResetTokenForUser(String email) throws AuthException {
-        User user = userRepository.findByEmail(email)
+        User User = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("No user found with email " + email));
         String token = UUID.randomUUID().toString();
-        Token createdToken = createVerificationToken(user, token, PASSWORD_RESET.toString());
+        Token createdToken = createVerificationToken(User, token, PASSWORD_RESET.toString());
         return modelMapper.map(createdToken, TokenResponse.class);
     }
 

@@ -66,7 +66,7 @@ class AuthServiceImplTest {
     @Mock
     private EmailService emailService;
 
-    private com.trailiva.data.model.User mockedUser;
+    private User mockedUser;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -74,7 +74,7 @@ class AuthServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mockedUser = new com.trailiva.data.model.User();
+        mockedUser = new User();
         mockedUser.setUserId(1L);
         mockedUser.setFirstName("Ismail");
         mockedUser.setLastName("Abdullah");
@@ -93,8 +93,8 @@ class AuthServiceImplTest {
         EmailRequest emailRequest = new EmailRequest();
         //Given
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(modelMapper.map(userRequest, com.trailiva.data.model.User.class)).thenReturn(mockedUser);
-        when(userRepository.save(any(com.trailiva.data.model.User.class))).thenReturn(mockedUser);
+        when(modelMapper.map(userRequest, User.class)).thenReturn(mockedUser);
+        when(userRepository.save(any(User.class))).thenReturn(mockedUser);
         doNothing().when(emailService).sendUserVerificationEmail(any());
 
         //When
@@ -203,7 +203,7 @@ class AuthServiceImplTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockedUser));
         when(passwordEncoder.encode(anyString())).thenReturn(randomEncoder);
 
-        ArgumentCaptor<com.trailiva.data.model.User> tokenArgumentCaptor = ArgumentCaptor.forClass(com.trailiva.data.model.User.class);
+        ArgumentCaptor<User> tokenArgumentCaptor = ArgumentCaptor.forClass(User.class);
 
         verify(userRepository, times(1)).save(tokenArgumentCaptor.capture());
 

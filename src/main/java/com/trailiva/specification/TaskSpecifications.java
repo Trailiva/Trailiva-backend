@@ -22,4 +22,12 @@ public final class TaskSpecifications {
         final String wildcard = "%" + taskDesc + "%";
         return ((root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("description"), wildcard));
     }
+
+    public static Specification<Task> withUser(String creatorId){
+        if (Helper.isNullOrEmpty(creatorId))
+            return null;
+        return (root, query, criteriaBuilder) -> criteriaBuilder.or(criteriaBuilder.equal(root.get("creator").get("userId"),
+                creatorId), criteriaBuilder.equal(root.get("reporter").get("userId"),
+                creatorId), criteriaBuilder.equal(root.get("assignee").get("userId"), creatorId));
+    }
 }

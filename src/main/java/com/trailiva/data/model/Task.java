@@ -3,11 +3,9 @@ package com.trailiva.data.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jdk.jfr.Timestamp;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.http.ResponseEntity;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -59,4 +57,15 @@ public class Task {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "reporter_id")
     private User reporter;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "creator_id")
+    private User creator;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "project_id")
+    @JsonIgnore
+    private Project project;
+
+
 }

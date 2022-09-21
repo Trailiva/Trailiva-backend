@@ -49,11 +49,7 @@ public class TaskServiceImpl implements TaskService{
     @Transactional
     public Task createTask(TaskRequest request, Long projectId) throws TaskException, ProjectException {
         Project project = projectRepository.findById(projectId).orElseThrow(()-> new ProjectException("project not found"));
-        boolean existByName = false;
-
-
-        if (project.getTasks().size() > 0)
-            existByName = project.getTasks().stream().anyMatch(task -> task.getName().equals(request.getName()));
+        boolean existByName = project.getTasks().stream().anyMatch(task -> task.getName().equalsIgnoreCase(request.getName()));
 
         if (existByName)  throw new TaskException("This task already exist");
 
@@ -65,8 +61,8 @@ public class TaskServiceImpl implements TaskService{
         newTask.setTaskReference(project.getReferenceName().concat("-").concat(formattedId));
 
         Task task = taskRepository.save(newTask);
-        project.getTasks().add(newTask);
-        projectRepository.save(project);
+        project.addTask(newTask);
+//        projectRepository.save(project);
         return task;
     }
 

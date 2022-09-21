@@ -22,8 +22,8 @@ public interface AuthService {
     void confirmVerificationToken(String verificationToken) throws TokenException;
     void resendVerificationToken(String token) throws  TokenException;
     void resendResetPasswordToken(String token) throws  TokenException;
-    Token createVerificationToken(User user, String token, String tokenType);
-    void sendVerificationToken(User user, String token);
+    Token createVerificationToken(User User, String token, String tokenType);
+    void sendVerificationToken(User User, String token);
     TokenResponse createPasswordResetTokenForUser(String email) throws AuthException;
     boolean validatePasswordResetToken(String token) throws TokenException;
     JwtTokenResponse refreshToken(TokenRefreshRequest request) throws TokenException;

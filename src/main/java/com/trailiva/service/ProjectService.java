@@ -28,9 +28,9 @@ public interface ProjectService {
 
     int countProjectTask(Long projectId) throws ProjectException;
 
-    void addContributor(List<String>contributorEmails, String userEmail) throws UserException, ProjectException;
+    void addContributor(List<String>contributorEmails, Long projectId) throws UserException, ProjectException;
 
-    void addContributorFromCSV(MultipartFile file, String userEmail) throws IOException, CsvValidationException, UserException, ProjectException;
+    void addContributorFromCSV(MultipartFile file, Long projectId) throws IOException, CsvValidationException, UserException, ProjectException;
 
     void addContributor(String requestToken) throws TokenException, UserException;
 

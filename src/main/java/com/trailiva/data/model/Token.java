@@ -28,7 +28,7 @@ public class Token {
 
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
     @JoinColumn(nullable = false, name = "user_id", foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
-    private User user;
+    private User User;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
@@ -42,9 +42,9 @@ public class Token {
 
     private String tokenType;
 
-    public Token(String token, User user, String tokenType) {
+    public Token(String token, User User, String tokenType) {
         this.token = token;
-        this.user = user;
+        this.User = User;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
@@ -59,11 +59,11 @@ public class Token {
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public Token(User user){
+    public Token(User User){
         this.token = UUID.randomUUID().toString();
         this.tokenType = REFRESH.toString();
         this.expiryDate = calculateExpiryDate(AppConstants.JWT_REFRESH_TOKEN_EXPIRATION_IN_HR);
-        this.user = user;
+        this.User = User;
     }
 
     public void updateToken(String code, String tokenType){

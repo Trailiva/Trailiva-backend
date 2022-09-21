@@ -35,21 +35,21 @@ public class ProjectController {
     }
 
 
-    @PostMapping("personal/create/{id}")
+    @PostMapping("personal/create/{workspaceId}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> createProject(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
+    public ResponseEntity<?> createProject(@Valid @PathVariable Long workspaceId, @RequestBody ProjectRequest request){
         try {
-            Project project = projectService.createProjectForPersonalWorkspace(request, id);
+            Project project = projectService.createProjectForPersonalWorkspace(request, workspaceId);
             return  ResponseEntity.ok(project);
         } catch (WorkspaceException | UserException | ProjectException e) {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
     }
-  @PostMapping("official/create/{id}")
+  @PostMapping("official/create/{workspaceId}")
   @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-  public ResponseEntity<?> createProjectForOfficialWorkspace(@Valid @PathVariable Long id, @RequestBody ProjectRequest request){
+  public ResponseEntity<?> createProjectForOfficialWorkspace(@Valid @PathVariable Long workspaceId, @RequestBody ProjectRequest request){
         try {
-            Project project = projectService.createProjectForOfficialWorkspace(request, id);
+            Project project = projectService.createProjectForOfficialWorkspace(request, workspaceId);
             return  ResponseEntity.ok(project);
         } catch (WorkspaceException  | ProjectException e) {
             return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
@@ -98,11 +98,11 @@ public class ProjectController {
         }
     }
 
-    @PostMapping("/add-contributors")
+    @PostMapping("/add-contributors/{projectId}")
     @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<?> addContributor(@CurrentUser UserPrincipal userPrincipal, @RequestBody List<String> emails) {
+    public ResponseEntity<?> addContributor(@RequestBody List<String> emails, @PathVariable Long projectId) {
         try {
-            projectService.addContributor(emails, userPrincipal.getEmail());
+            projectService.addContributor(emails, projectId);
 
             return new ResponseEntity<>(new ApiResponse(true, "Request token send to contributor", HttpStatus.OK), HttpStatus.OK);
         } catch (UserException | ProjectException e) {
@@ -111,12 +111,12 @@ public class ProjectController {
     }
 
 
-    @PostMapping("/csv/add-contributors")
+    @PostMapping("/csv/add-contributors/{projectId}")
     @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<?> addContributorFromCSV(@CurrentUser UserPrincipal userPrincipal, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> addContributorFromCSV(@RequestParam("file") MultipartFile file,  @PathVariable Long projectId) {
         try {
             if (Helper.hasCSVFormat(file)) {
-                projectService.addContributorFromCSV(file, userPrincipal.getEmail());
+                projectService.addContributorFromCSV(file, projectId);
                 return new ResponseEntity<>(new ApiResponse(true, "Request token send to contributor", HttpStatus.OK), HttpStatus.OK);
             }
             return new ResponseEntity<>(new ApiResponse(true, "Please upload a csv file!", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);

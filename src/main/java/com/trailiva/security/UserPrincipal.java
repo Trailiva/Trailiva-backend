@@ -29,18 +29,18 @@ public class UserPrincipal implements UserDetails {
 
 
 
-    public static UserDetails create(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
+    public static UserDetails create(User User) {
+        List<GrantedAuthority> authorities = User.getRoles().stream().map(role ->
                 new SimpleGrantedAuthority(role.getName())
         ).collect(Collectors.toList());
         return new UserPrincipal(
-                user.getUserId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getPhoneNumber(),
-                user.getPassword(),
-                user.isEnabled(),
+                User.getUserId(),
+                User.getFirstName(),
+                User.getLastName(),
+                User.getEmail(),
+                User.getPhoneNumber(),
+                User.getPassword(),
+                User.isEnabled(),
                 authorities
         );
     }

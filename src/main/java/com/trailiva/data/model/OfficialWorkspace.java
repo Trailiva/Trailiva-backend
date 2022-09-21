@@ -47,14 +47,8 @@ public class OfficialWorkspace {
     @JsonIgnore
     private List<Project> projects;
 
-    @JsonIgnore
-    @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
-    @JoinColumn(nullable = false, name = "creator_id")
-    private User creator;
-
-
     public void addProject(Project project){
-        projects.add(project);
+        this.projects.add(project);
     }
 
     @JsonIgnore

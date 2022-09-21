@@ -49,4 +49,12 @@ public class User {
     @UpdateTimestamp
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDated;
+
+    @ManyToOne
+    @JoinColumn(name = "personal_workspace_id")
+    private PersonalWorkspace personalWorkspace;
+
+    @ManyToOne
+    @JoinColumn(name = "official_workspace_id")
+    private OfficialWorkspace officialWorkspace;
 }

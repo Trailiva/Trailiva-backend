@@ -1,6 +1,7 @@
 package com.trailiva.security;
 
 import com.trailiva.data.model.Role;
+import com.trailiva.data.model.User;
 import com.trailiva.data.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -35,11 +36,11 @@ class SecurityTest {
     @InjectMocks
     private CustomUserDetailService customUserDetailsService;
 
-    private com.trailiva.data.model.User mockedUser;
+    private User mockedUser;
 
     @BeforeEach
     void setUp() {
-        mockedUser = new com.trailiva.data.model.User();
+        mockedUser = new User();
         mockedUser.setFirstName("Ismail");
         mockedUser.setLastName("Abdullah");
         mockedUser.setEmail("ohida2001@gmail.com");

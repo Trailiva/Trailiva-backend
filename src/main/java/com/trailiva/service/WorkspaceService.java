@@ -7,6 +7,7 @@ import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
+import com.trailiva.web.payload.request.AssignTaskRequest;
 import com.trailiva.web.payload.request.WorkspaceRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,7 +56,7 @@ public interface WorkspaceService {
 
     List<OfficialWorkspace> getOfficialWorkspaces();
 
-    void assignContributorToTaskOnOfficialWorkspace(Long moderatorId, Long contributorId, Long taskId, Long workspaceId) throws WorkspaceException, TaskException, UserException;
+    void assignContributorToTaskOnOfficialWorkspace(AssignTaskRequest request) throws WorkspaceException, TaskException, UserException;
 
     void requestTask(Long workspaceId, Long taskId, Long contributorId) throws UserException, WorkspaceException, TaskException;
 

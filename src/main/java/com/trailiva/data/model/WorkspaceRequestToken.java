@@ -24,7 +24,7 @@ public class WorkspaceRequestToken {
     @OneToOne(fetch = FetchType.EAGER, targetEntity = User.class)
     @JoinColumn(nullable = false, name = "user_id",
             foreignKey = @ForeignKey(name = "FK_VERIFY_USER"))
-    private User user;
+    private User User;
 
     @OneToOne(fetch = FetchType.EAGER, targetEntity = OfficialWorkspace.class)
     @JoinColumn(nullable = false, name = "official_workspace_id",
@@ -43,15 +43,15 @@ public class WorkspaceRequestToken {
 
     private String tokenType;
 
-    public WorkspaceRequestToken(String token, User user, String tokenType) {
+    public WorkspaceRequestToken(String token, User User, String tokenType) {
         this.token = token;
-        this.user = user;
+        this.User = User;
         this.tokenType = tokenType;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    public WorkspaceRequestToken(String token, User user, String tokenType, OfficialWorkspace workspace) {
-        this(token, user, tokenType);
+    public WorkspaceRequestToken(String token, User User, String tokenType, OfficialWorkspace workspace) {
+        this(token, User, tokenType);
         this.workspace = workspace;
     }
 

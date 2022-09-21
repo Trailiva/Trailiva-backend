@@ -11,6 +11,7 @@ import com.trailiva.web.exceptions.TaskException;
 import com.trailiva.web.exceptions.TokenException;
 import com.trailiva.web.exceptions.UserException;
 import com.trailiva.web.exceptions.WorkspaceException;
+import com.trailiva.web.payload.request.AssignTaskRequest;
 import com.trailiva.web.payload.request.WorkspaceRequest;
 import com.trailiva.web.payload.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -197,11 +198,11 @@ public class WorkspaceController {
         }
     }
 
-    @DeleteMapping("/my-workspace/remove-contributor/{userId}")
+    @DeleteMapping("/my-workspace/remove-contributor/{contributorId}")
     @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_ADMIN')")
-    public ResponseEntity<?> removeContributor(@PathVariable Long userId, @CurrentUser UserPrincipal userPrincipal) {
+    public ResponseEntity<?> removeContributor(@PathVariable Long contributorId, @CurrentUser UserPrincipal userPrincipal) {
         try {
-            workspaceService.removeContributorFromWorkspace(userPrincipal.getId(), userId);
+            workspaceService.removeContributorFromWorkspace(userPrincipal.getId(), contributorId);
             return new ResponseEntity<>(new ApiResponse(true, "Contributor is successfully removed from workspace", HttpStatus.OK), HttpStatus.OK);
         } catch (UserException | WorkspaceException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
@@ -249,17 +250,17 @@ public class WorkspaceController {
         return ResponseEntity.ok(new ApiResponse(true, "Successful", userCount));
     }
 
-    @PostMapping("/official/assign-task/{workspaceId}/{taskId}/{contributorId}")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
-    public ResponseEntity<?> assignTaskToContributorOnOfficialWorkspace(@CurrentUser UserPrincipal userPrincipal, @PathVariable Long workspaceId,
-                                                                        @PathVariable Long contributorId, @PathVariable Long taskId) {
-        try {
-            workspaceService.assignContributorToTaskOnOfficialWorkspace(userPrincipal.getId(), contributorId, taskId, workspaceId);
-            return ResponseEntity.ok(new ApiResponse(true, "Task is successfully assigned to contributor"));
-        } catch (TaskException | UserException | WorkspaceException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
-        }
-    }
+//    @PostMapping("/official/assign-task")
+//    @PreAuthorize("hasAnyRole('ROLE_SUPER_MODERATOR', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+//    public ResponseEntity<?> assignTaskToContributorOnOfficialWorkspace(@CurrentUser UserPrincipal userPrincipal, @RequestBody AssignTaskRequest request) {
+//        try {
+//            request.setModeratorId(userPrincipal.getId());
+//            workspaceService.assignContributorToTaskOnOfficialWorkspace(request);
+//            return ResponseEntity.ok(new ApiResponse(true, "Task is successfully assigned to contributor"));
+//        } catch (TaskException | UserException | WorkspaceException e) {
+//            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+//        }
+//    }
 
     @PostMapping("/official/request-task/{workspaceId}/{taskId}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")

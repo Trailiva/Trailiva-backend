@@ -49,10 +49,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRequest userRequest, HttpServletRequest request) {
         try {
-            User user = authService.registerNewUserAccount(userRequest);
+            User User = authService.registerNewUserAccount(userRequest);
             String appUrl = request.getContextPath();
-            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale(), appUrl));
-            return new ResponseEntity<>(modelMapper.map(user, UserProfile.class), HttpStatus.CREATED);
+            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(User, request.getLocale(), appUrl));
+            return new ResponseEntity<>(modelMapper.map(User, UserProfile.class), HttpStatus.CREATED);
         } catch (AuthException | MessagingException | UnsupportedEncodingException | RoleNotFoundException e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }

@@ -50,32 +50,32 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfile getUserDetails(Long userId) throws UserException {
-        User user = getAUser(userId);
-        return modelMapper.map(user, UserProfile.class);
+        User User = getAUser(userId);
+        return modelMapper.map(User, UserProfile.class);
     }
 
     @Override
     public void saveImageProperties(ImageRequest imageProperties, Long userId) throws UserException, IOException {
-        User user = getAUser(userId);
-        String url = user.getImageUrl();
-        String publicId = user.getPublicId();
+        User User = getAUser(userId);
+        String url = User.getImageUrl();
+        String publicId = User.getPublicId();
 
         if (!Objects.isNull(url) && !Objects.isNull(publicId))
             cloudinaryService.deleteImage(publicId, userId);
 
-        user.setImageUrl(imageProperties.getUrl());
-        user.setPublicId(imageProperties.getPublicId());
-        saveAUser(user);
+        User.setImageUrl(imageProperties.getUrl());
+        User.setPublicId(imageProperties.getPublicId());
+        saveAUser(User);
     }
 
     @Override
     public void deleteAUser(String email) throws UserException {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found with email " + email));
-        userRepository.delete(user);
+        User User = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found with email " + email));
+        userRepository.delete(User);
     }
 
-    private User saveAUser(User user) {
-        return userRepository.save(user);
+    private User saveAUser(User User) {
+        return userRepository.save(User);
     }
 
 

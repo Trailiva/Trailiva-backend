@@ -9,5 +9,4 @@ import java.util.Optional;
 
 public interface OfficialWorkspaceRepository extends JpaRepository<OfficialWorkspace, Long>, JpaSpecificationExecutor<OfficialWorkspace> {
     boolean existsByName(String name);
-    Optional<OfficialWorkspace> findByCreator(User user);
 }

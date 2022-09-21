@@ -8,7 +8,7 @@ Trailiva is a project management tool that you may use to keep track of your per
 - Springboot (Framework used to develop the APIs)
 - Postgresql (Database for datastorage)
 - Sendgrid (SMTP server for mail sending)
-- Cloudinary (File server for user pictures and videos)
+- Cloudinary (File server for User pictures and videos)
 - Jwt (Library for authentication)
 - Heroku (Hosting service)
 
@@ -44,7 +44,7 @@ Trailiva is a project management tool that you may use to keep track of your per
 - Users can create project
 - Users can create task
 - Contributor can work on task, request for task
-- Moderator can assign task to contributor, create task, review task
+- Moderator can assign task to User, create task, review task
 
 
 ## Non-Functional
