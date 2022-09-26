@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ import static com.trailiva.data.model.TokenType.REFRESH;
 @Getter
 @Entity
 @NoArgsConstructor
-public class Token {
+public class Token extends RepresentationModel<Token> {
     private final static long EXPIRATION = 48L;
 
     @Id

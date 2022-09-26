@@ -37,7 +37,6 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final CloudinaryService cloudinaryService;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
 
     @Override
     public User getUserProfile(Long userId) throws UserException {

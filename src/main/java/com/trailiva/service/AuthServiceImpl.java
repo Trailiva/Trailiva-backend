@@ -32,6 +32,7 @@ import java.util.UUID;
 
 import static com.trailiva.data.model.TokenType.*;
 import static com.trailiva.util.Helper.isNullOrEmpty;
+import static com.trailiva.util.Helper.isValidToken;
 
 
 @Service
@@ -51,7 +52,6 @@ public class AuthServiceImpl implements AuthService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    private final EmailService emailService;
 
     private final RoleRepository roleRepository;
 
@@ -69,11 +69,11 @@ public class AuthServiceImpl implements AuthService {
         return saveAUser(User);
     }
 
-    public void sendVerificationToken(User savedUser, String token) {
-        EmailRequest emailRequest = modelMapper.map(savedUser, EmailRequest.class);
-        emailRequest.setVerificationToken(token);
-        emailService.sendUserVerificationEmail(emailRequest);
-    }
+//    public void sendVerificationToken(User savedUser, String token) {
+//        EmailRequest emailRequest = modelMapper.map(savedUser, EmailRequest.class);
+//        emailRequest.setVerificationToken(token);
+//        emailService.sendUserVerificationEmail(emailRequest);
+//    }
 
     @Transactional
     @Override
@@ -105,11 +105,6 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.save(User);
     }
 
-    private boolean isValidToken(LocalDateTime expiryDate) {
-        long minutes = ChronoUnit.MINUTES.between(LocalDateTime.now(), expiryDate);
-        return minutes <= 0;
-    }
-
     @Override
     public void confirmVerificationToken(String verificationToken) throws TokenException {
         Token vToken = getToken(verificationToken, VERIFICATION.toString());
@@ -124,14 +119,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resendVerificationToken(String verificationToken) throws TokenException {
-        Token token = generateNewToken(verificationToken, VERIFICATION.toString());
-        sendVerificationToken(token.getUser(), token.getToken());
+    public Token resendVerificationToken(String token) throws TokenException {
+        return generateNewToken(token, VERIFICATION.toString());
     }
 
     @Override
-    public void resendResetPasswordToken(String verificationToken) throws TokenException {
-        generateNewToken(verificationToken, PASSWORD_RESET.toString());
+    public Token resendResetPasswordToken(String verificationToken) throws TokenException {
+        return generateNewToken(verificationToken, PASSWORD_RESET.toString());
     }
 
 
@@ -158,41 +152,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean validatePasswordResetToken(String token) throws TokenException {
-        final Token passToken = getToken(token, PASSWORD_RESET.toString());
-        if (isValidToken(passToken.getExpiryDate())) throw new TokenException("Token has expired");
-        return true;
-    }
-
-    @Override
     public JwtTokenResponse refreshToken(TokenRefreshRequest request) throws TokenException {
         String requestRefreshToken = request.getRefreshToken();
-        Optional<Token> refreshToken = tokenRepository.findByTokenAndTokenType(requestRefreshToken, REFRESH_TOKEN.toString());
+        Optional<Token> refreshToken = tokenRepository.findByTokenAndTokenType(requestRefreshToken, REFRESH.toString());
         if (refreshToken.isPresent()) {
             Token token = getRefreshToken(refreshToken.get());
-            String jwtToken = jwtTokenProvider.generateToken((UserPrincipal) customUserDetailService.loadUserByUsername(token.getUser().getEmail()));
+            String jwtToken = jwtTokenProvider.generateToken((UserPrincipal)
+                    customUserDetailService.loadUserByUsername(token.getUser().getEmail()));
             return new JwtTokenResponse(jwtToken, requestRefreshToken, token.getUser().getEmail());
-        } else throw new TokenException(requestRefreshToken + " Invalid refresh token");
-    }
-
-    @Override
-    public void updatePassword(PasswordRequest passwordRequest) throws TokenException {
-//        boolean isValid = validatePasswordResetToken(token);
-
-    }
-
-    @Override
-    public void deleteExpiredToken() {
-        List<Token> allTokens = tokenRepository.findAll();
-        allTokens.forEach(token -> {
-            if (token.getExpiryDate().isBefore(LocalDateTime.now())) tokenRepository.delete(token);
-        });
+        } else throw new TokenException("Invalid refresh token");
     }
 
     private Token getRefreshToken(Token token) throws TokenException {
         if (!isValidToken(token.getExpiryDate()))
             return token;
-        else throw new TokenException("Refresh token was expired. Please make a new signin request");
+        else throw new TokenException("Refresh token was expired. Please make a new sign in request");
     }
 
 
@@ -208,6 +182,7 @@ public class AuthServiceImpl implements AuthService {
         User userToChangePassword = pToken.getUser();
         userToChangePassword.setPassword(passwordEncoder.encode(request.getPassword()));
         saveAUser(userToChangePassword);
+        tokenRepository.delete(pToken);
     }
 
 }

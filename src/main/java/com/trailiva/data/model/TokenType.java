@@ -8,6 +8,4 @@ public enum TokenType {
     WORKSPACE_REQUEST,
     PROJECT_REQUEST,
     TASK_REQUEST,
-    REFRESH_TOKEN,
-
 }

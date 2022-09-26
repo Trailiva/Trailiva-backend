@@ -10,6 +10,5 @@ import lombok.Setter;
 public class AssignTaskRequest {
     private Long taskId;
     private Long contributorId;
-    private Long moderatorId;
     private Long workspaceId;
 }

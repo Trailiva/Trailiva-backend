@@ -1,7 +1,7 @@
 //package com.trailiva.web.controller;
 //
 //import com.trailiva.data.model.WorkSpaceType;
-//import com.trailiva.service.WorkspaceService;
+//import com.trailiva.service.workspace.WorkspaceService;
 //import com.trailiva.web.payload.request.WorkspaceRequest;
 //import org.junit.jupiter.api.AfterEach;
 //import org.junit.jupiter.api.BeforeEach;

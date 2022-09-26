@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -20,7 +21,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class OfficialWorkspace {
+public class OfficialWorkspace extends RepresentationModel<OfficialWorkspace> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long WorkspaceId;
@@ -69,4 +70,5 @@ public class OfficialWorkspace {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> moderators = new HashSet<>();
+
 }

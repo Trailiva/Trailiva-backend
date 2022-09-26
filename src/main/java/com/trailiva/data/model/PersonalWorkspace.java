@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-public class PersonalWorkspace {
+public class PersonalWorkspace extends RepresentationModel<PersonalWorkspace> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long WorkspaceId;

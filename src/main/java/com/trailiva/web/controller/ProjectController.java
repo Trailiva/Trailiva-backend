@@ -42,7 +42,7 @@ public class ProjectController {
             Project project = projectService.createProjectForPersonalWorkspace(request, workspaceId);
             return  ResponseEntity.ok(project);
         } catch (WorkspaceException | UserException | ProjectException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
   @PostMapping("official/create/{workspaceId}")
@@ -52,7 +52,7 @@ public class ProjectController {
             Project project = projectService.createProjectForOfficialWorkspace(request, workspaceId);
             return  ResponseEntity.ok(project);
         } catch (WorkspaceException  | ProjectException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -62,7 +62,7 @@ public class ProjectController {
             Project project = projectService.getProjectById(projectId);
             return  ResponseEntity.ok(project);
         } catch ( ProjectException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -73,7 +73,7 @@ public class ProjectController {
             List<Task> tasks = projectService.getTasksByProjectId(projectId);
             return ResponseEntity.ok(tasks);
         } catch (ProjectException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -83,7 +83,7 @@ public class ProjectController {
             int taskCount = projectService.countProjectTask(projectId);
             return  ResponseEntity.ok(new ApiResponse(true, "Task is successfully counted", taskCount));
         } catch ( ProjectException e) {
-            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -92,9 +92,9 @@ public class ProjectController {
     public ResponseEntity<?> addModerator(@RequestParam("requestToken") String requestToken) {
         try {
             projectService.addContributor(requestToken);
-            return new ResponseEntity<>(new ApiResponse(true, "contributor is successfully added to project", HttpStatus.OK), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "contributor is successfully added to project"), HttpStatus.OK);
         } catch (TokenException | UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -104,9 +104,9 @@ public class ProjectController {
         try {
             projectService.addContributor(emails, projectId);
 
-            return new ResponseEntity<>(new ApiResponse(true, "Request token send to contributor", HttpStatus.OK), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "Request token send to contributor"), HttpStatus.OK);
         } catch (UserException | ProjectException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -117,12 +117,12 @@ public class ProjectController {
         try {
             if (Helper.hasCSVFormat(file)) {
                 projectService.addContributorFromCSV(file, projectId);
-                return new ResponseEntity<>(new ApiResponse(true, "Request token send to contributor", HttpStatus.OK), HttpStatus.OK);
+                return new ResponseEntity<>(new ApiResponse(true, "Request token send to contributor"), HttpStatus.OK);
             }
-            return new ResponseEntity<>(new ApiResponse(true, "Please upload a csv file!", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(true, "Please upload a csv file!"), HttpStatus.BAD_REQUEST);
 
         } catch (CsvValidationException | IOException | UserException | ProjectException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 

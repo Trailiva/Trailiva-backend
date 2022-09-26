@@ -27,12 +27,12 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <version>4.2.0</version>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.awaitility</groupId>-->
+<!--            <artifactId>awaitility</artifactId>-->
+<!--            <version>4.2.0</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -50,11 +50,6 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-jdbc</artifactId>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>javax.validation</groupId>
@@ -76,11 +71,11 @@
             <version>0.9.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.sendgrid</groupId>
-            <artifactId>sendgrid-java</artifactId>
-            <version>4.8.3</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.sendgrid</groupId>-->
+<!--            <artifactId>sendgrid-java</artifactId>-->
+<!--            <version>4.8.3</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.modelmapper</groupId>
@@ -88,11 +83,11 @@
             <version>3.0.0</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>mysql</groupId>-->
-<!--            <artifactId>mysql-connector-java</artifactId>-->
-<!--            <version>8.0.27</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-hateoas</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -100,6 +95,19 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>3.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>3.0.0</version>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

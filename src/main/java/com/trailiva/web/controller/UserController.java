@@ -47,7 +47,7 @@ public class UserController {
             User userProfile = userService.getUserProfile(currentUser.getId());
             return new ResponseEntity<>(userProfile, HttpStatus.OK);
         } catch (UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -56,9 +56,9 @@ public class UserController {
     public ResponseEntity<?> uploadProfileData(@CurrentUser UserPrincipal currentUser, @RequestBody ImageRequest imageProperties) {
         try {
             userService.saveImageProperties(imageProperties, currentUser.getId());
-            return ResponseEntity.ok(new ApiResponse(true, "profile image is successfully uploaded", HttpStatus.OK));
+            return ResponseEntity.ok(new ApiResponse(true, "profile image is successfully uploaded"));
         } catch (UserException | IOException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -71,7 +71,7 @@ public class UserController {
             String url = cloudinaryService.uploadImage(file, currentUser.getId());
             return ResponseEntity.ok(new ApiResponse(true, "file is successfully uploaded", url));
         } catch (IOException | UserException exception) {
-            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -80,9 +80,9 @@ public class UserController {
     public ResponseEntity<?> deleteUploadedImage(@CurrentUser UserPrincipal currentUser, @RequestParam("public_id") String publicId) {
         try {
             cloudinaryService.deleteImage(publicId, currentUser.getId());
-            return ResponseEntity.ok(new ApiResponse(true, "image deleted successfully", HttpStatus.OK));
+            return ResponseEntity.ok(new ApiResponse(true, "image deleted successfully"));
         } catch (IOException | UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -91,9 +91,9 @@ public class UserController {
     public ResponseEntity<?> deleteAUser(@RequestParam("email") String email) {
         try {
             userService.deleteAUser(email);
-            return ResponseEntity.ok(new ApiResponse(true, "user deleted successfully", HttpStatus.OK));
+            return ResponseEntity.ok(new ApiResponse(true, "user deleted successfully"));
         } catch (UserException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -102,10 +102,10 @@ public class UserController {
     public ResponseEntity<?> updatePassword(@CurrentUser UserPrincipal currentUser, @Valid @RequestBody PasswordRequest request) {
         try {
             userService.updatePassword(request, currentUser.getEmail());
-            return new ResponseEntity<>(new ApiResponse(true, "Password updated successful", HttpStatus.OK), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(true, "Password updated successful"), HttpStatus.OK);
         } catch (AuthException e) {
 
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -118,7 +118,7 @@ public class UserController {
             Map<String, Object> response = userService.SearchUserByName(params, page, size);
             return new ResponseEntity<>(new ApiResponse(true, "Data successfully filtered", response), HttpStatus.OK);
         } catch (BadRequestException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 }

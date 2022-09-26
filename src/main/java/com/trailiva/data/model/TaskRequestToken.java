@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ import static com.trailiva.util.AppConstants.EXPIRATION;
 @AllArgsConstructor
 @Entity
 @NoArgsConstructor
-public class TaskRequestToken {
+public class TaskRequestToken extends RepresentationModel<TaskRequestToken> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
